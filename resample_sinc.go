@@ -139,9 +139,10 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 	}
 
 	// too many phases, quantize and approximate
-	if srIn > 512 {
+	const maxPhases = 512 // TODO adjust to limit maximum sample drift
+	if srIn > maxPhases {
 		idealInPerOut := ratio
-		quantScale := Ffdiv(512, srIn)
+		quantScale := Ffdiv(maxPhases, srIn)
 		srIn = Fmul(srIn, quantScale)
 		srOut = Fmul(srOut, quantScale)
 
@@ -160,6 +161,7 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 			srIn = FmulCeiled(srOut, idealInPerOut)
 		}
 
+		ratio = Ffdiv(srIn, srOut)
 		initConsts()
 
 		idealOutPerIn := 1 / idealInPerOut
@@ -169,7 +171,7 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 		// premultiply by number of input samples per phase reset
 		s.consts.driftStep, s.alt.driftStep =
 			F64mul(s.consts.invRatio-idealOutPerIn, srIn),
-			F64mul(s.alt.ratio-idealOutPerIn, srInAlt)
+			F64mul(s.alt.invRatio-idealOutPerIn, srInAlt)
 	} else {
 		initConsts()
 		s.alt = s.consts
@@ -207,7 +209,7 @@ func (s *OfflineSincResampler[T]) Process(in []T) {
 			// accumulate drift relative to ideal sample rate
 			// swap to alternate undershoot/overshoot resampler if clock drift is too high
 			s.drift += s.driftStep
-			if Abs(s.drift) > 0.5 { // TODO variable threshold
+			if Abs(s.drift+s.driftStep) >= 0.5 { // TODO variable threshold
 				s.consts, s.alt = s.alt, s.consts
 			}
 		}
