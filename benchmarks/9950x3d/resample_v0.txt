@@ -1,0 +1,378 @@
+goos: windows
+goarch: amd64
+pkg: github.com/dmgard/vavr
+cpu: AMD Ryzen 9 9950X3D 16-Core Processor
+BenchmarkScalarResample
+BenchmarkScalarResample/48x441
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=16
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=16-32         	   16735	       724.9 ns/op	 353.16 MB/s	        11.33 ns/sample	      1840 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=16-32         	   16623	       714.7 ns/op	 358.21 MB/s	        11.17 ns/sample	      1866 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=16-32         	   16324	      1130 ns/op	 226.61 MB/s	        17.65 ns/sample	      1180 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=16-32         	   16146	       763.5 ns/op	 335.29 MB/s	        11.93 ns/sample	      1746 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=16-32         	   16628	       722.5 ns/op	 354.31 MB/s	        11.29 ns/sample	      1845 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=16-32         	   16434	       813.9 ns/op	 314.53 MB/s	        12.72 ns/sample	      1638 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=16
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=16-32         	     496	     23823 ns/op	  10.75 MB/s	       372.2 ns/sample	        55.97 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=16-32         	     487	     23813 ns/op	  10.75 MB/s	       372.1 ns/sample	        55.99 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=16-32         	     453	     24440 ns/op	  10.47 MB/s	       381.8 ns/sample	        54.56 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=16-32         	     501	     23856 ns/op	  10.73 MB/s	       372.7 ns/sample	        55.90 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=16-32         	     504	     23994 ns/op	  10.67 MB/s	       374.8 ns/sample	        55.58 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=16-32         	     499	     23863 ns/op	  10.73 MB/s	       372.8 ns/sample	        55.88 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=16
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=16-32          	     498	     23672 ns/op	  10.81 MB/s	       369.9 ns/sample	        56.33 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=16-32          	     505	     29110 ns/op	   8.79 MB/s	       454.8 ns/sample	        45.80 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=16-32          	     495	     23929 ns/op	  10.70 MB/s	       373.9 ns/sample	        55.72 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=16-32          	     508	     23609 ns/op	  10.84 MB/s	       368.9 ns/sample	        56.48 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=16-32          	     504	     23969 ns/op	  10.68 MB/s	       374.5 ns/sample	        55.63 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=16-32          	     506	     24177 ns/op	  10.59 MB/s	       377.7 ns/sample	        55.15 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=32
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=32-32         	    9338	      1368 ns/op	 187.19 MB/s	        21.37 ns/sample	       975.0 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=32-32         	    9112	      1300 ns/op	 197.00 MB/s	        20.30 ns/sample	      1026 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=32-32         	    9117	      1303 ns/op	 196.43 MB/s	        20.36 ns/sample	      1023 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=32-32         	    9184	      1302 ns/op	 196.66 MB/s	        20.34 ns/sample	      1024 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=32-32         	    9090	      1306 ns/op	 196.00 MB/s	        20.41 ns/sample	      1021 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=32-32         	    9086	      1314 ns/op	 194.86 MB/s	        20.53 ns/sample	      1015 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=32
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=32-32         	     258	     45631 ns/op	   5.61 MB/s	       713.0 ns/sample	        29.22 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=32-32         	     244	     46041 ns/op	   5.56 MB/s	       719.3 ns/sample	        28.96 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=32-32         	     259	     45990 ns/op	   5.57 MB/s	       718.6 ns/sample	        28.99 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=32-32         	     254	     46146 ns/op	   5.55 MB/s	       721.0 ns/sample	        28.90 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=32-32         	     255	     45662 ns/op	   5.61 MB/s	       713.4 ns/sample	        29.20 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=32-32         	     262	     45974 ns/op	   5.57 MB/s	       718.3 ns/sample	        29.00 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=32
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=32-32          	     261	     46025 ns/op	   5.56 MB/s	       719.1 ns/sample	        28.97 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=32-32          	     262	     45719 ns/op	   5.60 MB/s	       714.3 ns/sample	        29.17 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=32-32          	     265	     46388 ns/op	   5.52 MB/s	       724.8 ns/sample	        28.74 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=32-32          	     262	     45407 ns/op	   5.64 MB/s	       709.5 ns/sample	        29.37 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=32-32          	     252	     46111 ns/op	   5.55 MB/s	       720.4 ns/sample	        28.92 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=32-32          	     264	     45488 ns/op	   5.63 MB/s	       710.7 ns/sample	        29.31 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=64
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=64-32         	    4828	      2549 ns/op	 100.45 MB/s	        39.82 ns/sample	       523.2 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=64-32         	    4659	      2551 ns/op	 100.36 MB/s	        39.85 ns/sample	       522.7 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=64-32         	    4659	      2536 ns/op	 100.93 MB/s	        39.63 ns/sample	       525.7 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=64-32         	    4653	      2553 ns/op	 100.27 MB/s	        39.89 ns/sample	       522.3 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=64-32         	    4650	      2545 ns/op	 100.59 MB/s	        39.76 ns/sample	       523.9 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=64-32         	    4672	      2546 ns/op	 100.57 MB/s	        39.77 ns/sample	       523.8 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=64
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=64-32         	     130	     91241 ns/op	   2.81 MB/s	      1426 ns/sample	        14.61 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=64-32         	     133	     91702 ns/op	   2.79 MB/s	      1433 ns/sample	        14.54 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=64-32         	     133	     91447 ns/op	   2.80 MB/s	      1429 ns/sample	        14.58 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=64-32         	     124	     90714 ns/op	   2.82 MB/s	      1417 ns/sample	        14.70 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=64-32         	     129	     93059 ns/op	   2.75 MB/s	      1454 ns/sample	        14.33 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=64-32         	     129	     91753 ns/op	   2.79 MB/s	      1434 ns/sample	        14.53 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=64
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=64-32          	     123	     92651 ns/op	   2.76 MB/s	      1448 ns/sample	        14.39 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=64-32          	     132	    107220 ns/op	   2.39 MB/s	      1675 ns/sample	        12.44 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=64-32          	     132	     94361 ns/op	   2.71 MB/s	      1474 ns/sample	        14.13 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=64-32          	     133	     91821 ns/op	   2.79 MB/s	      1435 ns/sample	        14.52 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=64-32          	     132	     90237 ns/op	   2.84 MB/s	      1410 ns/sample	        14.78 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=64-32          	     130	     90181 ns/op	   2.84 MB/s	      1409 ns/sample	        14.79 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=128
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=128-32        	    2481	      4939 ns/op	  51.83 MB/s	        77.17 ns/sample	       270.0 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=128-32        	    2380	      5161 ns/op	  49.60 MB/s	        80.64 ns/sample	       258.4 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=128-32        	    2378	      5039 ns/op	  50.80 MB/s	        78.74 ns/sample	       264.6 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=128-32        	    2353	      4973 ns/op	  51.48 MB/s	        77.69 ns/sample	       268.1 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=128-32        	    2385	      4993 ns/op	  51.27 MB/s	        78.00 ns/sample	       267.1 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=128-32        	    2385	      5007 ns/op	  51.13 MB/s	        78.23 ns/sample	       266.3 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=128
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=128-32        	      56	    190236 ns/op	   1.35 MB/s	      2972 ns/sample	         7.010 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=128-32        	      58	    215336 ns/op	   1.19 MB/s	      3364 ns/sample	         6.192 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=128-32        	      62	    188981 ns/op	   1.35 MB/s	      2953 ns/sample	         7.056 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=128-32        	      63	    188465 ns/op	   1.36 MB/s	      2945 ns/sample	         7.075 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=128-32        	      62	    189358 ns/op	   1.35 MB/s	      2959 ns/sample	         7.042 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=128-32        	      62	    190111 ns/op	   1.35 MB/s	      2970 ns/sample	         7.014 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=128
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=128-32         	      60	    189065 ns/op	   1.35 MB/s	      2954 ns/sample	         7.053 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=128-32         	      62	    191268 ns/op	   1.34 MB/s	      2988 ns/sample	         6.971 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=128-32         	      62	    188731 ns/op	   1.36 MB/s	      2949 ns/sample	         7.065 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=128-32         	      62	    188729 ns/op	   1.36 MB/s	      2949 ns/sample	         7.065 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=128-32         	      60	    188577 ns/op	   1.36 MB/s	      2946 ns/sample	         7.071 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=128-32         	      61	    188952 ns/op	   1.35 MB/s	      2952 ns/sample	         7.057 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=256
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=256-32        	    1201	     10179 ns/op	  25.15 MB/s	       159.0 ns/sample	       131.0 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=256-32        	    1167	     10215 ns/op	  25.06 MB/s	       159.6 ns/sample	       130.5 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=256-32        	    1172	     10213 ns/op	  25.07 MB/s	       159.6 ns/sample	       130.6 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=256-32        	    1177	     10219 ns/op	  25.05 MB/s	       159.7 ns/sample	       130.5 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=256-32        	    1171	     10220 ns/op	  25.05 MB/s	       159.7 ns/sample	       130.5 xRt_48k
+BenchmarkScalarResample/48x441/node=offlineSinc/ratio=48000_44100/quantum=64/taps=256-32        	    1170	     10281 ns/op	  24.90 MB/s	       160.6 ns/sample	       129.7 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=256
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=256-32        	      28	    384500 ns/op	   0.67 MB/s	      6007 ns/sample	         3.468 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=256-32        	      31	    381658 ns/op	   0.67 MB/s	      5963 ns/sample	         3.494 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=256-32        	      30	    381260 ns/op	   0.67 MB/s	      5957 ns/sample	         3.497 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=256-32        	      27	    382037 ns/op	   0.67 MB/s	      5969 ns/sample	         3.490 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=256-32        	      31	    382687 ns/op	   0.67 MB/s	      5979 ns/sample	         3.484 xRt_48k
+BenchmarkScalarResample/48x441/node=integerSinc/ratio=48000_44100/quantum=64/taps=256-32        	      31	    381735 ns/op	   0.67 MB/s	      5964 ns/sample	         3.493 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=256
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=256-32         	      30	    381483 ns/op	   0.67 MB/s	      5960 ns/sample	         3.495 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=256-32         	      31	    381545 ns/op	   0.67 MB/s	      5961 ns/sample	         3.495 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=256-32         	      30	    378557 ns/op	   0.68 MB/s	      5915 ns/sample	         3.522 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=256-32         	      30	    387947 ns/op	   0.66 MB/s	      6061 ns/sample	         3.437 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=256-32         	      30	    377220 ns/op	   0.68 MB/s	      5894 ns/sample	         3.535 xRt_48k
+BenchmarkScalarResample/48x441/node=onlineSinc/ratio=48000_44100/quantum=64/taps=256-32         	      31	    381574 ns/op	   0.67 MB/s	      5962 ns/sample	         3.494 xRt_48k
+PASS
+
+Process finished with the exit code 0
+
+goos: windows
+goarch: amd64
+pkg: github.com/dmgard/vavr
+cpu: AMD Ryzen 9 9950X3D 16-Core Processor
+BenchmarkAvxResample
+BenchmarkAvxResample/F32
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=256
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=256-32         	   44248	       285.8 ns/op	7164.70 MB/s	         1.116 ns/sample	     18660 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=256-32         	   44144	       278.1 ns/op	7365.55 MB/s	         1.086 ns/sample	     19184 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=256-32         	   44056	       274.7 ns/op	7455.58 MB/s	         1.073 ns/sample	     19418 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=256-32         	   43389	       277.6 ns/op	7378.13 MB/s	         1.084 ns/sample	     19216 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=256-32         	   43860	       270.5 ns/op	7571.31 MB/s	         1.057 ns/sample	     19719 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=256-32         	   44970	       269.2 ns/op	7607.55 MB/s	         1.052 ns/sample	     19812 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=512
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=512-32         	   22497	       533.4 ns/op	7679.68 MB/s	         1.042 ns/sample	     20000 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=512-32         	   22610	       533.0 ns/op	7685.27 MB/s	         1.041 ns/sample	     20015 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=512-32         	   22526	       533.7 ns/op	7674.61 MB/s	         1.042 ns/sample	     19987 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=512-32         	   22434	       533.2 ns/op	7681.28 MB/s	         1.041 ns/sample	     20004 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=512-32         	   22438	       531.4 ns/op	7707.98 MB/s	         1.038 ns/sample	     20074 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=512-32         	   22532	       541.9 ns/op	7558.58 MB/s	         1.058 ns/sample	     19685 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=1024
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=1024-32        	   10000	      1058 ns/op	7746.13 MB/s	         1.033 ns/sample	     20173 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=1024-32        	   10000	      1052 ns/op	7788.40 MB/s	         1.027 ns/sample	     20283 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=1024-32        	   10000	      1050 ns/op	7803.32 MB/s	         1.025 ns/sample	     20322 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=1024-32        	   10000	      1052 ns/op	7788.78 MB/s	         1.027 ns/sample	     20284 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=1024-32        	   10000	      1052 ns/op	7784.63 MB/s	         1.028 ns/sample	     20274 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=1024-32        	   10000	      1053 ns/op	7778.20 MB/s	         1.028 ns/sample	     20257 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=2048
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=2048-32        	    5662	      2153 ns/op	7609.65 MB/s	         1.051 ns/sample	     19818 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=2048-32        	    5702	      2102 ns/op	7793.70 MB/s	         1.026 ns/sample	     20297 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=2048-32        	    5697	      2095 ns/op	7819.81 MB/s	         1.023 ns/sample	     20365 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=2048-32        	    5706	      2094 ns/op	7823.78 MB/s	         1.022 ns/sample	     20375 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=2048-32        	    5689	      2128 ns/op	7700.07 MB/s	         1.039 ns/sample	     20054 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=2048-32        	    5532	      2101 ns/op	7796.40 MB/s	         1.026 ns/sample	     20304 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=4096
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=4096-32        	    2851	      4189 ns/op	7822.68 MB/s	         1.023 ns/sample	     20372 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=4096-32        	    2858	      4185 ns/op	7829.56 MB/s	         1.022 ns/sample	     20391 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=4096-32        	    2851	      4191 ns/op	7818.62 MB/s	         1.023 ns/sample	     20362 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=4096-32        	    2820	      4196 ns/op	7809.22 MB/s	         1.024 ns/sample	     20338 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=4096-32        	    2797	      4172 ns/op	7853.45 MB/s	         1.019 ns/sample	     20452 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=4096-32        	    2863	      4178 ns/op	7843.46 MB/s	         1.020 ns/sample	     20426 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=8192
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=8192-32        	    1436	      8348 ns/op	7850.06 MB/s	         1.019 ns/sample	     20444 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=8192-32        	    1429	      8356 ns/op	7843.27 MB/s	         1.020 ns/sample	     20426 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=8192-32        	    1434	      8340 ns/op	7857.74 MB/s	         1.018 ns/sample	     20464 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=8192-32        	    1440	      8298 ns/op	7897.49 MB/s	         1.013 ns/sample	     20567 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=8192-32        	    1446	      8300 ns/op	7895.57 MB/s	         1.013 ns/sample	     20562 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44100/quantum=64/taps=64/len=8192-32        	    1436	      8333 ns/op	7864.50 MB/s	         1.017 ns/sample	     20481 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=256
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=256-32         	   45589	       264.1 ns/op	7755.96 MB/s	         1.031 ns/sample	     20198 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=256-32         	   45457	       264.1 ns/op	7754.70 MB/s	         1.032 ns/sample	     20196 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=256-32         	   44512	       266.4 ns/op	7688.01 MB/s	         1.041 ns/sample	     20022 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=256-32         	   43551	       262.8 ns/op	7792.86 MB/s	         1.027 ns/sample	     20295 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=256-32         	   45710	       260.6 ns/op	7857.68 MB/s	         1.018 ns/sample	     20464 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=256-32         	   46070	       261.6 ns/op	7828.88 MB/s	         1.022 ns/sample	     20388 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=512
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=512-32         	   23523	       516.0 ns/op	7937.90 MB/s	         1.008 ns/sample	     20672 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=512-32         	   23628	       515.0 ns/op	7953.08 MB/s	         1.006 ns/sample	     20712 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=512-32         	   23456	       512.5 ns/op	7992.39 MB/s	         1.001 ns/sample	     20814 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=512-32         	   23385	       511.3 ns/op	8011.46 MB/s	         0.9985 ns/sample	     20864 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=512-32         	   23475	       520.0 ns/op	7876.99 MB/s	         1.016 ns/sample	     20514 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=512-32         	   23599	       524.1 ns/op	7815.77 MB/s	         1.024 ns/sample	     20355 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=1024
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=1024-32        	   10000	      1019 ns/op	8043.12 MB/s	         0.9946 ns/sample	     20947 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=1024-32        	   10000	      1019 ns/op	8040.12 MB/s	         0.9950 ns/sample	     20939 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=1024-32        	   10000	      1019 ns/op	8038.54 MB/s	         0.9952 ns/sample	     20935 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=1024-32        	   10000	      1017 ns/op	8054.03 MB/s	         0.9933 ns/sample	     20975 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=1024-32        	   10000	      1021 ns/op	8024.21 MB/s	         0.9969 ns/sample	     20897 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=1024-32        	   10000	      1018 ns/op	8045.73 MB/s	         0.9943 ns/sample	     20953 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=2048
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=2048-32        	    5878	      2103 ns/op	7790.04 MB/s	         1.027 ns/sample	     20288 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=2048-32        	    5878	      2027 ns/op	8084.31 MB/s	         0.9895 ns/sample	     21054 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=2048-32        	    5937	      2023 ns/op	8099.23 MB/s	         0.9877 ns/sample	     21093 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=2048-32        	    5925	      2020 ns/op	8110.42 MB/s	         0.9864 ns/sample	     21122 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=2048-32        	    5884	      2025 ns/op	8092.09 MB/s	         0.9886 ns/sample	     21074 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=2048-32        	    5905	      2022 ns/op	8102.88 MB/s	         0.9873 ns/sample	     21102 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=4096
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=4096-32        	    2960	      4038 ns/op	8115.85 MB/s	         0.9857 ns/sample	     21136 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=4096-32        	    2971	      4051 ns/op	8088.88 MB/s	         0.9890 ns/sample	     21065 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=4096-32        	    2952	      4020 ns/op	8151.55 MB/s	         0.9814 ns/sample	     21229 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=4096-32        	    2948	      4031 ns/op	8129.95 MB/s	         0.9840 ns/sample	     21173 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=4096-32        	    2965	      4036 ns/op	8118.96 MB/s	         0.9853 ns/sample	     21144 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=4096-32        	    2960	      4046 ns/op	8097.96 MB/s	         0.9879 ns/sample	     21089 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=8192
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=8192-32        	    1482	      8070 ns/op	8120.56 MB/s	         0.9851 ns/sample	     21148 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=8192-32        	    1494	      8121 ns/op	8070.06 MB/s	         0.9913 ns/sample	     21017 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=8192-32        	    1477	      8101 ns/op	8089.58 MB/s	         0.9889 ns/sample	     21067 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=8192-32        	    1476	      8067 ns/op	8124.37 MB/s	         0.9847 ns/sample	     21158 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=8192-32        	    1480	      8238 ns/op	7955.16 MB/s	         1.006 ns/sample	     20718 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_44000/quantum=64/taps=64/len=8192-32        	    1324	      8556 ns/op	7659.48 MB/s	         1.044 ns/sample	     19948 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=256
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=256-32         	   45404	       259.0 ns/op	7907.23 MB/s	         1.012 ns/sample	     20593 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=256-32         	   45826	       258.7 ns/op	7915.49 MB/s	         1.011 ns/sample	     20614 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=256-32         	   46381	       258.1 ns/op	7934.34 MB/s	         1.008 ns/sample	     20664 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=256-32         	   46112	       260.1 ns/op	7874.70 MB/s	         1.016 ns/sample	     20508 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=256-32         	   46206	       260.8 ns/op	7853.69 MB/s	         1.019 ns/sample	     20453 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=256-32         	   46623	       259.3 ns/op	7898.35 MB/s	         1.013 ns/sample	     20569 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=512
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=512-32         	   23622	       512.3 ns/op	7996.01 MB/s	         1.000 ns/sample	     20824 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=512-32         	   23274	       512.2 ns/op	7997.24 MB/s	         1.000 ns/sample	     20827 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=512-32         	   23774	       538.6 ns/op	7605.48 MB/s	         1.052 ns/sample	     19807 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=512-32         	   23630	       512.5 ns/op	7992.77 MB/s	         1.001 ns/sample	     20815 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=512-32         	   23508	       512.5 ns/op	7991.70 MB/s	         1.001 ns/sample	     20813 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=512-32         	   23724	       513.6 ns/op	7975.17 MB/s	         1.003 ns/sample	     20770 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=1024
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=1024-32        	   10000	      1017 ns/op	8056.97 MB/s	         0.9929 ns/sample	     20983 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=1024-32        	   10000	      1008 ns/op	8128.68 MB/s	         0.9841 ns/sample	     21169 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=1024-32        	   10000	      1014 ns/op	8075.07 MB/s	         0.9907 ns/sample	     21030 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=1024-32        	   11832	      1015 ns/op	8073.34 MB/s	         0.9909 ns/sample	     21025 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=1024-32        	   10000	      1014 ns/op	8077.78 MB/s	         0.9903 ns/sample	     21037 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=1024-32        	   10000	      1012 ns/op	8096.22 MB/s	         0.9881 ns/sample	     21085 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=2048
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=2048-32        	    5901	      2017 ns/op	8121.47 MB/s	         0.9850 ns/sample	     21150 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=2048-32        	    5916	      2018 ns/op	8117.29 MB/s	         0.9855 ns/sample	     21140 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=2048-32        	    5862	      2013 ns/op	8139.44 MB/s	         0.9828 ns/sample	     21197 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=2048-32        	    5911	      2019 ns/op	8116.00 MB/s	         0.9857 ns/sample	     21136 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=2048-32        	    5905	      2021 ns/op	8108.17 MB/s	         0.9866 ns/sample	     21116 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=2048-32        	    5919	      2018 ns/op	8118.41 MB/s	         0.9854 ns/sample	     21143 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=4096
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=4096-32        	    2946	      4047 ns/op	8097.31 MB/s	         0.9879 ns/sample	     21088 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=4096-32        	    2994	      4035 ns/op	8120.94 MB/s	         0.9851 ns/sample	     21149 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=4096-32        	    2968	      4015 ns/op	8161.68 MB/s	         0.9802 ns/sample	     21255 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=4096-32        	    2992	      4029 ns/op	8133.22 MB/s	         0.9836 ns/sample	     21181 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=4096-32        	    2995	      4012 ns/op	8166.98 MB/s	         0.9795 ns/sample	     21269 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=4096-32        	    2983	      4009 ns/op	8173.71 MB/s	         0.9787 ns/sample	     21286 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=8192
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=8192-32        	    1490	      8047 ns/op	8144.65 MB/s	         0.9822 ns/sample	     21211 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=8192-32        	    1482	      8042 ns/op	8149.52 MB/s	         0.9816 ns/sample	     21224 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=8192-32        	    1483	      8040 ns/op	8151.05 MB/s	         0.9814 ns/sample	     21227 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=8192-32        	    1489	      8041 ns/op	8150.47 MB/s	         0.9815 ns/sample	     21226 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=8192-32        	    1485	      8025 ns/op	8166.70 MB/s	         0.9796 ns/sample	     21268 xRt_48k
+BenchmarkAvxResample/F32/layout=8x8/simd=AVX/ratio=48000_48000/quantum=64/taps=64/len=8192-32        	    1484	      8073 ns/op	8117.47 MB/s	         0.9855 ns/sample	     21140 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=256
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=256-32  	   10000	      1080 ns/op	1895.45 MB/s	         4.220 ns/sample	      4936 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=256-32  	   10000	      1074 ns/op	1906.84 MB/s	         4.195 ns/sample	      4966 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=256-32  	   10000	      1077 ns/op	1901.72 MB/s	         4.207 ns/sample	      4953 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=256-32  	   10000	      1071 ns/op	1912.46 MB/s	         4.183 ns/sample	      4981 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=256-32  	   10000	      1068 ns/op	1917.91 MB/s	         4.171 ns/sample	      4995 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=256-32  	   10000	      1082 ns/op	1893.16 MB/s	         4.226 ns/sample	      4930 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=512
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=512-32  	    5964	      2054 ns/op	1994.44 MB/s	         4.011 ns/sample	      5194 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=512-32  	    6020	      2048 ns/op	2000.29 MB/s	         3.999 ns/sample	      5209 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=512-32  	    5907	      2037 ns/op	2011.28 MB/s	         3.977 ns/sample	      5238 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=512-32  	    5913	      2052 ns/op	1996.44 MB/s	         4.007 ns/sample	      5199 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=512-32  	    5919	      2049 ns/op	1998.63 MB/s	         4.003 ns/sample	      5205 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=512-32  	    5996	      2048 ns/op	2000.36 MB/s	         3.999 ns/sample	      5209 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=1024
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=1024-32 	    2876	      4227 ns/op	1938.11 MB/s	         4.128 ns/sample	      5047 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=1024-32 	    2833	      4206 ns/op	1947.86 MB/s	         4.107 ns/sample	      5073 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=1024-32 	    2877	      4199 ns/op	1950.94 MB/s	         4.100 ns/sample	      5081 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=1024-32 	    2871	      4303 ns/op	1903.68 MB/s	         4.202 ns/sample	      4958 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=1024-32 	    2876	      4207 ns/op	1947.12 MB/s	         4.108 ns/sample	      5071 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=1024-32 	    2847	      4212 ns/op	1944.78 MB/s	         4.113 ns/sample	      5065 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=2048
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=2048-32 	    1432	      8404 ns/op	1949.47 MB/s	         4.104 ns/sample	      5077 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=2048-32 	    1429	      8392 ns/op	1952.40 MB/s	         4.097 ns/sample	      5085 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=2048-32 	    1424	      8428 ns/op	1944.01 MB/s	         4.115 ns/sample	      5063 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=2048-32 	    1432	      8425 ns/op	1944.75 MB/s	         4.113 ns/sample	      5065 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=2048-32 	    1431	      8381 ns/op	1954.82 MB/s	         4.092 ns/sample	      5091 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=2048-32 	    1431	      8377 ns/op	1955.91 MB/s	         4.090 ns/sample	      5094 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=4096
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=4096-32 	     715	     16701 ns/op	1962.01 MB/s	         4.077 ns/sample	      5110 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=4096-32 	     715	     16774 ns/op	1953.52 MB/s	         4.095 ns/sample	      5087 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=4096-32 	     720	     16688 ns/op	1963.56 MB/s	         4.074 ns/sample	      5114 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=4096-32 	     718	     16778 ns/op	1953.00 MB/s	         4.096 ns/sample	      5086 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=4096-32 	     718	     16667 ns/op	1966.06 MB/s	         4.069 ns/sample	      5120 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=4096-32 	     718	     16655 ns/op	1967.42 MB/s	         4.066 ns/sample	      5124 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=8192
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=8192-32 	     358	     33586 ns/op	1951.27 MB/s	         4.100 ns/sample	      5082 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=8192-32 	     358	     33615 ns/op	1949.63 MB/s	         4.103 ns/sample	      5077 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=8192-32 	     356	     34104 ns/op	1921.67 MB/s	         4.163 ns/sample	      5005 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=8192-32 	     354	     33736 ns/op	1942.64 MB/s	         4.118 ns/sample	      5059 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=8192-32 	     356	     33799 ns/op	1938.98 MB/s	         4.126 ns/sample	      5050 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44100/quantum=256/taps=256/len=8192-32 	     334	     33647 ns/op	1947.77 MB/s	         4.107 ns/sample	      5072 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=256
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=256-32  	   28478	       449.4 ns/op	4556.98 MB/s	         1.755 ns/sample	     11868 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=256-32  	   27043	       426.9 ns/op	4796.82 MB/s	         1.668 ns/sample	     12492 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=256-32  	   28095	       427.8 ns/op	4787.06 MB/s	         1.671 ns/sample	     12467 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=256-32  	   28185	       427.1 ns/op	4795.33 MB/s	         1.668 ns/sample	     12488 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=256-32  	   28218	       428.5 ns/op	4779.47 MB/s	         1.674 ns/sample	     12447 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=256-32  	   28210	       427.2 ns/op	4793.61 MB/s	         1.669 ns/sample	     12484 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=512
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=512-32  	   14344	       842.2 ns/op	4863.34 MB/s	         1.645 ns/sample	     12665 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=512-32  	   14290	       967.2 ns/op	4235.09 MB/s	         1.889 ns/sample	     11030 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=512-32  	   14452	       837.3 ns/op	4891.98 MB/s	         1.635 ns/sample	     12740 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=512-32  	   14337	       838.4 ns/op	4885.51 MB/s	         1.637 ns/sample	     12723 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=512-32  	   14338	       837.8 ns/op	4888.78 MB/s	         1.636 ns/sample	     12732 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=512-32  	   14352	       842.7 ns/op	4860.78 MB/s	         1.646 ns/sample	     12659 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=1024
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=1024-32 	    7108	      1664 ns/op	4923.66 MB/s	         1.625 ns/sample	     12823 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=1024-32 	    7120	      1674 ns/op	4894.65 MB/s	         1.634 ns/sample	     12747 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=1024-32 	    6454	      1672 ns/op	4898.29 MB/s	         1.633 ns/sample	     12757 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=1024-32 	    7062	      1675 ns/op	4890.56 MB/s	         1.636 ns/sample	     12736 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=1024-32 	    7134	      1668 ns/op	4910.90 MB/s	         1.629 ns/sample	     12789 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=1024-32 	    7159	      1670 ns/op	4903.92 MB/s	         1.631 ns/sample	     12771 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=2048
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=2048-32 	    3553	      3351 ns/op	4889.12 MB/s	         1.636 ns/sample	     12733 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=2048-32 	    3555	      3344 ns/op	4899.94 MB/s	         1.633 ns/sample	     12761 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=2048-32 	    3564	      3364 ns/op	4870.96 MB/s	         1.642 ns/sample	     12685 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=2048-32 	    3549	      3342 ns/op	4902.02 MB/s	         1.632 ns/sample	     12766 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=2048-32 	    3566	      3339 ns/op	4907.01 MB/s	         1.630 ns/sample	     12779 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=2048-32 	    3596	      3543 ns/op	4624.78 MB/s	         1.730 ns/sample	     12044 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=4096
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=4096-32 	    1780	      6726 ns/op	4872.00 MB/s	         1.642 ns/sample	     12688 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=4096-32 	    1784	      6698 ns/op	4892.10 MB/s	         1.635 ns/sample	     12740 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=4096-32 	    1779	      6689 ns/op	4898.55 MB/s	         1.633 ns/sample	     12757 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=4096-32 	    1789	      6701 ns/op	4889.81 MB/s	         1.636 ns/sample	     12734 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=4096-32 	    1788	      6696 ns/op	4893.48 MB/s	         1.635 ns/sample	     12744 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=4096-32 	    1764	      6721 ns/op	4875.73 MB/s	         1.641 ns/sample	     12698 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=8192
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=8192-32 	     889	     13435 ns/op	4877.93 MB/s	         1.640 ns/sample	     12703 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=8192-32 	     898	     13412 ns/op	4886.44 MB/s	         1.637 ns/sample	     12726 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=8192-32 	     894	     13387 ns/op	4895.45 MB/s	         1.634 ns/sample	     12749 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=8192-32 	     890	     13360 ns/op	4905.27 MB/s	         1.631 ns/sample	     12775 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=8192-32 	     880	     13438 ns/op	4876.97 MB/s	         1.640 ns/sample	     12701 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_44000/quantum=256/taps=256/len=8192-32 	     877	     13692 ns/op	4786.36 MB/s	         1.671 ns/sample	     12465 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=256
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=256-32  	   28174	       425.5 ns/op	4813.14 MB/s	         1.662 ns/sample	     12535 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=256-32  	   28299	       425.3 ns/op	4815.17 MB/s	         1.661 ns/sample	     12540 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=256-32  	   28404	       424.4 ns/op	4826.02 MB/s	         1.658 ns/sample	     12568 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=256-32  	   28173	       426.0 ns/op	4807.75 MB/s	         1.664 ns/sample	     12521 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=256-32  	   28551	       428.5 ns/op	4779.15 MB/s	         1.674 ns/sample	     12446 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=256-32  	   28226	       425.3 ns/op	4815.79 MB/s	         1.661 ns/sample	     12542 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=512
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=512-32  	   14336	       840.9 ns/op	4870.99 MB/s	         1.642 ns/sample	     12686 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=512-32  	   14336	       855.4 ns/op	4788.60 MB/s	         1.671 ns/sample	     12471 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=512-32  	   14328	       841.4 ns/op	4867.91 MB/s	         1.643 ns/sample	     12677 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=512-32  	   14341	       843.9 ns/op	4853.40 MB/s	         1.648 ns/sample	     12639 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=512-32  	   14419	       844.0 ns/op	4852.94 MB/s	         1.648 ns/sample	     12638 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=512-32  	   14364	       844.2 ns/op	4852.13 MB/s	         1.649 ns/sample	     12636 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=1024
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=1024-32 	    7070	      1672 ns/op	4899.87 MB/s	         1.633 ns/sample	     12761 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=1024-32 	    7142	      1660 ns/op	4935.82 MB/s	         1.621 ns/sample	     12854 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=1024-32 	    7191	      1665 ns/op	4918.98 MB/s	         1.626 ns/sample	     12810 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=1024-32 	    7198	      1664 ns/op	4923.31 MB/s	         1.625 ns/sample	     12822 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=1024-32 	    7033	      1664 ns/op	4924.22 MB/s	         1.625 ns/sample	     12824 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=1024-32 	    7129	      1693 ns/op	4838.67 MB/s	         1.653 ns/sample	     12601 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=2048
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=2048-32 	    3553	      3337 ns/op	4909.99 MB/s	         1.629 ns/sample	     12787 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=2048-32 	    3559	      3344 ns/op	4899.23 MB/s	         1.633 ns/sample	     12759 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=2048-32 	    3578	      3343 ns/op	4900.80 MB/s	         1.632 ns/sample	     12763 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=2048-32 	    3579	      3351 ns/op	4888.97 MB/s	         1.636 ns/sample	     12732 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=2048-32 	    3589	      3353 ns/op	4886.66 MB/s	         1.637 ns/sample	     12726 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=2048-32 	    3184	      3346 ns/op	4896.62 MB/s	         1.634 ns/sample	     12752 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=4096
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=4096-32 	    1572	      6686 ns/op	4900.70 MB/s	         1.632 ns/sample	     12763 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=4096-32 	    1784	      6648 ns/op	4929.06 MB/s	         1.623 ns/sample	     12837 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=4096-32 	    1790	      6705 ns/op	4887.36 MB/s	         1.637 ns/sample	     12728 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=4096-32 	    1782	      6695 ns/op	4894.31 MB/s	         1.634 ns/sample	     12746 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=4096-32 	    1788	      6655 ns/op	4923.83 MB/s	         1.625 ns/sample	     12823 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=4096-32 	    1797	      6660 ns/op	4920.09 MB/s	         1.626 ns/sample	     12813 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=8192
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=8192-32 	     838	     13368 ns/op	4902.36 MB/s	         1.632 ns/sample	     12767 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=8192-32 	     888	     13393 ns/op	4893.17 MB/s	         1.635 ns/sample	     12743 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=8192-32 	     892	     13353 ns/op	4907.95 MB/s	         1.630 ns/sample	     12782 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=8192-32 	     898	     13351 ns/op	4908.57 MB/s	         1.630 ns/sample	     12783 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=8192-32 	     900	     13331 ns/op	4916.02 MB/s	         1.627 ns/sample	     12803 xRt_48k
+BenchmarkAvxResample/F32/layout=16x16/simd=AVX512/ratio=48000_48000/quantum=256/taps=256/len=8192-32 	     900	     13360 ns/op	4905.27 MB/s	         1.631 ns/sample	     12775 xRt_48k
+PASS
+
+Process finished with the exit code 0
