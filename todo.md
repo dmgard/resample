@@ -1,4 +1,4 @@
-- Over-under resampler
+- DOING Over-under resampler
   - Extract consts/coefs into reusable, shared bundle, embedded in resampler
   - Keep count of deviation between approximate and ideal resampling
   - On phase-wrap, swap to alternate coef/const bundle 
@@ -9,6 +9,12 @@
     - Broadcast sample, multiply by coefs and do unaligned load, add, store
     - Pad filters to register length
     - Might even have enough time to calculate sinc coefficients online using approximations due to how memory-bound the operation would be
+  - Can basically adapt current resampler by zero-padding coefficient phases by register len on either end and adjusting tapcount offset separately for loads
+  - Eventually add SIMD coefficient generation
+  - Need to consider extending length of output slice and copying+wrapping outIdx to avoid per-register index wrapping in assembly
+    - Basically, pad output with enough room to always write partial accumulated samples past the midpoint. Once output is writing completely past the midpoint, copy midpoint:output+taps samples back to the start of output and wrap/update relevant indices
 - API
   - Compute taps needed for desired -3db point, ripple, and rejection
 - Tests
+- Readme
+  - Basically brings inner-outer convolution loop vectorization optimization to a multirate resampler

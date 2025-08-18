@@ -131,10 +131,6 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 			}
 			outIdx += s.outStep
 			outIdx &= fixedPointOne - 1 // only care about the fractional part
-
-			//if outIdx >= 4294967292 {
-			//	println("almost done")
-			//}
 		}
 	}
 
@@ -154,7 +150,7 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 		s.alt, s.consts = s.consts, new(consts[T])
 		srInAlt := srIn
 
-		// TODO consider order
+		// TODO adjust ratios to minimize drift discrepancy
 		if ratio > idealInPerOut { // old ratio was lower, alternate will be lower
 			srIn = Fmul(srOut, idealInPerOut)
 		} else { // old ratio was higher, approximate it with overshoot
@@ -186,9 +182,7 @@ func (s *OfflineSincResampler[T]) Process(in []T) {
 		// and accumulate to output samples at integer output slice indices
 		// TODO might be off by one relative to floating point calculation
 		outMin := int(s.outIdx>>fixedPointShift) - s.delay
-		//outMin := int(float64(s.outIdx)/float64(fixedPointOne)) - s.delay
 
-		// TODO wrap output index to avoid float precision issues at very high counts
 		s.outIdx += s.outStep // + 1
 
 		// coefs contains precomputed centered windowed sinc on each output sample
@@ -203,13 +197,12 @@ func (s *OfflineSincResampler[T]) Process(in []T) {
 		// wrap sample coefficients index
 		if s.coefsIdx >= len(s.coefs) {
 			s.coefsIdx = 0
-			//s.outIdx = 0 // TODO make sure this lines up as expected
 
 			// IFF this is a rational-approximation resampler,
 			// accumulate drift relative to ideal sample rate
 			// swap to alternate undershoot/overshoot resampler if clock drift is too high
 			s.drift += s.driftStep
-			if Abs(s.drift+s.driftStep) >= 0.5 { // TODO variable threshold
+			if Sign(s.drift) == Sign(s.driftStep) { // TODO variable threshold?
 				s.consts, s.alt = s.alt, s.consts
 			}
 		}
@@ -222,7 +215,7 @@ func (s *OfflineSincResampler[T]) Read(into []T) int {
 		wrapped := (s.quantumIdx << s.logQuantum) & (len(s.out) - 1)
 		chunk := s.out[wrapped:][:s.quantum]
 		into = into[copy(into, chunk):]
-		_memClr(chunk) // TODO clearing inappropriately or something, still
+		_memClr(chunk)
 	}
 	return n - len(into)
 }

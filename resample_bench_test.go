@@ -18,7 +18,6 @@ func BenchmarkScalarResample(b *testing.B) {
 
 		for taps := 16; taps <= 256; taps <<= 1 {
 			tail := printResampleSuffix(srIn, srOut, quantum, taps)
-
 			benchNode(b, "node=offlineSinc/"+tail, New[T](srIn, srOut, quantum, taps).Process, s)
 			benchNode(b, "node=integerSinc/"+tail, NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps).Process, s)
 			benchNode(b, "node=onlineSinc/"+tail, NewOnlineSincResampler[T](quantum, Ffdiv(srIn, srOut), taps).Process, s)
