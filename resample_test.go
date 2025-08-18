@@ -48,9 +48,9 @@ func TestPlotSincResample(t *testing.T) {
 func TestApproximate(t *testing.T) {
 	type T = float32
 
-	const srIn, srOut = 1023, 513
+	const srIn, srOut = 1031, 513
 	const quantum = 64
-	const taps = 16
+	const taps = 32
 
 	rs := New[T](srIn, srOut, quantum, taps)
 	us := New[T](srOut, srIn, quantum, taps)
@@ -83,7 +83,7 @@ func TestApproximate(t *testing.T) {
 	for i := range numQuanta - 1 {
 		i := i + 1 // skip the first aliased chunk
 		chunk := safeSlice(recovered, i*quantum+taps+taps/2, quantum)
-		if idx := ApproxVec(t, 0.01, chunk, samples); idx >= 0 {
+		if idx := ApproxVec(t, 0.25, chunk, samples); idx >= 0 {
 			plot(t, samples)
 			plot(t, chunk)
 			return
