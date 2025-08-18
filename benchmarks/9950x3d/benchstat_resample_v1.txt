@@ -1,0 +1,144 @@
+/ratio: 48000_44100
+        │   offlineSinc   │             integerSinc              │              onlineSinc              │                                                                                           │
+        │       64        │                  64                  │                  64                  │                     64                      │                     256                     │
+        │                 │                                      │                                      │                     AVX                     │                   AVX512                    │
+        │                 │                                      │                                      │                     8x8                     │                    16x16                    │
+        │       B/s       │     B/s       vs base                │     B/s       vs base                │       B/s        vs base                    │       B/s        vs base                    │
+16         291.49Mi ±  3%   10.16Mi ± 3%  -96.52% (p=0.000 n=12)   10.27Mi ± 1%  -96.48% (p=0.000 n=12)
+32        153.265Mi ±  5%   5.226Mi ± 2%  -96.59% (p=0.000 n=12)   5.288Mi ± 2%  -96.55% (p=0.000 n=12)
+64         75.641Mi ±  9%   2.656Mi ± 2%  -96.49% (p=0.000 n=12)   2.680Mi ± 1%  -96.46% (p=0.000 n=12)   3520.570Mi ± 1%  +4554.33% (p=0.000 n=12)
+128        39.988Mi ±  5%   1.287Mi ± 1%  -96.78% (p=0.000 n=12)   1.297Mi ± 1%  -96.76% (p=0.000 n=12)
+256       19174.8Ki ± 10%   654.3Ki ± 1%  -96.59% (p=0.000 n=12)   664.1Ki ± 1%  -96.54% (p=0.000 n=12)                                                 929521.5Ki ± 1%  +4747.62% (p=0.000 n=12)
+geomean     75.97Mi         2.587Mi       -96.59%                  2.615Mi       -96.56%                     3.438Gi       +4554.33%                ¹      907.7Mi       +4747.62%                ¹
+¹ benchmark set differs from baseline; geomeans may not be comparable
+
+        │  offlineSinc  │               integerSinc                │                onlineSinc                │                                                                               │
+        │      64       │                    64                    │                    64                    │                  64                   │                  256                  │
+        │               │                                          │                                          │                  AVX                  │                AVX512                 │
+        │               │                                          │                                          │                  8x8                  │                 16x16                 │
+        │  sec/sample   │   sec/sample    vs base                  │   sec/sample    vs base                  │ sec/sample   vs base                  │ sec/sample   vs base                  │
+16          13.09n ± 3%     375.65n ± 3%  +2769.75% (p=0.000 n=12)     371.65n ± 1%  +2739.19% (p=0.000 n=12)
+32          24.92n ± 5%     730.10n ± 2%  +2829.78% (p=0.000 n=12)     721.55n ± 2%  +2795.47% (p=0.000 n=12)
+64         50.430n ± 9%   1435.000n ± 2%  +2745.53% (p=0.000 n=12)   1423.000n ± 1%  +2721.73% (p=0.000 n=12)   1.084n ± 1%  -97.85% (p=0.000 n=12)
+128         95.56n ± 5%    2953.00n ± 1%  +2990.04% (p=0.000 n=12)    2940.50n ± 2%  +2976.96% (p=0.000 n=12)
+256       203.750n ± 9%   5930.500n ± 0%  +2810.67% (p=0.000 n=12)   5909.000n ± 2%  +2800.12% (p=0.000 n=12)                                           4.202n ± 1%  -97.94% (p=0.000 n=12)
+geomean     50.25n           1.471µ       +2827.92%                     1.460µ       +2805.32%                  1.083n       -97.85%                ¹   4.202n       -97.94%                ¹
+¹ benchmark set differs from baseline; geomeans may not be comparable
+
+        │  offlineSinc  │            integerSinc             │             onlineSinc             │                                                                                       │
+        │      64       │                 64                 │                 64                 │                    64                     │                    256                    │
+        │               │                                    │                                    │                    AVX                    │                  AVX512                   │
+        │               │                                    │                                    │                    8x8                    │                   16x16                   │
+        │    xRt_48k    │  xRt_48k    vs base                │  xRt_48k    vs base                │    xRt_48k     vs base                    │    xRt_48k     vs base                    │
+16        1592.00 ±  3%   55.46 ± 3%  -96.52% (p=0.000 n=12)   56.07 ± 1%  -96.48% (p=0.000 n=12)
+32         837.10 ±  5%   28.53 ± 2%  -96.59% (p=0.000 n=12)   28.87 ± 2%  -96.55% (p=0.000 n=12)
+64         413.10 ±  9%   14.51 ± 2%  -96.49% (p=0.000 n=12)   14.64 ± 1%  -96.45% (p=0.000 n=12)   19228.00 ± 1%  +4554.56% (p=0.000 n=12)
+128       218.350 ±  5%   7.054 ± 1%  -96.77% (p=0.000 n=12)   7.085 ± 1%  -96.76% (p=0.000 n=12)
+256       102.250 ± 10%   3.513 ± 1%  -96.56% (p=0.000 n=12)   3.526 ± 2%  -96.55% (p=0.000 n=12)                                               4958.000 ± 1%  +4748.90% (p=0.000 n=12)
+geomean     414.9         14.16       -96.59%                  14.27       -96.56%                    19.23k       +4554.56%                ¹     4.958k       +4748.90%                ¹
+¹ benchmark set differs from baseline; geomeans may not be comparable
+
+/ratio: 48000_44000
+        │                                    │
+        │      64      │         256         │
+        │     AVX      │       AVX512        │
+        │     8x8      │        16x16        │
+        │     B/s      │     B/s       vs base   │
+64        3.498Gi ± 0%
+256                      2.209Gi ± 1%
+geomean   3.498Gi        2.209Gi       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                  │
+        │     64      │        256         │
+        │     AVX     │       AVX512       │
+        │     8x8     │       16x16        │
+        │ sec/sample  │ sec/sample   vs base   │
+64        1.065n ± 0%
+256                     1.686n ± 1%
+geomean   1.065n        1.686n       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                  │
+        │     64      │        256         │
+        │     AVX     │       AVX512       │
+        │     8x8     │       16x16        │
+        │   xRt_48k   │   xRt_48k    vs base   │
+64        19.57k ± 0%
+256                     12.36k ± 1%
+geomean   19.57k        12.36k       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+/ratio: 48000_48000
+        │                                    │
+        │      64      │         256         │
+        │     AVX      │       AVX512        │
+        │     8x8      │        16x16        │
+        │     B/s      │     B/s       vs base   │
+64        3.525Gi ± 0%
+256                      2.207Gi ± 1%
+geomean   3.525Gi        2.207Gi       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                  │
+        │     64      │        256         │
+        │     AVX     │       AVX512       │
+        │     8x8     │       16x16        │
+        │ sec/sample  │ sec/sample   vs base   │
+64        1.056n ± 0%
+256                     1.688n ± 1%
+geomean   1.056n        1.688n       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                  │
+        │     64      │        256         │
+        │     AVX     │       AVX512       │
+        │     8x8     │       16x16        │
+        │   xRt_48k   │   xRt_48k    vs base   │
+64        19.71k ± 0%
+256                     12.34k ± 1%
+geomean   19.71k        12.34k       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+/ratio: 48111_47892
+        │  offlineSinc   │             integerSinc              │             onlineSinc              │
+        │       64       │                  64                  │                 64                  │
+        │                │                                      │                                     │
+        │                │                                      │                                     │
+        │      B/s       │      B/s       vs base               │     B/s       vs base               │
+16         284.57Mi ± 1%   10.45Mi ±  3%  -96.33% (p=0.002 n=6)   10.30Mi ± 8%  -96.38% (p=0.002 n=6)
+32        148.258Mi ± 1%   5.407Mi ± 27%  -96.35% (p=0.002 n=6)   5.460Mi ± 2%  -96.32% (p=0.002 n=6)
+64         75.889Mi ± 5%   2.713Mi ±  1%  -96.42% (p=0.002 n=6)   2.694Mi ± 2%  -96.45% (p=0.002 n=6)
+128        37.942Mi ± 6%   1.278Mi ±  3%  -96.63% (p=0.002 n=6)   1.297Mi ± 1%  -96.58% (p=0.002 n=6)
+256       18740.2Ki ± 2%   664.1Ki ±  1%  -96.46% (p=0.002 n=6)   664.1Ki ± 4%  -96.46% (p=0.002 n=6)
+geomean     74.03Mi        2.635Mi        -96.44%                 2.637Mi       -96.44%
+
+        │ offlineSinc │               integerSinc               │               onlineSinc               │
+        │     64      │                   64                    │                   64                   │
+        │             │                                         │                                        │
+        │             │                                         │                                        │
+        │ sec/sample  │   sec/sample    vs base                 │  sec/sample    vs base                 │
+16        13.40n ± 1%    364.85n ±  4%  +2621.75% (p=0.002 n=6)    370.20n ± 9%  +2661.66% (p=0.002 n=6)
+32        25.73n ± 1%    705.15n ± 37%  +2640.58% (p=0.002 n=6)    699.10n ± 2%  +2617.06% (p=0.002 n=6)
+64        50.27n ± 5%   1404.00n ±  1%  +2693.20% (p=0.002 n=6)   1417.00n ± 2%  +2719.06% (p=0.002 n=6)
+128       100.5n ± 6%    2988.5n ±  3%  +2872.15% (p=0.002 n=6)    2935.5n ± 1%  +2819.44% (p=0.002 n=6)
+256       208.5n ± 2%    5917.5n ±  1%  +2738.81% (p=0.002 n=6)    5870.0n ± 4%  +2716.02% (p=0.002 n=6)
+geomean   51.53n          1.449µ        +2711.90%                   1.446µ       +2705.83%
+
+        │ offlineSinc  │            integerSinc             │            onlineSinc             │
+        │      64      │                 64                 │                64                 │
+        │              │                                    │                                   │
+        │              │                                    │                                   │
+        │   xRt_48k    │   xRt_48k    vs base               │  xRt_48k    vs base               │
+16        1554.00 ± 1%   57.10 ±  3%  -96.33% (p=0.002 n=6)   56.27 ± 8%  -96.38% (p=0.002 n=6)
+32         809.75 ± 1%   29.55 ± 27%  -96.35% (p=0.002 n=6)   29.80 ± 2%  -96.32% (p=0.002 n=6)
+64         414.45 ± 5%   14.84 ±  1%  -96.42% (p=0.002 n=6)   14.70 ± 2%  -96.45% (p=0.002 n=6)
+128       207.200 ± 6%   6.972 ±  3%  -96.64% (p=0.002 n=6)   7.097 ± 1%  -96.58% (p=0.002 n=6)
+256        99.950 ± 2%   3.521 ±  1%  -96.48% (p=0.002 n=6)   3.549 ± 4%  -96.45% (p=0.002 n=6)
+geomean     404.3        14.38        -96.44%                 14.41       -96.44%

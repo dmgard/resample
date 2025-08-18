@@ -1,7 +1,11 @@
 - DOING Over-under resampler
-  - Extract consts/coefs into reusable, shared bundle, embedded in resampler
-  - Keep count of deviation between approximate and ideal resampling
-  - On phase-wrap, swap to alternate coef/const bundle 
+  - TODO increasing approximate numerator and denominator both by 1 nudges the resample ratio down by a perhaps minimal amount. Decreasing both by 1 would have the opposite effect. Maybe scale to a floored 512 numerator ratio and then nudge low to find the phasecount(s) <=512 such that the resampler discrepancy is minimized
+    - If the initial resample ratio approximation is always lower than the target, decrementing both numerator and denominator by 1 will always increase the sample ratio. At some small number of such steps the threshold between under and over will be crossed, providing near integer approximations
+  - TODO also need to accept floating point sample rates, as that's what real devices actually return
+  - TODO can probably test this resampler audibly before even building the SIMD version. It already runs at 100x real time in the scalar mode.
+  - DONE Extract consts/coefs into reusable, shared bundle, embedded in resampler
+  - DONE? Keep count of deviation between approximate and ideal resampling
+  - DONE On phase-wrap, swap to alternate coef/const bundle 
 - Multichannel
 - SIMD
   - Fixed-register-length AVX/512 resampler kernels for all multiples of register counts
