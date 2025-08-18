@@ -118,6 +118,14 @@ func Fmul[T Scalar, F Float](s T, f F) T {
 	return T(F(s) * f)
 }
 
+func F64mul[T, F Scalar](s T, f F) T {
+	return T(float64(s) * float64(f))
+}
+
+func FmulCeiled[T Scalar, F Float](s T, f F) T {
+	return T(math.Ceil(float64(F(s) * f)))
+}
+
 func Fdiv[T Scalar, F Scalar](s T, f F) T {
 	return T(Ffdiv(s, f))
 }

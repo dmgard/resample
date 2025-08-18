@@ -18,31 +18,51 @@ type OfflineSincResampler[T Sample] struct {
 	out []T
 
 	// output time in fixed-point ratio of input samples
-	outIdx  fixed64
+	outIdx fixed64
+	// last processed full chunk of quantum samples
+	quantumIdx int
+	// input sample count for selecting output phases
+	coefsIdx int
+	// accumulated output-time drift due to rational sample ratio approximation
+	drift float64
+
+	*consts[T]
+	alt *consts[T]
+}
+
+type consts[T Sample] struct {
+	// ratio of output samples traversed per input sample
 	outStep fixed64
 
 	ratio, invRatio,
+	// TODO explain
 	scaleFactor, sincFactor float64
-	halfTapsFixedPoint fixed64
-	delay, taps        int
-	invFilterWidth     float64
 
+	// half of the filter width in output samples fixed-point time
+	halfTapsFixedPoint fixed64
+	// half filter width in output sample indices, and the full width
+	delay, taps int
+	// used to window output time for sinc coefficient generation
+	// TODO doesn't need to be kept after initialization does it?
+	invFilterWidth float64
+
+	// length of samples to accumulate before reading/advancing an output chunk
 	quantum    int
 	logQuantum int
 
-	// last processed full chunk of quantum samples
-	quantumIdx int
-
 	// precomputed sinc coefficients
 	coefs []T
-	// input sample count for selecting output phases
-	coefsIdx int
+
+	// output clock drift per input sample
+	driftStep float64
 }
 
-func NewOfflineSincResampler[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) {
+// New constructs a resampler with precomputed sinc coefficients
+func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) {
 	if quantum != RoundUpPow2(quantum) {
 		panic("quantum must be a power of 2")
 	}
+	s = &OfflineSincResampler[T]{consts: new(consts[T])}
 
 	inR, outR := big.NewInt(int64(srIn)), big.NewInt(int64(srOut))
 	gcd := big.NewInt(0).GCD(nil, nil, inR, outR)
@@ -52,92 +72,116 @@ func NewOfflineSincResampler[T Sample](srIn, srOut, quantum, taps int) (s *Offli
 
 	ratio := Ffdiv(srIn, srOut)
 
+	initConsts := func() {
+		s.ratio = ratio
+		s.invRatio = 1 / ratio
+
+		// advance output fixed point time this much per new input sample
+		s.outStep = fixed64(math.Ceil(s.invRatio * fixedPointOne))
+		// downsampling accumulates ratio input samples per output sample
+		// rescale output to maintain unity gain
+		s.scaleFactor = min(s.invRatio, 1)
+		// when upsampling, scale sinc inputs to low-pass at lower input rate
+		// avoids aliasing
+		s.sincFactor = min(s.ratio, 1)
+
+		// TODO does taps need to scale up when sinc is widened due to resample ratio?
+		//taps = Fmul(taps, s.ratio)
+
+		// output is a power of two ringbuffer, padded
+		s.out = make([]T, RoundUpPow2(max(taps, quantum)*4))
+
+		// convolved samples need to be output half the filter length ahead
+		// this way they accumulate just in time to be read with a minimal delay
+		s.delay = CeiledDivide(taps, 2)
+
+		// compute the fixed point distance of the filter offset for computing sinc's window
+		// window functions are from 0 ... 1, sinc is -taps/2 ... taps/2
+		s.halfTapsFixedPoint = CeiledDivide(fixed64(taps<<fixedPointShift), 2)
+		// scale the sinc window both by the width of the filter and the resample ratio
+		// if and only if the resample ratio is <1, i.e. upsampling, always low-passing at the
+		// lower sample rate to avoid aliasing
+		s.invFilterWidth = 1 / float64(taps) / s.sincFactor
+
+		// output chunk size. Will accumulate this many samples before pushing to the next node
+		s.quantum = quantum
+		s.logQuantum = tzcnt(quantum)
+
+		phases := srIn
+
+		// precompute coefficients for each unique phase of the windowed sinc filter
+		s.taps = 2*s.delay + 1
+		s.coefs = make([]T, s.taps*phases)
+
+		var outIdx fixed64
+		// one unique set of filter taps per reduced output sample rate index
+		for i := range phases {
+			outPos := float64(outIdx) / float64(fixedPointOne)
+			//outPos := float64(outIdx >> fixedPointShift)
+
+			ci := i * s.taps
+			for fi := range s.coefs[ci:][:s.taps] {
+				// center a sinc on each outPos within the filter spread and compute coefficients
+				coef := T(windowedSinc(
+					(outPos-float64(fi-s.delay))*s.sincFactor,
+					float64(s.delay)*s.sincFactor,
+					s.invFilterWidth),
+				)
+				s.coefs[ci+fi] = coef * T(s.scaleFactor)
+			}
+			outIdx += s.outStep
+			outIdx &= fixedPointOne - 1 // only care about the fractional part
+
+			//if outIdx >= 4294967292 {
+			//	println("almost done")
+			//}
+		}
+	}
+
 	// too many phases, quantize and approximate
 	if srIn > 512 {
+		idealInPerOut := ratio
 		quantScale := Ffdiv(512, srIn)
 		srIn = Fmul(srIn, quantScale)
 		srOut = Fmul(srOut, quantScale)
 
 		ratio = Ffdiv(srIn, srOut)
 
-		// TODO compare ratio for greater/less than previous ratio
 		// generate second resampler and second coefficients for lower or higher quantized ratio
 		// track sample drift from ideal and switch+interpolate between over/undershoot
-	}
+		initConsts()
+		s.alt, s.consts = s.consts, new(consts[T])
+		srInAlt := srIn
 
-	s = new(OfflineSincResampler[T])
-
-	s.ratio = ratio
-	s.invRatio = 1 / ratio
-
-	// advance output fixed point time this much per new input sample
-	s.outStep = fixed64(math.Ceil(s.invRatio * fixedPointOne))
-	// downsampling accumulates ratio input samples per output sample
-	// rescale output to maintain unity gain
-	s.scaleFactor = min(s.invRatio, 1)
-	// when upsampling, scale sinc inputs to low-pass at lower input rate
-	// avoids aliasing
-	s.sincFactor = min(s.ratio, 1)
-
-	// TODO does taps need to scale up when sinc is widened due to resample ratio?
-	//taps = Fmul(taps, s.ratio)
-
-	// output is a power of two ringbuffer, padded
-	s.out = make([]T, RoundUpPow2(max(taps, quantum)*4))
-
-	// convolved samples need to be output half the filter length ahead
-	// this way they accumulate just in time to be read with a minimal delay
-	s.delay = CeiledDivide(taps, 2)
-
-	// compute the fixed point distance of the filter offset for computing sinc's window
-	// window functions are from 0 ... 1, sinc is -taps/2 ... taps/2
-	s.halfTapsFixedPoint = CeiledDivide(fixed64(taps<<fixedPointShift), 2)
-	// scale the sinc window both by the width of the filter and the resample ratio
-	// if and only if the resample ratio is <1, i.e. upsampling, always low-passing at the
-	// lower sample rate to avoid aliasing
-	s.invFilterWidth = 1 / float64(taps) / s.sincFactor
-
-	// output chunk size. Will accumulate this many samples before pushing to the next node
-	s.quantum = quantum
-	s.logQuantum = tzcnt(quantum)
-
-	phases := srIn
-
-	// precompute coefficients for each unique phase of the windowed sinc filter
-	s.taps = 2*s.delay + 1
-	s.coefs = make([]T, s.taps*phases)
-
-	var outIdx fixed64
-	// one unique set of filter taps per reduced output sample rate index
-	for i := range phases {
-		outPos := float64(outIdx) / float64(fixedPointOne)
-		//outPos := float64(outIdx >> fixedPointShift)
-
-		ci := i * s.taps
-		for fi := range s.coefs[ci:][:s.taps] {
-			// center a sinc on each outPos within the filter spread and compute coefficients
-			coef := T(windowedSinc(
-				(outPos-float64(fi-s.delay))*s.sincFactor,
-				float64(s.delay)*s.sincFactor,
-				s.invFilterWidth),
-			)
-			s.coefs[ci+fi] = coef * T(s.scaleFactor)
+		// TODO consider order
+		if ratio > idealInPerOut { // old ratio was lower, alternate will be lower
+			srIn = Fmul(srOut, idealInPerOut)
+		} else { // old ratio was higher, approximate it with overshoot
+			srIn = FmulCeiled(srOut, idealInPerOut)
 		}
-		outIdx += s.outStep
-		outIdx &= fixedPointOne - 1 // only care about the fractional part
 
-		//if outIdx >= 4294967292 {
-		//	println("almost done")
-		//}
+		initConsts()
+
+		idealOutPerIn := 1 / idealInPerOut
+
+		// how many more/fewer output samples are being generated per input sample than
+		// would be expected at the true ratio
+		// premultiply by number of input samples per phase reset
+		s.consts.driftStep, s.alt.driftStep =
+			F64mul(s.consts.invRatio-idealOutPerIn, srIn),
+			F64mul(s.alt.ratio-idealOutPerIn, srInAlt)
+	} else {
+		initConsts()
+		s.alt = s.consts
 	}
+
 	return s
 }
 
 func (s *OfflineSincResampler[T]) Process(in []T) {
 	for _, input := range in {
-		// TODO is filter length in input samples or output samples?
-		// accumulate contribution of this input sample to a patch the size of the filter
-		// and deposit output samples at integer slice indices
+		// weight contribution of this input sample to a patch the size of the filter
+		// and accumulate to output samples at integer output slice indices
 		// TODO might be off by one relative to floating point calculation
 		outMin := int(s.outIdx>>fixedPointShift) - s.delay
 		//outMin := int(float64(s.outIdx)/float64(fixedPointOne)) - s.delay
@@ -145,11 +189,10 @@ func (s *OfflineSincResampler[T]) Process(in []T) {
 		// TODO wrap output index to avoid float precision issues at very high counts
 		s.outIdx += s.outStep // + 1
 
-		// center a windowed sinc on each output sample and calculate the weighted
-		// contribution of the current input sample against that sinc window
+		// coefs contains precomputed centered windowed sinc on each output sample
 		for range s.taps {
 			// wrap into output buffer
-			// TODO consider proper delay offset
+			// delay output by half the filter taps so all inputs can accumulate in time
 			s.out[(outMin+s.delay)&(len(s.out)-1)] += input * s.coefs[s.coefsIdx]
 			s.coefsIdx++
 			outMin++
@@ -158,6 +201,15 @@ func (s *OfflineSincResampler[T]) Process(in []T) {
 		// wrap sample coefficients index
 		if s.coefsIdx >= len(s.coefs) {
 			s.coefsIdx = 0
+			//s.outIdx = 0 // TODO make sure this lines up as expected
+
+			// IFF this is a rational-approximation resampler,
+			// accumulate drift relative to ideal sample rate
+			// swap to alternate undershoot/overshoot resampler if clock drift is too high
+			s.drift += s.driftStep
+			if Abs(s.drift) > 0.5 { // TODO variable threshold
+				s.consts, s.alt = s.alt, s.consts
+			}
 		}
 	}
 }
