@@ -1,0 +1,14 @@
+- Over-under resampler
+  - Extract consts/coefs into reusable, shared bundle, embedded in resampler
+  - Keep count of deviation between approximate and ideal resampling
+  - On phase-wrap, swap to alternate coef/const bundle 
+- Multichannel
+- SIMD
+  - Fixed-register-length AVX/512 resampler kernels for all multiples of register counts
+  - SSE+AVX/512 version of the scalar load-accum-store resampler for arbitrary filter lengths
+    - Broadcast sample, multiply by coefs and do unaligned load, add, store
+    - Pad filters to register length
+    - Might even have enough time to calculate sinc coefficients online using approximations due to how memory-bound the operation would be
+- API
+  - Compute taps needed for desired -3db point, ripple, and rejection
+- Tests
