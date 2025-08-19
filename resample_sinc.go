@@ -88,8 +88,15 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 		// TODO does taps need to scale up when sinc is widened due to resample ratio?
 		//taps = Fmul(taps, s.ratio)
 
+		// TODO there is no real need to process exclusively in chunks of quanta, is there?
 		// output is a power of two ringbuffer, padded
-		s.out = make([]T, RoundUpPow2(max(taps, quantum)*4))
+		s.out = make([]T,
+			RoundUpPow2(
+				FmulCeiled(
+					max(taps, quantum)*2,
+					max(s.invRatio, 1)),
+			),
+		)
 
 		// convolved samples need to be output half the filter length ahead
 		// this way they accumulate just in time to be read with a minimal delay
