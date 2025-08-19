@@ -137,30 +137,78 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 	// too many phases, quantize and approximate
 	const maxPhases = 512 // TODO adjust to limit maximum sample drift
 	if srIn > maxPhases {
+		s.alt = new(consts[T])
 		idealInPerOut := ratio
+		idealOutPerIn := 1 / idealInPerOut
+
 		quantScale := Ffdiv(maxPhases, srIn)
 		srIn = Fmul(srIn, quantScale)
 		srOut = Fmul(srOut, quantScale)
 
+		attempts := 0
+		var best struct {
+			err                    float64
+			in, out, altIn, altOut int
+		}
+		best.err = 100000000
+		lastIn, lastOut := srIn, srOut
+	findRatio:
+		ratio = Ffdiv(srIn, srOut)
+
+		delta := 1
+
+		if ratio < 1 { // decrementing reduces towards 1
+			delta = -1
+		}
+
+		for ratio < idealInPerOut {
+			srIn -= delta
+			srOut -= delta
+			ratio = Ffdiv(srIn, srOut)
+		}
+
+		altRatio, srInAlt, srOutAlt := ratio, srIn, srOut
+
+		for ratio > idealInPerOut {
+			altRatio, srInAlt, srOutAlt = ratio, srIn, srOut
+			srIn += delta
+			srOut += delta
+			ratio = Ffdiv(srIn, srOut)
+		}
+
+		// how many more/fewer output samples are being generated per input sample than
+		// would be expected at the true ratio
+		// premultiply by number of input samples per phase reset
+		drift, altDrift :=
+			F64mul(1/ratio-idealOutPerIn, srInAlt),
+			F64mul(1/altRatio-idealOutPerIn, srIn)
+
+		// record best ratios by squared drift errors
+		err := drift*drift + altDrift*altDrift
+		if err < best.err {
+			best.err = err
+			best.in, best.out, best.altIn, best.altOut = srIn, srOut, srInAlt, srOutAlt
+		}
+
+		// increase max phase count to search for a better rational approximation
+		if srIn < 1024 && err > 0.00001 && srIn != srOut && lastIn != srIn && lastOut != srOut {
+			lastIn, lastOut = srIn, srOut
+			srIn, srOut = FmulCeiled(srIn, 1.02), FmulCeiled(srOut, 1.02)
+			attempts++
+			goto findRatio
+		}
+
+		srIn, srOut, srInAlt, srOutAlt = best.in, best.out, best.altIn, best.altOut
 		ratio = Ffdiv(srIn, srOut)
 
 		// generate second resampler and second coefficients for lower or higher quantized ratio
 		// track sample drift from ideal and switch+interpolate between over/undershoot
 		initConsts()
-		s.alt, s.consts = s.consts, new(consts[T])
-		srInAlt := srIn
-
-		// TODO adjust ratios to minimize drift discrepancy
-		if ratio > idealInPerOut { // old ratio was lower, alternate will be lower
-			srIn = Fmul(srOut, idealInPerOut)
-		} else { // old ratio was higher, approximate it with overshoot
-			srIn = FmulCeiled(srOut, idealInPerOut)
-		}
+		s.alt, s.consts = s.consts, s.alt
+		srIn, srOut, srInAlt, srOutAlt = srInAlt, srOutAlt, srIn, srOut
 
 		ratio = Ffdiv(srIn, srOut)
 		initConsts()
-
-		idealOutPerIn := 1 / idealInPerOut
 
 		// how many more/fewer output samples are being generated per input sample than
 		// would be expected at the true ratio
@@ -168,6 +216,8 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 		s.consts.driftStep, s.alt.driftStep =
 			F64mul(s.consts.invRatio-idealOutPerIn, srIn),
 			F64mul(s.alt.invRatio-idealOutPerIn, srInAlt)
+
+		return s
 	} else {
 		initConsts()
 		s.alt = s.consts

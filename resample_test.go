@@ -59,6 +59,7 @@ func TestApproximate(t *testing.T) {
 	// that might just be alignment issues in the comparison
 	// blip locations seems independent of tap count
 	//const srIn, srOut = 48111, 47892
+	//const srIn, srOut = 48111, 44111
 	const srIn, srOut = 40971, 21131
 	// TODO total delay seems to shift with sample rate
 
@@ -98,8 +99,8 @@ func TestApproximate(t *testing.T) {
 		buf = buf[us.Read(buf):]
 	}
 
-	trimmed := recovered[quantum+taps:]
-	if idxs, deltas, avg := MaxErrors(0.015, 10,
+	trimmed := recovered[quantum+taps+taps/2-1:]
+	if idxs, deltas, avg := MaxErrors(0.005, 10,
 		trimmed, truth); len(idxs) > 0 {
 		t.Log("Errors at: ", idxs)
 		t.Logf("Errors: %3.3f", deltas)
