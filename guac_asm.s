@@ -2,6 +2,232 @@
 
 #include "textflag.h"
 
+// func ResampleFixedF32_16x16(Out []float32, In []float32, Coefs []float32, PhaseIdx int, Phases int, OutIdx int, OutStep int, Taps int) (PhaseIdxOut int, OutIdxOut int)
+// Requires: AVX, AVX512DQ, AVX512F, CMOV
+TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $8-128
+	MOVQ Out_base+0(FP), AX
+	MOVQ In_base+24(FP), CX
+	MOVQ Coefs_base+48(FP), DX
+	MOVQ PhaseIdx+72(FP), BX
+	MOVQ OutIdx+88(FP), DI
+	MOVQ Out_len+8(FP), R8
+	SUBQ $+1, R8
+	MOVQ OutStep+96(FP), R9
+	MOVQ Taps+104(FP), R10
+
+	// Reload previous partially accumulated output samples
+	VMOVUPS (AX), Z0
+	VMOVUPS 64(AX), Z1
+	VMOVUPS 128(AX), Z2
+	VMOVUPS 192(AX), Z3
+	VMOVUPS 256(AX), Z4
+	VMOVUPS 320(AX), Z5
+	VMOVUPS 384(AX), Z6
+	VMOVUPS 448(AX), Z7
+	VMOVUPS 512(AX), Z8
+	VMOVUPS 576(AX), Z9
+	VMOVUPS 640(AX), Z10
+	VMOVUPS 704(AX), Z11
+	VMOVUPS 768(AX), Z12
+	VMOVUPS 832(AX), Z13
+	VMOVUPS 896(AX), Z14
+	VMOVUPS 960(AX), Z15
+	XORQ    R12, R12
+	MOVQ    In_len+32(FP), R13
+	SUBQ    $0x00000001, R13
+
+In0:
+	CMPQ R13, R12
+	JL   In0end
+
+	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
+	SHRQ $+32, DI, R14
+	SHRQ $+1, R10, R15
+	SUBQ R15, R14
+
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	SHRQ $+36, DI, R11
+	SHLQ $+4, R11
+	ANDQ R8, R11
+
+	// The coefficient load index is (filtertaps+padding) * phase index
+	// + (outAlignedIdx*vectorLength - outSampleIdx
+	// This loads each coefficient set within a block with proper zero padding
+	// so that multiple coefficient sets can be accumulated into one set of registers,
+	// offset by the proper number of in-register samples
+	MOVQ  R10, SI
+	ADDQ  $+32, SI
+	IMULQ BX, SI
+	ADDQ  R11, SI
+	SUBQ  R14, SI
+
+	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
+	VBROADCASTSS (CX)(R12*4), Z16
+	VFMADD231PS  (DX)(SI*4), Z16, Z0
+	VFMADD231PS  64(DX)(SI*4), Z16, Z1
+	VFMADD231PS  128(DX)(SI*4), Z16, Z2
+	VFMADD231PS  192(DX)(SI*4), Z16, Z3
+	VFMADD231PS  256(DX)(SI*4), Z16, Z4
+	VFMADD231PS  320(DX)(SI*4), Z16, Z5
+	VFMADD231PS  384(DX)(SI*4), Z16, Z6
+	VFMADD231PS  448(DX)(SI*4), Z16, Z7
+	VFMADD231PS  512(DX)(SI*4), Z16, Z8
+	VFMADD231PS  576(DX)(SI*4), Z16, Z9
+	VFMADD231PS  640(DX)(SI*4), Z16, Z10
+	VFMADD231PS  704(DX)(SI*4), Z16, Z11
+	VFMADD231PS  768(DX)(SI*4), Z16, Z12
+	VFMADD231PS  832(DX)(SI*4), Z16, Z13
+	VFMADD231PS  896(DX)(SI*4), Z16, Z14
+	VFMADD231PS  960(DX)(SI*4), Z16, Z15
+
+	// If incrementing the output index crosses a multiple of vectorLength,
+	// the lowest register is completely accumulated and can be stored while the rest
+	// are shifted down in its place
+	MOVQ    DI, SI
+	SHRQ    $+36, SI
+	ADDQ    R9, DI
+	MOVQ    DI, BP
+	SHRQ    $+36, BP
+	CMPQ    SI, BP
+	JE      no_store
+	VMOVUPS Z0, (AX)(R11*4)
+	VMOVUPS Z1, Z0
+	VMOVUPS Z2, Z1
+	VMOVUPS Z3, Z2
+	VMOVUPS Z4, Z3
+	VMOVUPS Z5, Z4
+	VMOVUPS Z6, Z5
+	VMOVUPS Z7, Z6
+	VMOVUPS Z8, Z7
+	VMOVUPS Z9, Z8
+	VMOVUPS Z10, Z9
+	VMOVUPS Z11, Z10
+	VMOVUPS Z12, Z11
+	VMOVUPS Z13, Z12
+	VMOVUPS Z14, Z13
+	VMOVUPS Z15, Z14
+	VXORPS  Z15, Z15, Z15
+	ADDQ    $+16, DI
+
+no_store:
+	// Update and wrap phase index counter
+	XORQ BP, BP
+	MOVQ Phases+80(FP), SI
+	ADDQ $+1, BX
+	CMPQ BX, SI
+
+	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
+	CMOVQGE SI, BP
+	SUBQ    BP, BX
+	ADDQ    $0x00000001, R12
+	JMP     In0
+
+In0end:
+	// Save partial outputs
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z0, (AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z1, 64(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z2, 128(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z3, 192(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z4, 256(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z5, 320(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z6, 384(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z7, 448(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z8, 512(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z9, 576(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z10, 640(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z11, 704(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z12, 768(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z13, 832(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z14, 896(AX)(R11*4)
+
+	// Store each partially accumulated vector to the output slice
+	// taking care to wrap into output ringbuffer
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS Z15, 960(AX)(R11*4)
+	VZEROUPPER
+
+	// Return the latest phase and output index for reuse in future calls
+	MOVQ BX, PhaseIdxOut+112(FP)
+	MOVQ DI, OutIdxOut+120(FP)
+	RET
+
 // func ResampleF32x64_8x8(Out []float32, In []float32, Coefs []float32, PhaseIdx int, Phases int, SubsampleIdx uint64, SubsampleDelta uint64, Taps int) (PhaseIdxOut int, SubsampleIdxOut uint64)
 // Requires: AVX, CMOV, FMA3
 TEXT ·ResampleF32x64_8x8(SB), NOSPLIT, $0-128

@@ -60,19 +60,27 @@ type consts[T Sample] struct {
 var maxPhases = 512
 
 // New constructs a resampler with precomputed sinc coefficients
-func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) {
+func New[T Sample, S Scalar](_srIn, _srOut S, quantum, taps int) (s *OfflineSincResampler[T]) {
 	if quantum != RoundUpPow2(quantum) {
 		panic("quantum must be a power of 2")
 	}
 	s = &OfflineSincResampler[T]{consts: new(consts[T])}
 
-	inR, outR := big.NewInt(int64(srIn)), big.NewInt(int64(srOut))
+	ratio := Ffdiv(_srIn, _srOut)
+
+	// TODO
+	// if sample rates are floats, need to quantize them for good initial ratio estimate
+	// in fact, floats with non-exact ratios should possibly always use over-under approximation
+
+	inR, outR := big.NewInt(int64(_srIn)), big.NewInt(int64(_srOut))
 	gcd := big.NewInt(0).GCD(nil, nil, inR, outR)
 
-	srIn /= int(gcd.Int64())
-	srOut /= int(gcd.Int64())
+	_srIn /= S(gcd.Int64())
+	_srOut /= S(gcd.Int64())
 
-	ratio := Ffdiv(srIn, srOut)
+	srIn, srOut := int(_srIn), int(_srOut)
+	taps = CeiledDivide(taps, 2) * 2 // round taps to multiple of 2
+	// TODO for SIMD pad to multiple of vector length
 
 	initConsts := func() {
 		s.ratio = ratio
