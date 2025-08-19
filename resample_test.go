@@ -48,6 +48,8 @@ func TestPlotSincResample(t *testing.T) {
 func TestApproximate(t *testing.T) {
 	type T = float32
 
+	const quantum = 64
+	const taps = 64
 	// TODO weird corruption after tens of thousands of chunks
 	//const srIn, srOut = 40971, 21131
 	//const quantum = 64
@@ -58,20 +60,17 @@ func TestApproximate(t *testing.T) {
 	// odd numbers of taps produce earlier errors and larger averages but
 	// that might just be alignment issues in the comparison
 	// blip locations seems independent of tap count
-	//const srIn, srOut = 48111, 47892
-	//const srIn, srOut = 48111, 44111
-	const srIn, srOut = 40971, 21131
-	// TODO total delay seems to shift with sample rate
-
-	const quantum = 64
-	const taps = 32
+	//const srIn, srOut, outOffset = 48111, 47892, quantum + taps
+	const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
+	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 1
+	// TODO total delay seems to shift with resample ratio
 
 	rs := New[T](srIn, srOut, quantum, taps)
 	us := New[T](srOut, srIn, quantum, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
-	samples = cosSignal[T](quantum, 1.)
-	//samples = LogSweptSine[T](quantum, 0., 10.)
+	//samples = cosSignal[T](quantum, 1.)
+	samples = LogSweptSine[T](quantum, 0., 10.)
 	//samples = Const[T](quantum, 1)
 
 	const numQuanta = 100 * 2048
@@ -99,7 +98,7 @@ func TestApproximate(t *testing.T) {
 		buf = buf[us.Read(buf):]
 	}
 
-	trimmed := recovered[quantum+taps+taps/2-1:]
+	trimmed := recovered[outOffset:]
 	if idxs, deltas, avg := MaxErrors(0.005, 10,
 		trimmed, truth); len(idxs) > 0 {
 		t.Log("Errors at: ", idxs)
