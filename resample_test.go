@@ -2,49 +2,13 @@ package resample
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 )
 
 const plotWidth = 300
 const plotHeight = 50
 
-func TestPlotSincResample(t *testing.T) {
-	type T = float32
-
-	const srIn, srOut = 6, 5
-	const quantum = 64
-	const taps = 8
-
-	rs := New[T](srIn, srOut, quantum, taps)
-	us := New[T](srOut, srIn, quantum, taps)
-
-	rs2 := NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps)
-	us2 := NewIntegerTimedSincResampler[T](srOut, srIn, quantum, taps)
-	rs3 := NewOnlineSincResampler[T](quantum, Ffdiv(srIn, srOut), taps)
-	us3 := NewOnlineSincResampler[T](quantum, Ffdiv(srOut, srIn), taps)
-
-	samples := YeqX[T](quantum + 1)[1:]
-	samples = cosSignal[T](quantum, 1.)
-	samples = LogSweptSine[T](quantum, 0., 10.)
-	//samples = Const[T](quantum, 1)
-
-	for range 3 {
-		rs.Process(samples)
-		plotRead[T](t, rs, quantum)
-		us.Process(samples)
-		plotRead[T](t, us, quantum)
-
-		rs2.Process(samples)
-		plotRead[T](t, rs2, quantum)
-		us2.Process(samples)
-		plotRead[T](t, us2, quantum)
-
-		rs3.Process(samples)
-		plotRead[T](t, rs3, quantum)
-		us3.Process(samples)
-		plotRead[T](t, us3, quantum)
-	}
-}
 func TestApproximate(t *testing.T) {
 	type T = float32
 
@@ -62,9 +26,9 @@ func TestApproximate(t *testing.T) {
 	// blip locations seems independent of tap count
 	//const srIn, srOut, outOffset = 48111, 47892, quantum + taps
 	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
-	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 1
-	const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/2
-	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
+	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
+	//const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
+	const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
 
@@ -95,9 +59,10 @@ func TestApproximate(t *testing.T) {
 			recovered = recovered[us.Read(recovered):]
 		}
 	}
+	ln := len(output) - len(recovered)
 	recovered = output
 
-	trimmed := recovered[outOffset:]
+	trimmed := recovered[outOffset:ln]
 	if idxs, deltas, avg := MaxErrorsVsRepeat(0.005, 10,
 		trimmed, samples); len(idxs) > 0 {
 		t.Log("Errors at: ", idxs)
@@ -112,6 +77,16 @@ func TestApproximate(t *testing.T) {
 		}
 
 		t.Fail()
+	}
+}
+
+func TestFareySearch(t *testing.T) {
+	for range 100 {
+		r := rand.Float64()
+
+		num, denom, numAlt, denomAlt := FareySearch(r, 1000, 10000)
+		t.Logf("%4.4f : %5d/%5d -> %4.4f (%4.4g)", r, num, denom, Ffdiv(num, denom), r-Ffdiv(num, denom))
+		t.Logf("%4.4f : %5d/%5d -> %4.4f (%4.4g)", r, numAlt, denomAlt, Ffdiv(numAlt, denomAlt), r-Ffdiv(numAlt, denomAlt))
 	}
 }
 
@@ -151,6 +126,43 @@ func MaxErrorsVsRepeat[T Float](delta T, count int, test, truth []T) (errorIndex
 	d = safeSlice(d, 0, total)
 
 	return
+}
+func TestPlotSincResample(t *testing.T) {
+	type T = float32
+
+	const srIn, srOut = 6, 5
+	const quantum = 64
+	const taps = 8
+
+	rs := New[T](srIn, srOut, quantum, taps)
+	us := New[T](srOut, srIn, quantum, taps)
+
+	rs2 := NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps)
+	us2 := NewIntegerTimedSincResampler[T](srOut, srIn, quantum, taps)
+	rs3 := NewOnlineSincResampler[T](quantum, Ffdiv(srIn, srOut), taps)
+	us3 := NewOnlineSincResampler[T](quantum, Ffdiv(srOut, srIn), taps)
+
+	samples := YeqX[T](quantum + 1)[1:]
+	samples = cosSignal[T](quantum, 1.)
+	samples = LogSweptSine[T](quantum, 0., 10.)
+	//samples = Const[T](quantum, 1)
+
+	for range 3 {
+		rs.Process(samples)
+		plotRead[T](t, rs, quantum)
+		us.Process(samples)
+		plotRead[T](t, us, quantum)
+
+		rs2.Process(samples)
+		plotRead[T](t, rs2, quantum)
+		us2.Process(samples)
+		plotRead[T](t, us2, quantum)
+
+		rs3.Process(samples)
+		plotRead[T](t, rs3, quantum)
+		us3.Process(samples)
+		plotRead[T](t, us3, quantum)
+	}
 }
 
 func safeSlice[T any](s []T, at, ln int) []T {

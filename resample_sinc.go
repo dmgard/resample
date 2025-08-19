@@ -57,6 +57,8 @@ type consts[T Sample] struct {
 	driftStep float64
 }
 
+var maxPhases = 512
+
 // New constructs a resampler with precomputed sinc coefficients
 func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) {
 	if quantum != RoundUpPow2(quantum) {
@@ -89,11 +91,12 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 		//taps = Fmul(taps, s.ratio)
 
 		// TODO there is no real need to process exclusively in chunks of quanta, is there?
-		// output is a power of two ringbuffer, padded
+		// output is a power of two ringbuffer, padded and scaled up for upsampling many more
+		// output samples than were input
 		s.out = make([]T,
 			RoundUpPow2(
 				FmulCeiled(
-					max(taps, quantum)*2,
+					max(taps, quantum)*4,
 					max(s.invRatio, 1)),
 			),
 		)
@@ -142,7 +145,6 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 	}
 
 	// too many phases, quantize and approximate
-	const maxPhases = 512 // TODO adjust to limit maximum sample drift
 	if srIn > maxPhases {
 		s.alt = new(consts[T])
 		idealInPerOut := ratio
@@ -198,7 +200,7 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 		}
 
 		// increase max phase count to search for a better rational approximation
-		if srIn < 1024 && err > 0.00001 && srIn != srOut && lastIn != srIn && lastOut != srOut {
+		if srIn < maxPhases*2 && err > 0.00001 && srIn != srOut && lastIn != srIn && lastOut != srOut {
 			lastIn, lastOut = srIn, srOut
 			srIn, srOut = FmulCeiled(srIn, 1.02), FmulCeiled(srOut, 1.02)
 			attempts++
@@ -231,6 +233,37 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 	}
 
 	return s
+}
+
+func FareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
+	if target > 1 {
+		denom, num, denomAlt, numAlt = _fareySearch(1/target, maxDenom, maxNum)
+	} else {
+		num, denom, numAlt, denomAlt = _fareySearch(target, maxNum, maxDenom)
+	}
+	return
+}
+
+func _fareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
+	numLo, denomLo := T(0), T(1)
+	numHi, denomHi := T(1), T(1)
+
+	for {
+		num, denom = numLo+numHi, denomLo+denomHi
+
+		if num > maxNum || denom > maxDenom {
+			if target-Ftdiv[F](numLo, denomLo) < Ftdiv[F](numHi, denomHi)-target {
+				return numLo, denomLo, numHi, denomHi
+			}
+			return numHi, denomHi, numLo, denomLo
+		}
+
+		if Ftdiv[F](num, denom) < target {
+			numLo, denomLo = num, denom
+		} else {
+			numHi, denomHi = num, denom
+		}
+	}
 }
 
 func (s *OfflineSincResampler[T]) Process(in []T) {

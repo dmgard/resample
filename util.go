@@ -134,6 +134,10 @@ func Ffdiv[T Scalar, F Scalar](s T, f F) float64 {
 	return float64(s) / float64(f)
 }
 
+func Ftdiv[F Float, T, S Scalar](s T, f S) F {
+	return F(s) / F(f)
+}
+
 func Copysign[T Scalar, F Scalar](to T, from F) T {
 	return T(math.Copysign(float64(to), float64(from)))
 }
