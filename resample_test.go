@@ -61,9 +61,16 @@ func TestApproximate(t *testing.T) {
 	// that might just be alignment issues in the comparison
 	// blip locations seems independent of tap count
 	//const srIn, srOut, outOffset = 48111, 47892, quantum + taps
-	const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
+	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
 	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 1
+	const srIn, srOut, outOffset = 40971, 7131, quantum + taps + taps/2 - 1
 	// TODO total delay seems to shift with resample ratio
+
+	// TODO of course, because buffers are all the same size regardless of
+	// resample ratio
+	// rework with reading only feeding one quantum into upsampler once
+	// one quantum read from downsampler and draining upsampler greedily
+	// then fully drain at the end
 
 	rs := New[T](srIn, srOut, quantum, taps)
 	us := New[T](srOut, srIn, quantum, taps)
