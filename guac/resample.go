@@ -14,8 +14,13 @@ func resample() {
 
 // resample_f32_64_avx generates a windowed sinc interpolator operating on sets of 8-sample registers
 func resample_f32_64_avx() {
-	fixed_resample_avx[float32, []float32](8, 8)
-	fixed_resample_avx[float32, []float32](16, 16)
+	// minimum is two registers, including prev/next zero-padding
+	for i := range 8 - 1 {
+		fixed_resample_avx[float32, []float32](8, i+2)
+	}
+	for i := range 16 - 1 {
+		fixed_resample_avx[float32, []float32](16, i+2)
+	}
 	_new_resample_f32_64_avx(8, 8)
 	_new_resample_f32_64_avx(16, 16)
 }
@@ -102,13 +107,16 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			And(outLenMask)
 		SetIndex(outAlignedIdx, out)
 
-		// TODO why
+		// TODO this might not work correctly or test/benchmark functions are not
+		// setting up coefficients slice properly
 		Comment("The coefficient load index is (filtertaps+padding) * wrappedInputIndex",
 			"+ (outAlignedIdx*vectorLength - outSampleIdx")
 		Comment("This loads each coefficient set within a block with proper zero padding",
 			"so that multiple coefficient sets can be accumulated into one set of registers,",
 			"offset by the proper number of in-register samples")
+		Comment("TODO test and then re-enable")
 		SetIndex(coefIdx.Copy().Add(outAlignedIdx).Sub(outMin), coefs)
+		SetIndex(coefIdx, coefs)
 
 		Comment("Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range")
 		bcst.Broadcast(in.Addr())
