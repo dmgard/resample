@@ -14,6 +14,7 @@ func resample() {
 
 // resample_f32_64_avx generates a windowed sinc interpolator operating on sets of 8-sample registers
 func resample_f32_64_avx() {
+	fixed_resample_avx[float32, []float32](8, 8)
 	fixed_resample_avx[float32, []float32](16, 16)
 	_new_resample_f32_64_avx(8, 8)
 	_new_resample_f32_64_avx(16, 16)
@@ -29,15 +30,14 @@ type Integer interface {
 
 func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls int) {
 	var p struct {
-		Out, In, Coefs   Reg[S]
-		PhaseIdx, Phases Reg[int]
-		OutIdx, OutStep  Reg[int]
-		Taps             Reg[int]
+		Out, In, Coefs  Reg[S]
+		CoefIdx         Reg[int]
+		OutIdx, OutStep Reg[int]
 	}
 
 	var r struct {
-		PhaseIdxOut Reg[int]
-		OutIdxOut   Reg[int]
+		CoefIdxOut Reg[int]
+		OutIdxOut  Reg[int]
 	}
 
 	suffix := fmt.Sprintf("F%d_%dx%d", unsafe.Sizeof(*new(T))*8, simdVecLen, unrolls)
@@ -69,47 +69,46 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	in := Iter[T](&p.In)
 	bcst := R[T](simdVecLen)
 	coefs := Iter[T](&p.Coefs, simdVecLen, unrolls)
-	phaseIdx := p.PhaseIdx.Init().Load()
-	phases := p.Phases.Init()
+	coefIdx := p.CoefIdx.Init().Load()
+	coefsLen := Len[T, int](coefs).Init().Load()
 	outIdx := p.OutIdx.Init().Load()
 
 	// TODO this throws bad operands
 	outLenMask := Len[T, int](out).Init().Load().Sub(int32(1))
 
 	outStep := p.OutStep.Init().Load()
-	taps := p.Taps.Init().Load()
 	Comment("Reload previous partially accumulated output samples")
 
 	out.Load()
 
 	outAlignedIdx := outIdx.CloneDef()
 
+	taps := simdVecLen * unrolls
+
 	RangeOver(in, func(i *Reg[int]) {
 		Comment("Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2")
 		outMin := outIdx.CloneDef().BitRshift(outIdx, int8(fixedPointShift)).
-			Sub(taps.CloneDef().BitRshift(taps, int8(1)))
+			Sub(int32(taps / 2))
 
 		Comment("Compute output vector index as ",
 			"(fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength",
 			"wraps within the output buffer and quantizes the nearest vector register multiple")
 		lg2vecLn := int8(tzcnt(simdVecLen))
 		outIdxToOutVecShift := fixedPointShift + lg2vecLn
+		// TODO somewhat redudnant to do this every time when it only shifts when
+		// the later CMOV test succeeds
 		outAlignedIdx.BitRshift(outIdx, outIdxToOutVecShift).
 			BitLshift(lg2vecLn).
 			And(outLenMask)
 		SetIndex(outAlignedIdx, out)
 
-		Comment("The coefficient load index is (filtertaps+padding) * phase index",
+		// TODO why
+		Comment("The coefficient load index is (filtertaps+padding) * wrappedInputIndex",
 			"+ (outAlignedIdx*vectorLength - outSampleIdx")
 		Comment("This loads each coefficient set within a block with proper zero padding",
 			"so that multiple coefficient sets can be accumulated into one set of registers,",
 			"offset by the proper number of in-register samples")
-		coefIdx := taps.Copy().
-			Add(int32(2 * simdVecLen)).Mul(phaseIdx).
-			Add(outAlignedIdx).
-			Sub(outMin)
-
-		SetIndex(coefIdx, coefs)
+		SetIndex(coefIdx.Copy().Add(outAlignedIdx).Sub(outMin), coefs)
 
 		Comment("Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range")
 		bcst.Broadcast(in.Addr())
@@ -123,7 +122,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			"are shifted down in its place")
 		// TODO could probably do this with a bit test but const shifts might actually be faster
 		outIdx.Copy().BitRshift(outIdxToOutVecShift).Compare(
-			outIdx.Add(outStep).Copy().BitRshift(outIdxToOutVecShift)).
+			outIdx.Copy().Add(outStep).BitRshift(outIdxToOutVecShift)).
 			JumpE("no_store")
 		{
 			out.SwizzledUnrolls(0).Store()
@@ -133,29 +132,26 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		}
 		Label("no_store")
 
-		Comment("Update and wrap phase index counter")
+		Comment("Update and wrap coefficient index")
 		phaseScratch := R[int]().Xor()
-		phases.Load()
-		phaseIdx.Add(int32(1)).Compare(phases)
+		coefIdx.Add(int32(taps + 2*simdVecLen)).Compare(coefsLen)
 		Comment("Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result")
-		phaseIdx.Sub(phaseScratch.MoveIf_GE(phases))
-
+		coefIdx.Sub(phaseScratch.MoveIf_GE(coefsLen))
 	}, out)
 
-	// TODO set index of each unrolled register and wrap and then store
-	Comment("Save partial outputs")
+	Comment("Store each partially accumulated vector to the output slice")
+	Comment("taking care to wrap into output ringbuffer")
 	for i := range unrolls {
-		Comment("Store each partially accumulated vector to the output slice")
-		Comment("taking care to wrap into output ringbuffer")
 		// TODO int constant in Add generates "bad operands" instead automatic convert or
 		// type error
+		out := out.ByteOffsetAllTo(0)
 		SetIndex(outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask),
 			out.SwizzledUnrolls(i).Store())
 	}
 
 	ZeroUpper()
 	Comment("Return the latest phase and output index for reuse in future calls")
-	r.PhaseIdxOut.Init().Addr().Load(phaseIdx)
+	r.CoefIdxOut.Init().Addr().Load(coefIdx)
 	r.OutIdxOut.Init().Addr().Load(outIdx)
 
 	Ret()

@@ -2,7 +2,9 @@
 
 package resample
 
-func ResampleFixedF32_16x16(Out []float32, In []float32, Coefs []float32, PhaseIdx int, Phases int, OutIdx int, OutStep int, Taps int) (PhaseIdxOut int, OutIdxOut int)
+func ResampleFixedF32_8x8(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x16(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 
 func ResampleF32x64_8x8(Out []float32, In []float32, Coefs []float32, PhaseIdx int, Phases int, SubsampleIdx uint64, SubsampleDelta uint64, Taps int) (PhaseIdxOut int, SubsampleIdxOut uint64)
 
