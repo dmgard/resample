@@ -14,29 +14,14 @@ func TestApproximate(t *testing.T) {
 
 	const quantum = 64
 	const taps = 64
-	// TODO weird corruption after tens of thousands of chunks
-	//const srIn, srOut = 40971, 21131
-	//const quantum = 64
-	//const taps = 16
-	// and 4096 max phases produces a weird blip @13105755 samples or so
-	// which is almost exactly 200 * 4096 * 16... because that's
-	// basically the end of the test input, duh
-	// odd numbers of taps produce earlier errors and larger averages but
-	// that might just be alignment issues in the comparison
-	// blip locations seems independent of tap count
+
 	//const srIn, srOut, outOffset = 48111, 47892, quantum + taps
 	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
-	const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
-	//const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
+	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
+	const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
 	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
-
-	// TODO of course, because buffers are all the same size regardless of
-	// resample ratio
-	// rework with reading only feeding one quantum into upsampler once
-	// one quantum read from downsampler and draining upsampler greedily
-	// then fully drain at the end
 
 	rs := New[T](srIn, srOut, quantum, taps)
 	us := New[T](srOut, srIn, quantum, taps)
@@ -54,8 +39,8 @@ func TestApproximate(t *testing.T) {
 
 	for range numQuanta {
 		rs.Process(samples)
-		if rs.Read(buf) != 0 {
-			us.Process(buf)
+		if next := buf[:rs.Read(buf)]; len(next) != 0 {
+			us.Process(next)
 			recovered = recovered[us.Read(recovered):]
 		}
 	}
@@ -63,7 +48,7 @@ func TestApproximate(t *testing.T) {
 	recovered = output
 
 	trimmed := recovered[outOffset:ln]
-	if idxs, deltas, avg := MaxErrorsVsRepeat(0.005, 10,
+	if idxs, deltas, avg := MaxErrorsVsRepeat(0.001, 10,
 		trimmed, samples); len(idxs) > 0 {
 		t.Log("Errors at: ", idxs)
 		t.Logf("Errors: %3.3f", deltas)

@@ -19,8 +19,8 @@ type OfflineSincResampler[T Sample] struct {
 
 	// output time in fixed-point ratio of input samples
 	outIdx fixed64
-	// last processed full chunk of quantum samples
-	quantumIdx int
+	// last read output sample location
+	readIdx int
 	// input sample count for selecting output phases
 	coefsIdx int
 	// accumulated output-time drift due to rational sample ratio approximation
@@ -150,6 +150,8 @@ func New[T Sample](srIn, srOut, quantum, taps int) (s *OfflineSincResampler[T]) 
 		idealOutPerIn := 1 / ratio
 		srInAlt, srOutAlt := srIn, srOut
 
+		// TODO limit denominator by maximum desired/expected error?
+		// i.e. prevent unlimited sample drift from accumulating at high ratios
 		srIn, srOut, srInAlt, srOutAlt = FareySearch(ratio, maxPhases, 1000000)
 		ratio = Ffdiv(srIn, srOut)
 		// track sample drift from ideal and switch+interpolate between over/undershoot
@@ -243,13 +245,25 @@ func (s *OfflineSincResampler[T]) Process(in []T) {
 
 func (s *OfflineSincResampler[T]) Read(into []T) int {
 	n := len(into)
-	for nextOutChunkIdx := int(s.outIdx >> s.logQuantum >> fixedPointShift); s.quantumIdx < nextOutChunkIdx && len(into) >= s.quantum; s.quantumIdx++ {
-		wrapped := (s.quantumIdx << s.logQuantum) & (len(s.out) - 1)
-		chunk := s.out[wrapped:][:s.quantum]
+	ln := min(int(s.outIdx>>fixedPointShift)-s.readIdx, n)
+	nextOutIdx := s.readIdx + ln
+	wrapped := s.readIdx & (len(s.out) - 1)
+	end := nextOutIdx & (len(s.out) - 1)
+
+	if end >= wrapped {
+		chunk := s.out[wrapped:end]
 		into = into[copy(into, chunk):]
 		_memClr(chunk)
+	} else {
+		into = into[copy(into, s.out[wrapped:]):]
+		into = into[copy(into, s.out[:end]):]
+		_memClr(s.out[wrapped:])
+		_memClr(s.out[:end])
 	}
-	return n - len(into)
+
+	s.readIdx = nextOutIdx
+
+	return ln
 }
 
 func (s *OfflineSincResampler[T]) putCoefs() {
