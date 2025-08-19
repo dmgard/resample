@@ -16,7 +16,7 @@ func BenchmarkScalarResample(b *testing.B) {
 		)
 		s := make([]T, quantum)
 
-		for taps := 16; taps <= 256; taps <<= 1 {
+		for taps := 16; taps <= 256; taps += 8 {
 			tail := printResampleSuffix(srIn, srOut, quantum, taps)
 			benchNode(b, "node=offlineSinc/"+tail, New[T](srIn, srOut, quantum, taps).Process, s)
 			benchNode(b, "node=integerSinc/"+tail, NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps).Process, s)
@@ -30,7 +30,7 @@ func BenchmarkScalarResample(b *testing.B) {
 		)
 		s := make([]T, quantum)
 
-		for taps := 16; taps <= 256; taps <<= 1 {
+		for taps := 16; taps <= 256; taps += 8 {
 			tail := printResampleSuffix(srIn, srOut, quantum, taps)
 			benchNode(b, "node=offlineSinc/"+tail, New[T](srIn, srOut, quantum, taps).Process, s)
 			benchNode(b, "node=integerSinc/"+tail, NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps).Process, s)
@@ -52,11 +52,73 @@ func BenchmarkAvxResample(b *testing.B) {
 
 	coefs := make([]float32, 256*160)
 	b.Run("F32", func(b *testing.B) {
-		names := sliceOf("layout=8x8/simd=AVX", "layout=16x16/simd=AVX512")
-		taps := sliceOf(64, 256)
+		names := sliceOf("simd=AVX", "simd=AVX512")
+		taps := make([][]int, 2)
+		taps[0] = make([]int, 7)
+		for i := range taps[0] {
+			taps[0][i] = 8 * (i + 2)
+		}
+		taps[1] = make([]int, 15)
+		for i := range taps[1] {
+			taps[1][i] = 16 * (i + 2)
+		}
+
+		ffns := sliceOf(
+			sliceOf(
+				ResampleFixedF32_8x2,
+				ResampleFixedF32_8x3,
+				ResampleFixedF32_8x4,
+				ResampleFixedF32_8x5,
+				ResampleFixedF32_8x6,
+				ResampleFixedF32_8x7,
+				ResampleFixedF32_8x8,
+			),
+			sliceOf(
+				ResampleFixedF32_16x2,
+				ResampleFixedF32_16x3,
+				ResampleFixedF32_16x4,
+				ResampleFixedF32_16x5,
+				ResampleFixedF32_16x6,
+				ResampleFixedF32_16x7,
+				ResampleFixedF32_16x8,
+				ResampleFixedF32_16x9,
+				ResampleFixedF32_16x10,
+				ResampleFixedF32_16x11,
+				ResampleFixedF32_16x12,
+				ResampleFixedF32_16x13,
+				ResampleFixedF32_16x14,
+				ResampleFixedF32_16x15,
+				ResampleFixedF32_16x16,
+			),
+		)
+
+		for i, fns := range ffns {
+			for z, fn := range fns {
+				layout := fmt.Sprintf("/layout=%dx%d", (i+1)*8, z+2)
+				b.Run(names[i]+"/version=2"+layout, func(b *testing.B) {
+					var coefIdx, outIdx int
+					benchNode(b, printResampleSuffix(48000, 44100, taps[i][z], taps[i][z]),
+						func(s []float32) {
+							coefIdx, outIdx = fn(s, s, coefs, coefIdx, outIdx, fixedPointOne*480/441)
+						}, make([]float32, taps[i][z]))
+					coefIdx, outIdx = 0, 0
+					benchNode(b, printResampleSuffix(48000, 44000, taps[i][z], taps[i][z]),
+						func(s []float32) {
+							coefIdx, outIdx = fn(s, s, coefs, coefIdx, outIdx, fixedPointOne*48/44)
+						}, make([]float32, taps[i][z]))
+					coefIdx, outIdx = 0, 0
+					benchNode(b, printResampleSuffix(48000, 48000, taps[i][z], taps[i][z]),
+						func(s []float32) {
+							coefIdx, outIdx = fn(s, s, coefs, coefIdx, outIdx, fixedPointOne)
+						}, make([]float32, taps[i][z]))
+				})
+			}
+		}
 
 		for i, fn := range sliceOf(ResampleF32x64_8x8, ResampleF32x64_16x16) {
-			b.Run(names[i], func(b *testing.B) {
+			taps := sliceOf(64, 256)
+			layout := sliceOf("/layout=8x8", "/layout=16x16")
+			b.Run(names[i]+"/version=1"+layout[i], func(b *testing.B) {
 				benchNode(b, printResampleSuffix(48000, 44100, taps[i], taps[i]),
 					func(s []float32) {
 						fn(
