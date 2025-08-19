@@ -63,8 +63,10 @@ func TestApproximate(t *testing.T) {
 	//const srIn, srOut, outOffset = 48111, 47892, quantum + taps
 	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
 	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 1
-	const srIn, srOut, outOffset = 40971, 7131, quantum + taps + taps/2 - 1
-	// TODO total delay seems to shift with resample ratio
+	const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/2
+	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
+	// TODO total delay seems to shift with resample ratio,
+	// TODO probably multiple of taps, not quantum?
 
 	// TODO of course, because buffers are all the same size regardless of
 	// resample ratio
@@ -76,38 +78,28 @@ func TestApproximate(t *testing.T) {
 	us := New[T](srOut, srIn, quantum, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
-	//samples = cosSignal[T](quantum, 1.)
-	samples = LogSweptSine[T](quantum, 0., 10.)
+	samples = cosSignal[T](quantum, 1.)
+	//samples = LogSweptSine[T](quantum, 0., 10.)
 	//samples = Const[T](quantum, 1)
 
 	const numQuanta = 100 * 2048
 
-	truth := make([]T, quantum*numQuanta)
-	for i := range numQuanta {
-		copy(truth[i*quantum:][:quantum], samples)
-	}
-
 	output := make([]T, quantum*numQuanta)
-	buf := output
+	recovered := output
+	buf := make([]T, quantum)
 
-	for len(buf) >= quantum {
+	for range numQuanta {
 		rs.Process(samples)
-		buf = buf[rs.Read(buf):]
+		if rs.Read(buf) != 0 {
+			us.Process(buf)
+			recovered = recovered[us.Read(recovered):]
+		}
 	}
-
-	recovered := DupSized(output)
-	buf = recovered
-
-	q := 0
-	for len(buf) >= quantum && q < len(output) {
-		us.Process(output[q:][:quantum])
-		q += quantum
-		buf = buf[us.Read(buf):]
-	}
+	recovered = output
 
 	trimmed := recovered[outOffset:]
-	if idxs, deltas, avg := MaxErrors(0.005, 10,
-		trimmed, truth); len(idxs) > 0 {
+	if idxs, deltas, avg := MaxErrorsVsRepeat(0.005, 10,
+		trimmed, samples); len(idxs) > 0 {
 		t.Log("Errors at: ", idxs)
 		t.Logf("Errors: %3.3f", deltas)
 		t.Logf("%3.3f average error. Ground truth:", avg)
@@ -123,15 +115,16 @@ func TestApproximate(t *testing.T) {
 	}
 }
 
-func MaxErrors[T Float](delta T, count int, test, truth []T) (errorIndex []int, d []T, avg T) {
+func MaxErrorsVsRepeat[T Float](delta T, count int, test, truth []T) (errorIndex []int, d []T, avg T) {
 	errorIndex = make([]int, count)
 	d = make([]T, count)
 	total := 0
 	for i, c := range test {
-		err := Abs(c - truth[i])
+		t := truth[i&(len(truth)-1)]
+		err := Abs(c - t)
 		avg += err
 
-		if !Approx(delta, c, truth[i]) {
+		if !Approx(delta, c, t) {
 			var di, smallI int
 			var del, smallest T
 			for di, del = range d {
