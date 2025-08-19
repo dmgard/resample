@@ -26,9 +26,9 @@ func TestApproximate(t *testing.T) {
 	// blip locations seems independent of tap count
 	//const srIn, srOut, outOffset = 48111, 47892, quantum + taps
 	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
-	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
+	const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
 	//const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
-	const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
+	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
 
