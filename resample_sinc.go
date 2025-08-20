@@ -46,10 +46,6 @@ type consts[T Sample] struct {
 	// TODO doesn't need to be kept after initialization does it?
 	invFilterWidth float64
 
-	// length of samples to accumulate before reading/advancing an output chunk
-	quantum    int
-	logQuantum int
-
 	// precomputed sinc coefficients
 	coefs []T
 
@@ -60,10 +56,7 @@ type consts[T Sample] struct {
 var maxPhases = 512
 
 // New constructs a resampler with precomputed sinc coefficients
-func New[T Sample, S Scalar](_srIn, _srOut S, quantum, taps int) (s *OfflineSincResampler[T]) {
-	if quantum != RoundUpPow2(quantum) {
-		panic("quantum must be a power of 2")
-	}
+func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler[T]) {
 	s = &OfflineSincResampler[T]{consts: new(consts[T])}
 
 	ratio := Ffdiv(_srIn, _srOut)
@@ -104,7 +97,7 @@ func New[T Sample, S Scalar](_srIn, _srOut S, quantum, taps int) (s *OfflineSinc
 		s.out = make([]T,
 			RoundUpPow2(
 				FmulCeiled(
-					max(taps, quantum)*4,
+					taps*4,
 					max(s.invRatio, 1)),
 			),
 		)
@@ -120,10 +113,6 @@ func New[T Sample, S Scalar](_srIn, _srOut S, quantum, taps int) (s *OfflineSinc
 		// if and only if the resample ratio is <1, i.e. upsampling, always low-passing at the
 		// lower sample rate to avoid aliasing
 		s.invFilterWidth = 1 / float64(taps) / s.sincFactor
-
-		// output chunk size. Will accumulate this many samples before pushing to the next node
-		s.quantum = quantum
-		s.logQuantum = tzcnt(quantum)
 
 		phases := srIn
 

@@ -23,8 +23,8 @@ func TestApproximate(t *testing.T) {
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
 
-	rs := New[T](srIn, srOut, quantum, taps)
-	us := New[T](srOut, srIn, quantum, taps)
+	rs := New[T](srIn, srOut, taps)
+	us := New[T](srOut, srIn, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
 	samples = cosSignal[T](quantum, 1.)
@@ -119,8 +119,8 @@ func TestPlotSincResample(t *testing.T) {
 	const quantum = 64
 	const taps = 8
 
-	rs := New[T](srIn, srOut, quantum, taps)
-	us := New[T](srOut, srIn, quantum, taps)
+	rs := New[T](srIn, srOut, taps)
+	us := New[T](srOut, srIn, taps)
 
 	rs2 := NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps)
 	us2 := NewIntegerTimedSincResampler[T](srOut, srIn, quantum, taps)
@@ -179,25 +179,6 @@ func cosSignal[T Sample, F Float](ln int, rate F) []T {
 	return s
 }
 
-func LogSweptSine[T Scalar, F Float](ln int, minFreq, maxFreq F) []T {
-	s := make([]T, ln)
-
-	tScale := 1 / (F(ln) - 1) // scale the sample index so that the time parameter of the sine function runs from zero to one over the sample slice
-
-	for i := range s {
-		// scale t from 0 to 1 over range of samples
-		t := F(i) * tScale
-		// interpolate logarithmically between minimum and maximum frequency based on relative position in the sample stream
-		freq := Lerp(minFreq, maxFreq, (Exp(t)-1)/E)
-		freqT := t    // freqT goes from 0 to 1 in one second
-		freqT *= Pi   // now scaled to complete one sinewave cycle per second: 1hz
-		freqT *= freq // now scaled to complete freq cycles per second, between minFreq and maxFreq hz based on how far along the sample stream we are
-		s[i] = T(Sin(freqT))
-	}
-
-	return s
-}
-
 func TestOfflineSincResampleCoefs(t *testing.T) {
 	type T = float32
 
@@ -210,7 +191,7 @@ func TestOfflineSincResampleCoefs(t *testing.T) {
 	// filter coefficients seem to sum to oscillating values
 	// maybe sum coefficients in parallel array and then scale down by coefs
 
-	rs := New[T](srIn, srOut, quantum, taps)
+	rs := New[T](srIn, srOut, taps)
 
 	t.Log("pre-coefs:\n" + TextPlot(plotWidth, plotHeight,
 		lerpPlotter[T](rs.coefs).Plot, 0, -.25,
