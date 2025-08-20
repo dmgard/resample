@@ -16,16 +16,13 @@ func LogSweptSine[T Scalar, F Float](ln int, minFreq, maxFreq F) []T {
 		// interpolate logarithmically between minimum and maximum frequency based on relative position in the sample stream
 		expLerp := (Exp(t) - 1) / (E - 1)
 
-		if expLerp > 1 {
-			panic(i)
-		}
-
 		freq := Lerp(minFreq, maxFreq, expLerp)
 
-		freqT := t    // freqT goes from 0 to 1 in one second
-		freqT *= freq // now scaled to complete freq cycles per second, between minFreq and maxFreq hz based on how far along the sample stream we are
-		freqT *= Pi   // now scaled to complete one sinewave cycle per second: 1hz
-		s[i] = T(Sin(freqT))
+		freqT := t             // freqT goes from 0 to 1 in one second
+		freqT *= freq          // now scaled to complete freq cycles per second, between minFreq and maxFreq hz based on how far along the sample stream we are
+		freqT *= 0.5 * Pi * Pi // now scaled to complete one sinewave cycle per second: 1hz
+
+		s[i] = T(0.5 * Sin(freqT)) // 0.5x scalar = -6dbfs
 	}
 
 	return s
@@ -42,7 +39,7 @@ func LogSweptSine2[T Scalar](sr float64, duration time.Duration) []T {
 
 	for i := range s {
 		exp := Exp(F64mul(tScale, i)*lgRatio) - 1
-		s[i] = T(Sin(scale * exp))
+		s[i] = T(0.5 * Sin(scale*exp))
 	}
 
 	return s
