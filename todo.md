@@ -23,4 +23,4 @@
   - Compute taps needed for desired -3db point, ripple, and rejection
 - Tests
 - Readme
-  - Basically brings inner-outer convolution loop vectorization optimization to a multirate resampler
+  - Basically brings inner-outer convolution loop vectorization optimization to a multirate polyphase resampler

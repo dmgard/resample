@@ -106,6 +106,14 @@ func RoundUpPow2[T Scalar](vv T) T {
 	return T(v)
 }
 
+func RoundUpMultPow2[T Integer](v, multiple T) T {
+	if multiple == 0 || multiple&(multiple-1) != 0 {
+		panic("zero multiple or non-power of two")
+	}
+
+	return (v + multiple - 1) & -multiple
+}
+
 func tzcnt[I Integer](i I) int { return bits.TrailingZeros64(uint64(i)) }
 
 func _memClr[T any](s []T) {
@@ -142,7 +150,7 @@ func Copysign[T Scalar, F Scalar](to T, from F) T {
 	return T(math.Copysign(float64(to), float64(from)))
 }
 
-func sliceCast[T, F any](from []F) []T {
+func SliceCast[T, F any](from []F) []T {
 	if len(from) == 0 {
 		return nil
 	}
