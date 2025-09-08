@@ -15,20 +15,24 @@ import (
 func main() {
 	main_48_441[float32]()
 	main_48_441[float64]()
+	main_96_441[float32]()
+	main_96_441[float64]()
 }
 
-func main_96_441() {
+func main_96_441[T float32 | float64]() {
 	const inSr = 96000
 	const outSr = 44100
 	const secs = 8
 	const ln = secs * inSr / 256 * 256
-	//lss := resample.LogSweptSine[float32](ln, 0., ln/2)
-	lss := resample.LogSweptSine2[float32](inSr, secs*time.Second)
+	//lss := resample.LogSweptSine[T](ln, 0., ln/2)
+	lss := resample.LogSweptSine2[T](inSr, secs*time.Second)
 
 	filename := "groundTruth96k"
-	os.WriteFile(filename+".f4", resample.SliceCast[byte](lss), 0666)
+	pcmExt := fmt.Sprintf(".f%d", unsafe.Sizeof(*new(T)))
 
-	cmd := exec.Command("sox", "-r", "96000", "-c", "1", filename+".f4", "-n", "spectrogram", "-o", "\""+filename+".png\"", "-z", "180")
+	os.WriteFile(filename+pcmExt, resample.SliceCast[byte](lss), 0666)
+
+	cmd := exec.Command("sox", "-r", "96000", "-c", "1", filename+pcmExt, "-n", "spectrogram", "-o", "\""+filename+".png\"", "-z", "180")
 	log.Println(cmd.String())
 
 	if res, err := cmd.Output(); err != nil {
@@ -40,7 +44,7 @@ func main_96_441() {
 	if err != nil {
 		log.Println(err)
 	} else {
-		lss = resample.SliceCast[float32](sweepBytes)
+		lss = resample.SliceCast[T](sweepBytes)
 		if len(lss) != resample.RoundUpMultPow2(len(lss), 256) {
 			lss = lss[:len(lss)/256*256]
 		}
@@ -51,7 +55,7 @@ func main_96_441() {
 	out := resample.DupSized(lss)
 
 	for taps := 16; taps <= 256; taps <<= 1 {
-		r := resample.New[float32](inSr, outSr, taps)
+		r := resample.New[T](inSr, outSr, taps)
 		buf := out
 
 		for i := 0; i < len(lss); i += taps {
@@ -62,9 +66,9 @@ func main_96_441() {
 		out := out[taps:][:len(out)-len(buf)]
 
 		filename := fmt.Sprintf("96to441x%d", taps)
-		os.WriteFile(filename+".f4", resample.SliceCast[byte](out), 0666)
+		os.WriteFile(filename+pcmExt, resample.SliceCast[byte](out), 0666)
 
-		cmd := exec.Command("sox", "-r", outRarg, "-c", "1", filename+".f4", "-n", "spectrogram", "-o", "\""+filename+".png\"", "-z", "180")
+		cmd := exec.Command("sox", "-r", outRarg, "-c", "1", filename+pcmExt, "-n", "spectrogram", "-o", "\""+filename+pcmExt+".png\"", "-z", "180")
 		log.Println(cmd.String())
 		if res, err := cmd.Output(); err != nil {
 			log.Println(string(res))
