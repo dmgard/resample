@@ -1,3 +1,6 @@
+- TEST simd:
+  - Build scalar clone of SIMD logic using SIMD primitives, conditional gotos and the like
+  - Inspect SIMD output with trivial/known impulses, like an impulse train filter applied to a dirac delta and itself and vice versa
 - DOING Over-under resampler
   - DONE use Farey sequence online binary search to find nearest fractional approximations within a limit
     - OBSOLETE increasing approximate numerator and denominator both by 1 nudges the resample ratio down by a perhaps minimal amount. Decreasing both by 1 would have the opposite effect. Maybe scale to a floored 512 numerator ratio and then nudge low to find the phasecount(s) <=512 such that the resampler discrepancy is minimized
