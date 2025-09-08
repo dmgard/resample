@@ -2,7 +2,6 @@ package resample
 
 import (
 	"math"
-	"math/big"
 )
 
 type fixed64 int64
@@ -61,17 +60,8 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 
 	ratio := Ffdiv(_srIn, _srOut)
 
-	// TODO
-	// if sample rates are floats, need to quantize them for good initial ratio estimate
-	// in fact, floats with non-exact ratios should possibly always use over-under approximation
-
-	inR, outR := big.NewInt(int64(_srIn)), big.NewInt(int64(_srOut))
-	gcd := big.NewInt(0).GCD(nil, nil, inR, outR)
-
-	_srIn /= S(gcd.Int64())
-	_srOut /= S(gcd.Int64())
-
 	srIn, srOut := int(_srIn), int(_srOut)
+
 	taps = CeiledDivide(taps, 2) * 2 // round taps to multiple of 2
 	// TODO for SIMD pad to multiple of vector length
 
@@ -143,7 +133,6 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 
 	// too many phases, quantize and approximate
 	if srIn > maxPhases {
-		s.alt = new(consts[T])
 		idealOutPerIn := 1 / ratio
 		srInAlt, srOutAlt := srIn, srOut
 
@@ -153,19 +142,23 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 		ratio = Ffdiv(srIn, srOut)
 		// track sample drift from ideal and switch+interpolate between over/undershoot
 		initConsts()
-		s.alt, s.consts = s.consts, s.alt
-
-		// generate second resampler and second coefficients for lower or higher quantized ratio
-		srIn, srOut, srInAlt, srOutAlt = srInAlt, srOutAlt, srIn, srOut
-		ratio = Ffdiv(srIn, srOut)
-		initConsts()
-
-		// how many more/fewer output samples are being generated per input sample than
+		// how many more output samples are being generated per input sample than
 		// would be expected at the true ratio
 		// premultiply by number of input samples per phase reset
-		s.consts.driftStep, s.alt.driftStep =
-			F64mul(s.consts.invRatio-idealOutPerIn, srIn),
-			F64mul(s.alt.invRatio-idealOutPerIn, srInAlt)
+		s.consts.driftStep = F64mul(s.consts.invRatio-idealOutPerIn, srIn)
+
+		// if there is drift TODO or external drift sync
+		// use the second-best rational approximation to compute compensating slower resample
+		if s.consts.driftStep != 0 {
+			s.alt = new(consts[T])
+			s.alt, s.consts = s.consts, s.alt
+
+			// generate second resampler and second coefficients for lower quantized ratio
+			srIn, srOut, srInAlt, srOutAlt = srInAlt, srOutAlt, srIn, srOut
+			ratio = Ffdiv(srIn, srOut)
+			initConsts()
+			s.alt.driftStep = F64mul(s.alt.invRatio-idealOutPerIn, srInAlt)
+		}
 
 		return s
 	} else {
@@ -181,6 +174,12 @@ func FareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, n
 		denom, num, denomAlt, numAlt = _fareySearch(1/target, maxDenom, maxNum)
 	} else {
 		num, denom, numAlt, denomAlt = _fareySearch(target, maxNum, maxDenom)
+	}
+
+	f64t := float64(target)
+	// return closest ratio first
+	if Abs(Ffdiv(num, denom)-f64t) < Abs(Ffdiv(numAlt, denomAlt)-f64t) {
+		return numAlt, denomAlt, num, denom
 	}
 	return
 }
