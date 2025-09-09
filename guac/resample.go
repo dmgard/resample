@@ -129,7 +129,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			"the lowest register is completely accumulated and can be stored while the rest",
 			"are shifted down in its place")
 		// TODO could probably do this with a bit test but const shifts might actually be faster
-		outIdx.Copy().BitRshift(outIdxToOutVecShift).Compare(
+		outIdx.CloneDef().BitRshift(outIdx, outIdxToOutVecShift).Compare(
 			outIdx.Add(outStep).CloneDef().BitRshift(outIdx, outIdxToOutVecShift)).
 			JumpE("no_store")
 		{

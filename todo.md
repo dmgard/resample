@@ -1,3 +1,6 @@
+- BUGS SIMD
+  - Intermediate registers seem to save and advance too often (every input sample) at very least at very close sample rates
+  - Final register save might advance by a full register in memory inappropriately/indiscriminately
 - TODO codify taps as input samples or output samples: currently, actual taps scale with resample ratio
 - TEST simd:
   - Build scalar clone of SIMD logic using SIMD primitives, conditional gotos and the like

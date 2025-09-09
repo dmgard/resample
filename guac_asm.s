@@ -4,7 +4,7 @@
 
 // func ResampleFixedF32_8x2(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x2(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_8x2(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -55,11 +55,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
-	ADDQ    R9, DI
 	SHRQ    $+35, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -95,7 +94,7 @@ In0end:
 
 // func ResampleFixedF32_8x3(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x3(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_8x3(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -148,11 +147,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
-	ADDQ    R9, DI
 	SHRQ    $+35, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -192,7 +190,7 @@ In0end:
 
 // func ResampleFixedF32_8x4(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x4(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_8x4(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -247,11 +245,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
-	ADDQ    R9, DI
 	SHRQ    $+35, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -295,7 +292,7 @@ In0end:
 
 // func ResampleFixedF32_8x5(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x5(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_8x5(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -352,11 +349,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
-	ADDQ    R9, DI
 	SHRQ    $+35, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -404,7 +400,7 @@ In0end:
 
 // func ResampleFixedF32_8x6(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x6(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_8x6(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -463,11 +459,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
-	ADDQ    R9, DI
 	SHRQ    $+35, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -519,7 +514,7 @@ In0end:
 
 // func ResampleFixedF32_8x7(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x7(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_8x7(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -580,11 +575,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
-	ADDQ    R9, DI
 	SHRQ    $+35, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -640,7 +634,7 @@ In0end:
 
 // func ResampleFixedF32_8x8(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x8(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_8x8(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -703,11 +697,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
-	ADDQ    R9, DI
 	SHRQ    $+35, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -767,7 +760,7 @@ In0end:
 
 // func ResampleFixedF32_16x2(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x2(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x2(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -818,11 +811,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -858,7 +850,7 @@ In0end:
 
 // func ResampleFixedF32_16x3(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x3(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x3(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -911,11 +903,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -955,7 +946,7 @@ In0end:
 
 // func ResampleFixedF32_16x4(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x4(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x4(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1010,11 +1001,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1058,7 +1048,7 @@ In0end:
 
 // func ResampleFixedF32_16x5(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x5(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x5(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1115,11 +1105,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1167,7 +1156,7 @@ In0end:
 
 // func ResampleFixedF32_16x6(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x6(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x6(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1226,11 +1215,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1282,7 +1270,7 @@ In0end:
 
 // func ResampleFixedF32_16x7(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x7(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x7(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1343,11 +1331,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1403,7 +1390,7 @@ In0end:
 
 // func ResampleFixedF32_16x8(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x8(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x8(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1466,11 +1453,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1530,7 +1516,7 @@ In0end:
 
 // func ResampleFixedF32_16x9(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x9(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x9(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1595,11 +1581,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1663,7 +1648,7 @@ In0end:
 
 // func ResampleFixedF32_16x10(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x10(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x10(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1730,11 +1715,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1802,7 +1786,7 @@ In0end:
 
 // func ResampleFixedF32_16x11(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x11(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x11(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1871,11 +1855,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1947,7 +1930,7 @@ In0end:
 
 // func ResampleFixedF32_16x12(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x12(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x12(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2018,11 +2001,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2098,7 +2080,7 @@ In0end:
 
 // func ResampleFixedF32_16x13(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x13(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x13(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2171,11 +2153,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2255,7 +2236,7 @@ In0end:
 
 // func ResampleFixedF32_16x14(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x14(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x14(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2330,11 +2311,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2418,7 +2398,7 @@ In0end:
 
 // func ResampleFixedF32_16x15(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x15(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x15(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2495,11 +2475,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2587,7 +2566,7 @@ In0end:
 
 // func ResampleFixedF32_16x16(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $0-112
+TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $8-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2666,11 +2645,10 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
-	ADDQ    R9, DI
 	SHRQ    $+36, DI, R15
-	CMPQ    R14, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, BP
+	CMPQ    R15, BP
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
