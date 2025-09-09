@@ -80,7 +80,6 @@ func TestSIMD(t *testing.T) {
 	// TODO probably multiple of taps, not quantum?
 
 	rs := NewSIMD[T](srIn, srOut, taps)
-	us := NewSIMD[T](srOut, srIn, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
 	//samples = cosSignal[T](quantum, 1.)
@@ -91,17 +90,16 @@ func TestSIMD(t *testing.T) {
 
 	output := make([]T, quantum*numQuanta)
 	recovered := output
-	buf := make([]T, quantum)
 
 	for range numQuanta {
 		rs.Process(samples)
-		if next := buf[:rs.Read(buf)]; len(next) != 0 {
-			us.Process(next)
-			recovered = recovered[us.Read(recovered):]
-		}
+		recovered = recovered[rs.Read(recovered):]
 	}
 	ln := len(output) - len(recovered)
 	recovered = output
+
+	//1522042487932
+	//1539144088920
 
 	trimmed := recovered[:ln]
 	if idxs, deltas, avg := MaxErrorsVsRepeat(0.001, 10,
