@@ -57,15 +57,13 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+35, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
 	VXORPS  Y1, Y1, Y1
-	ADDQ    $+8, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -152,16 +150,14 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+35, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
 	VMOVUPS Y2, Y1
 	VXORPS  Y2, Y2, Y2
-	ADDQ    $+8, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -253,9 +249,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+35, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -263,7 +258,6 @@ In0:
 	VMOVUPS Y2, Y1
 	VMOVUPS Y3, Y2
 	VXORPS  Y3, Y3, Y3
-	ADDQ    $+8, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -360,9 +354,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+35, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -371,7 +364,6 @@ In0:
 	VMOVUPS Y3, Y2
 	VMOVUPS Y4, Y3
 	VXORPS  Y4, Y4, Y4
-	ADDQ    $+8, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -473,9 +465,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+35, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -485,7 +476,6 @@ In0:
 	VMOVUPS Y4, Y3
 	VMOVUPS Y5, Y4
 	VXORPS  Y5, Y5, Y5
-	ADDQ    $+8, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -592,9 +582,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+35, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -605,7 +594,6 @@ In0:
 	VMOVUPS Y5, Y4
 	VMOVUPS Y6, Y5
 	VXORPS  Y6, Y6, Y6
-	ADDQ    $+8, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -717,9 +705,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+35, R15
+	ADDQ    R9, DI
+	SHRQ    $+35, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -731,7 +718,6 @@ In0:
 	VMOVUPS Y6, Y5
 	VMOVUPS Y7, Y6
 	VXORPS  Y7, Y7, Y7
-	ADDQ    $+8, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -834,15 +820,13 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
 	VXORPS  Z1, Z1, Z1
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -929,16 +913,14 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
 	VMOVUPS Z2, Z1
 	VXORPS  Z2, Z2, Z2
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1030,9 +1012,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1040,7 +1021,6 @@ In0:
 	VMOVUPS Z2, Z1
 	VMOVUPS Z3, Z2
 	VXORPS  Z3, Z3, Z3
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1137,9 +1117,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1148,7 +1127,6 @@ In0:
 	VMOVUPS Z3, Z2
 	VMOVUPS Z4, Z3
 	VXORPS  Z4, Z4, Z4
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1250,9 +1228,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1262,7 +1239,6 @@ In0:
 	VMOVUPS Z4, Z3
 	VMOVUPS Z5, Z4
 	VXORPS  Z5, Z5, Z5
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1369,9 +1345,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1382,7 +1357,6 @@ In0:
 	VMOVUPS Z5, Z4
 	VMOVUPS Z6, Z5
 	VXORPS  Z6, Z6, Z6
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1494,9 +1468,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1508,7 +1481,6 @@ In0:
 	VMOVUPS Z6, Z5
 	VMOVUPS Z7, Z6
 	VXORPS  Z7, Z7, Z7
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1625,9 +1597,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1640,7 +1611,6 @@ In0:
 	VMOVUPS Z7, Z6
 	VMOVUPS Z8, Z7
 	VXORPS  Z8, Z8, Z8
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1762,9 +1732,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1778,7 +1747,6 @@ In0:
 	VMOVUPS Z8, Z7
 	VMOVUPS Z9, Z8
 	VXORPS  Z9, Z9, Z9
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -1905,9 +1873,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1922,7 +1889,6 @@ In0:
 	VMOVUPS Z9, Z8
 	VMOVUPS Z10, Z9
 	VXORPS  Z10, Z10, Z10
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -2054,9 +2020,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2072,7 +2037,6 @@ In0:
 	VMOVUPS Z10, Z9
 	VMOVUPS Z11, Z10
 	VXORPS  Z11, Z11, Z11
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -2209,9 +2173,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2228,7 +2191,6 @@ In0:
 	VMOVUPS Z11, Z10
 	VMOVUPS Z12, Z11
 	VXORPS  Z12, Z12, Z12
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -2370,9 +2332,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2390,7 +2351,6 @@ In0:
 	VMOVUPS Z12, Z11
 	VMOVUPS Z13, Z12
 	VXORPS  Z13, Z13, Z13
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -2537,9 +2497,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2558,7 +2517,6 @@ In0:
 	VMOVUPS Z13, Z12
 	VMOVUPS Z14, Z13
 	VXORPS  Z14, Z14, Z14
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
@@ -2710,9 +2668,8 @@ In0:
 	// are shifted down in its place
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	MOVQ    DI, R15
-	ADDQ    R9, R15
-	SHRQ    $+36, R15
+	ADDQ    R9, DI
+	SHRQ    $+36, DI, R15
 	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2732,7 +2689,6 @@ In0:
 	VMOVUPS Z14, Z13
 	VMOVUPS Z15, Z14
 	VXORPS  Z15, Z15, Z15
-	ADDQ    $+16, DI
 
 no_store:
 	// Update and wrap coefficient index
