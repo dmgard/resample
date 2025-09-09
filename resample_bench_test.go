@@ -44,8 +44,6 @@ func printResampleSuffix(srIn int, srOut int, quantum int, taps int) string {
 		srIn, srOut, quantum, taps)
 }
 
-func sliceOf[T any](s ...T) []T { return s }
-
 func BenchmarkAvxResample(b *testing.B) {
 	// TODO ??
 	// math.MaxUint64/(outRate*simdVecLen) * inRate + 1 (for rounding). Indicates output register advance on SubsampleIdx overflow

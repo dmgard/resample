@@ -21,8 +21,8 @@ func resample_f32_64_avx() {
 	for i := range 16 - 1 {
 		fixed_resample_avx[float32, []float32](16, i+2)
 	}
-	_new_resample_f32_64_avx(8, 8)
-	_new_resample_f32_64_avx(16, 16)
+	old_resample_f32_64_avx(8, 8)
+	old_resample_f32_64_avx(16, 16)
 }
 
 const fixedPointShift = 32
@@ -130,13 +130,12 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			"are shifted down in its place")
 		// TODO could probably do this with a bit test but const shifts might actually be faster
 		outIdx.Copy().BitRshift(outIdxToOutVecShift).Compare(
-			outIdx.Copy().Add(outStep).BitRshift(outIdxToOutVecShift)).
+			outIdx.Add(outStep).CloneDef().BitRshift(outIdx, outIdxToOutVecShift)).
 			JumpE("no_store")
 		{
 			out.SwizzledUnrolls(0).Store()
 			outShift.Store(out.SwizzledUnrolls(lowSwizzle...))
 			out.SwizzledUnrolls(unrolls - 1).Xor()
-			outIdx.Add(int32(simdVecLen))
 		}
 		Label("no_store")
 
@@ -165,7 +164,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	Ret()
 }
 
-func _new_resample_f32_64_avx(simdVecLen, unrolls int) {
+func old_resample_f32_64_avx(simdVecLen, unrolls int) {
 	var p struct {
 		Out, In, Coefs               Reg[[]float32]
 		PhaseIdx, Phases             Reg[int]

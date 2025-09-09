@@ -12,23 +12,6 @@ const fixedPointOne = 1 << fixedPointShift
 type Sample interface {
 	float32 | float64 | int8 | int16 | int32 | int64
 }
-
-type OfflineSincResampler[T Sample] struct {
-	out []T
-
-	// output time in fixed-point ratio of input samples
-	outIdx fixed64
-	// last read output sample location
-	readIdx int
-	// input sample count for selecting output phases
-	coefsIdx int
-	// accumulated output-time drift due to rational sample ratio approximation
-	drift float64
-
-	*consts[T]
-	alt *consts[T]
-}
-
 type consts[T Sample] struct {
 	// ratio of output samples traversed per input sample
 	outStep fixed64
@@ -53,6 +36,22 @@ type consts[T Sample] struct {
 }
 
 var maxPhases = 512
+
+type OfflineSincResampler[T Sample] struct {
+	out []T
+
+	// output time in fixed-point ratio of input samples
+	outIdx fixed64
+	// last read output sample location
+	readIdx int
+	// input sample count for selecting output phases
+	coefsIdx int
+	// accumulated output-time drift due to rational sample ratio approximation
+	drift float64
+
+	*consts[T]
+	alt *consts[T]
+}
 
 // New constructs a resampler with precomputed sinc coefficients
 func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler[T]) {
@@ -169,43 +168,6 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 	return s
 }
 
-func FareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
-	if target > 1 {
-		denom, num, denomAlt, numAlt = _fareySearch(1/target, maxDenom, maxNum)
-	} else {
-		num, denom, numAlt, denomAlt = _fareySearch(target, maxNum, maxDenom)
-	}
-
-	f64t := float64(target)
-	// return closest ratio first
-	if Abs(Ffdiv(num, denom)-f64t) < Abs(Ffdiv(numAlt, denomAlt)-f64t) {
-		return numAlt, denomAlt, num, denom
-	}
-	return
-}
-
-func _fareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
-	numLo, denomLo := T(0), T(1)
-	numHi, denomHi := T(1), T(1)
-
-	for {
-		num, denom = numLo+numHi, denomLo+denomHi
-
-		if num > maxNum || denom > maxDenom {
-			if target-Ftdiv[F](numLo, denomLo) < Ftdiv[F](numHi, denomHi)-target {
-				return numLo, denomLo, numHi, denomHi
-			}
-			return numHi, denomHi, numLo, denomLo
-		}
-
-		if Ftdiv[F](num, denom) < target {
-			numLo, denomLo = num, denom
-		} else {
-			numHi, denomHi = num, denom
-		}
-	}
-}
-
 func (s *OfflineSincResampler[T]) Process(in []T) {
 	for _, input := range in {
 		// weight contribution of this input sample to a patch the size of the filter
@@ -294,6 +256,43 @@ func (s *OfflineSincResampler[T]) putCoefs() {
 				return
 			}
 			looped = true
+		}
+	}
+}
+
+func FareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
+	if target > 1 {
+		denom, num, denomAlt, numAlt = _fareySearch(1/target, maxDenom, maxNum)
+	} else {
+		num, denom, numAlt, denomAlt = _fareySearch(target, maxNum, maxDenom)
+	}
+
+	f64t := float64(target)
+	// return closest ratio first
+	if Abs(Ffdiv(num, denom)-f64t) < Abs(Ffdiv(numAlt, denomAlt)-f64t) {
+		return numAlt, denomAlt, num, denom
+	}
+	return
+}
+
+func _fareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
+	numLo, denomLo := T(0), T(1)
+	numHi, denomHi := T(1), T(1)
+
+	for {
+		num, denom = numLo+numHi, denomLo+denomHi
+
+		if num > maxNum || denom > maxDenom {
+			if target-Ftdiv[F](numLo, denomLo) < Ftdiv[F](numHi, denomHi)-target {
+				return numLo, denomLo, numHi, denomHi
+			}
+			return numHi, denomHi, numLo, denomLo
+		}
+
+		if Ftdiv[F](num, denom) < target {
+			numLo, denomLo = num, denom
+		} else {
+			numHi, denomHi = num, denom
 		}
 	}
 }

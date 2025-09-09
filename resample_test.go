@@ -65,6 +65,62 @@ func TestApproximate(t *testing.T) {
 	}
 }
 
+func TestSIMD(t *testing.T) {
+	type T = float32
+
+	const quantum = 4
+	const taps = 64
+
+	const srIn, srOut, outOffset = 48111, 47892, quantum + taps
+	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
+	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
+	//const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
+	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
+	// TODO total delay seems to shift with resample ratio,
+	// TODO probably multiple of taps, not quantum?
+
+	rs := NewSIMD[T](srIn, srOut, taps)
+	us := NewSIMD[T](srOut, srIn, taps)
+
+	samples := YeqX[T](quantum + 1)[1:]
+	//samples = cosSignal[T](quantum, 1.)
+	//samples = LogSweptSine[T](quantum, 0., 10.)
+	samples = Const[T](quantum, 1)
+
+	const numQuanta = 100 * 2048
+
+	output := make([]T, quantum*numQuanta)
+	recovered := output
+	buf := make([]T, quantum)
+
+	for range numQuanta {
+		rs.Process(samples)
+		if next := buf[:rs.Read(buf)]; len(next) != 0 {
+			us.Process(next)
+			recovered = recovered[us.Read(recovered):]
+		}
+	}
+	ln := len(output) - len(recovered)
+	recovered = output
+
+	trimmed := recovered[:ln]
+	if idxs, deltas, avg := MaxErrorsVsRepeat(0.001, 10,
+		trimmed, samples); len(idxs) > 0 {
+		t.Log("Errors at: ", idxs)
+		t.Logf("Errors: %3.3f", deltas)
+		t.Logf("%3.3f average error. Ground truth:", avg)
+		plot(t, samples)
+
+		for i, loc := range idxs {
+			t.Logf("@%d: %3.3f", loc, deltas[i])
+			chunk := safeSlice(trimmed, loc/quantum*quantum, quantum)
+			plot(t, chunk)
+		}
+
+		t.Fail()
+	}
+}
+
 func TestFareySearch(t *testing.T) {
 	for range 100 {
 		r := rand.Float64()

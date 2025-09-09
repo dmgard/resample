@@ -93,6 +93,8 @@ func Wrapped[T Scalar](v T, min, max T) T {
 	return v
 }
 
+func sliceOf[T any](s ...T) []T { return s }
+
 func RoundUpPow2[T Scalar](vv T) T {
 	v := uint64(vv)
 	v--
