@@ -27,13 +27,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+8, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+35, DI, R10
+	MOVQ DI, R10
+	SHRQ $+35, R10
 	SHLQ $+3, R10
 	ANDQ R8, R10
 
@@ -55,12 +57,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+35, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+35, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -68,13 +70,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+32, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -120,13 +122,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+12, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+35, DI, R10
+	MOVQ DI, R10
+	SHRQ $+35, R10
 	SHLQ $+3, R10
 	ANDQ R8, R10
 
@@ -149,12 +153,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+35, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+35, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -163,13 +167,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+40, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -219,13 +223,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+16, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+35, DI, R10
+	MOVQ DI, R10
+	SHRQ $+35, R10
 	SHLQ $+3, R10
 	ANDQ R8, R10
 
@@ -249,12 +255,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+35, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+35, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -264,13 +270,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+48, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -324,13 +330,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+20, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+35, DI, R10
+	MOVQ DI, R10
+	SHRQ $+35, R10
 	SHLQ $+3, R10
 	ANDQ R8, R10
 
@@ -355,12 +363,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+35, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+35, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -371,13 +379,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+56, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -435,13 +443,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+24, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+35, DI, R10
+	MOVQ DI, R10
+	SHRQ $+35, R10
 	SHLQ $+3, R10
 	ANDQ R8, R10
 
@@ -467,12 +477,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+35, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+35, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -484,13 +494,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+64, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -552,13 +562,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+28, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+35, DI, R10
+	MOVQ DI, R10
+	SHRQ $+35, R10
 	SHLQ $+3, R10
 	ANDQ R8, R10
 
@@ -585,12 +597,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+35, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+35, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -603,13 +615,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+72, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -675,13 +687,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+32, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+35, DI, R10
+	MOVQ DI, R10
+	SHRQ $+35, R10
 	SHLQ $+3, R10
 	ANDQ R8, R10
 
@@ -709,12 +723,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+35, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+35, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+35, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -728,13 +742,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+80, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -797,13 +811,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+16, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -825,12 +841,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -838,13 +854,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+64, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -890,13 +906,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+24, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -919,12 +937,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -933,13 +951,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+80, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -989,13 +1007,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+32, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1019,12 +1039,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1034,13 +1054,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+96, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1094,13 +1114,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+40, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1125,12 +1147,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1141,13 +1163,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+112, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1205,13 +1227,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+48, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1237,12 +1261,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1254,13 +1278,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+128, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1322,13 +1346,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+56, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1355,12 +1381,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1373,13 +1399,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+144, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1445,13 +1471,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+64, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1479,12 +1507,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1498,13 +1526,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+160, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1574,13 +1602,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+72, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1609,12 +1639,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1629,13 +1659,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+176, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1709,13 +1739,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+80, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1745,12 +1777,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1766,13 +1798,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+192, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1850,13 +1882,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+88, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -1887,12 +1921,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1909,13 +1943,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+208, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -1997,13 +2031,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+96, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -2035,12 +2071,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2058,13 +2094,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+224, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -2150,13 +2186,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+104, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -2189,12 +2227,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2213,13 +2251,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+240, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -2309,13 +2347,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+112, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -2349,12 +2389,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2374,13 +2414,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+256, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -2474,13 +2514,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+120, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -2515,12 +2557,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2541,13 +2583,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+272, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
@@ -2645,13 +2687,15 @@ In0:
 	JL   In0end
 
 	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	SHRQ $+32, DI, R13
+	MOVQ DI, R13
+	SHRQ $+32, R13
 	SUBQ $+128, R13
 
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	SHRQ $+36, DI, R10
+	MOVQ DI, R10
+	SHRQ $+36, R10
 	SHLQ $+4, R10
 	ANDQ R8, R10
 
@@ -2687,12 +2731,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
+	MOVQ    DI, R13
+	SHRQ    $+36, R13
+	ADDQ    R9, DI
 	MOVQ    DI, R14
 	SHRQ    $+36, R14
-	ADDQ    R9, DI
-	MOVQ    DI, R15
-	SHRQ    $+36, R15
-	CMPQ    R14, R15
+	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2714,13 +2758,13 @@ In0:
 
 no_store:
 	// Update and wrap coefficient index
-	XORQ R14, R14
+	XORQ R13, R13
 	ADDQ $+288, BX
 	CMPQ BX, SI
 
 	// Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result
-	CMOVQGE SI, R14
-	SUBQ    R14, BX
+	CMOVQGE SI, R13
+	SUBQ    R13, BX
 	ADDQ    $0x00000001, R11
 	JMP     In0
 
