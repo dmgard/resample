@@ -1,3 +1,5 @@
+- COMPILER/ASSEMBLER BUG?
+  - Three-argument SHRQ `SHRQ $+36, R8, R9` encodes as `RORQ` somehow?
 - BUGS SIMD
   - Intermediate registers seem to save and advance too often (every input sample) at very least at very close sample rates
   - Final register save might advance by a full register in memory inappropriately/indiscriminately

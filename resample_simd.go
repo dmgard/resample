@@ -159,6 +159,24 @@ var resampleFuncsF32 = sliceOf(
 		ResampleFixedF32_16x11, ResampleFixedF32_16x12, ResampleFixedF32_16x13,
 		ResampleFixedF32_16x14, ResampleFixedF32_16x15, ResampleFixedF32_16x16),
 )
+
+// var dummyFuncsF32 = sliceOf(
+//
+//	nil,
+//	nil,
+//	nil,
+//	sliceOf(nil,
+//		dummyResampleFixedF32_8x2, dummyResampleFixedF32_8x3, dummyResampleFixedF32_8x4,
+//		dummyResampleFixedF32_8x5, dummyResampleFixedF32_8x6, dummyResampleFixedF32_8x7,
+//		dummyResampleFixedF32_8x8),
+//	sliceOf(nil,
+//		dummyResampleFixedF32_16x2, dummyResampleFixedF32_16x3, dummyResampleFixedF32_16x4,
+//		dummyResampleFixedF32_16x5, dummyResampleFixedF32_16x6, dummyResampleFixedF32_16x7,
+//		dummyResampleFixedF32_16x8, dummyResampleFixedF32_16x9, dummyResampleFixedF32_16x10,
+//		dummyResampleFixedF32_16x11, dummyResampleFixedF32_16x12, dummyResampleFixedF32_16x13,
+//		dummyResampleFixedF32_16x14, dummyResampleFixedF32_16x15, dummyResampleFixedF32_16x16),
+//
+// )
 var simdLevel = func() int {
 	switch {
 	case CPU.Supports(AVX, AVX512DQ, AVX512F, CMOV):
@@ -182,6 +200,7 @@ func (s *SimdResampler[T]) Process(in []T) {
 	switch unsafe.Sizeof(*new(T)) * 8 {
 	case 32:
 		fn := resampleFuncsF32[simdLevel][s.taps>>simdLevel]
+		//fn := dummyFuncsF32[simdLevel][s.taps>>simdLevel]
 
 		coefIdx, outIdx := fn(
 			SliceCast[float32](s.out),
@@ -190,6 +209,8 @@ func (s *SimdResampler[T]) Process(in []T) {
 		s.coefsIdx = coefIdx
 		s.outIdx = fixed64(outIdx)
 	case 64:
+		fallthrough
+	default:
 		panic("TODO")
 	}
 

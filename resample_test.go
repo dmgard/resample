@@ -98,9 +98,6 @@ func TestSIMD(t *testing.T) {
 	ln := len(output) - len(recovered)
 	recovered = output
 
-	//1522042487932
-	//1539144088920
-
 	trimmed := recovered[:ln]
 	if idxs, deltas, avg := MaxErrorsVsRepeat(0.001, 10,
 		trimmed, samples); len(idxs) > 0 {
