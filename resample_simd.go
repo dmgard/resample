@@ -75,9 +75,11 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 
 		// precompute coefficients for each unique phase of the windowed sinc filter
 		// round to nearest SIMD vector width
+		vecLen := 1 << simdLevel
 		// TODO bespoke routines for very small filter lengths?
-		s.taps = RoundUpMultPow2(2*s.delay+1, 16)
-		s.coefs = make([]T, s.taps*phases)
+		s.taps = RoundUpMultPow2(2*s.delay+1, vecLen)
+		// and pad by two SIMD registers
+		s.coefs = make([]T, (s.taps+2*vecLen)*phases)
 
 		// TODO temporary for testing
 		for i := range s.coefs {

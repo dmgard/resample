@@ -7,9 +7,14 @@ import (
 	"unsafe"
 )
 
+func BenchmarkResample(b *testing.B) {
+	BenchmarkScalarResample(b)
+	BenchmarkAvxResample(b)
+}
+
 func BenchmarkScalarResample(b *testing.B) {
 	type T = float32
-	b.Run("48x441", func(b *testing.B) {
+	b.Run("48_441", func(b *testing.B) {
 		const (
 			srIn, srOut = 48000, 44100
 			quantum     = 64
@@ -23,7 +28,7 @@ func BenchmarkScalarResample(b *testing.B) {
 			benchNode(b, "node=onlineSinc/"+tail, NewOnlineSincResampler[T](quantum, Ffdiv(srIn, srOut), taps).Process, s)
 		}
 	})
-	b.Run("48x441", func(b *testing.B) {
+	b.Run("48111_47892", func(b *testing.B) {
 		const (
 			srIn, srOut = 48111, 47892
 			quantum     = 64
@@ -39,12 +44,45 @@ func BenchmarkScalarResample(b *testing.B) {
 	})
 }
 
+func BenchmarkAvxResample(b *testing.B) {
+	type T = float32
+	defer func() {
+		if err := recover(); err != nil {
+			b.Fatal(err)
+		}
+	}()
+	b.Run("48_441", func(b *testing.B) {
+		const (
+			srIn, srOut = 48000, 44100
+			quantum     = 64
+		)
+		s := make([]T, quantum)
+
+		for taps := 16; taps <= 256; taps += 8 {
+			tail := printResampleSuffix(srIn, srOut, quantum, taps)
+			benchNode(b, "node=avx512/"+tail, NewSIMD[T](srIn, srOut, taps).Process, s)
+		}
+	})
+	b.Run("48111_47892", func(b *testing.B) {
+		const (
+			srIn, srOut = 48111, 47892
+			quantum     = 64
+		)
+		s := make([]T, quantum)
+
+		for taps := 16; taps <= 256; taps += 8 {
+			tail := printResampleSuffix(srIn, srOut, quantum, taps)
+			benchNode(b, "node=avx512/"+tail, NewSIMD[T](srIn, srOut, taps).Process, s)
+		}
+	})
+}
+
 func printResampleSuffix(srIn int, srOut int, quantum int, taps int) string {
 	return fmt.Sprintf("ratio=%d_%d/quantum=%d/taps=%d",
 		srIn, srOut, quantum, taps)
 }
 
-func BenchmarkAvxResample(b *testing.B) {
+func _BenchmarkAvxResample(b *testing.B) {
 	// TODO ??
 	// math.MaxUint64/(outRate*simdVecLen) * inRate + 1 (for rounding). Indicates output register advance on SubsampleIdx overflow
 
