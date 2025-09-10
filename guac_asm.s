@@ -4,7 +4,7 @@
 
 // func ResampleFixedF32_8x2(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x2(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_8x2(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -55,10 +55,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+35, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+35, R14
 	ADDQ    R9, DI
-	SHRQ    $+35, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+35, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -79,12 +81,12 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y1, (AX)(R10*4)
+	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -94,7 +96,7 @@ In0end:
 
 // func ResampleFixedF32_8x3(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x3(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_8x3(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -147,10 +149,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+35, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+35, R14
 	ADDQ    R9, DI
-	SHRQ    $+35, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+35, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -172,7 +176,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
@@ -181,6 +184,7 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y2, (AX)(R10*4)
+	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -190,7 +194,7 @@ In0end:
 
 // func ResampleFixedF32_8x4(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x4(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_8x4(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -245,10 +249,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+35, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+35, R14
 	ADDQ    R9, DI
-	SHRQ    $+35, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+35, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -271,7 +277,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
@@ -283,6 +288,7 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y3, (AX)(R10*4)
+	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -292,7 +298,7 @@ In0end:
 
 // func ResampleFixedF32_8x5(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x5(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_8x5(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -349,10 +355,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+35, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+35, R14
 	ADDQ    R9, DI
-	SHRQ    $+35, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+35, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -376,7 +384,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
@@ -391,6 +398,7 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y4, (AX)(R10*4)
+	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -400,7 +408,7 @@ In0end:
 
 // func ResampleFixedF32_8x6(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x6(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_8x6(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -459,10 +467,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+35, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+35, R14
 	ADDQ    R9, DI
-	SHRQ    $+35, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+35, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -487,7 +497,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
@@ -505,6 +514,7 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y5, (AX)(R10*4)
+	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -514,7 +524,7 @@ In0end:
 
 // func ResampleFixedF32_8x7(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x7(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_8x7(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -575,10 +585,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+35, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+35, R14
 	ADDQ    R9, DI
-	SHRQ    $+35, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+35, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -604,7 +616,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
@@ -625,6 +636,7 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y6, (AX)(R10*4)
+	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -634,7 +646,7 @@ In0end:
 
 // func ResampleFixedF32_8x8(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, CMOV, FMA3
-TEXT ·ResampleFixedF32_8x8(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_8x8(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -697,10 +709,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+35, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+35, R14
 	ADDQ    R9, DI
-	SHRQ    $+35, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+35, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
 	VMOVUPS Y1, Y0
@@ -727,7 +741,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
@@ -751,6 +764,7 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y7, (AX)(R10*4)
+	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -760,7 +774,7 @@ In0end:
 
 // func ResampleFixedF32_16x2(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x2(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x2(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -811,10 +825,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -835,12 +851,12 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z1, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -850,7 +866,7 @@ In0end:
 
 // func ResampleFixedF32_16x3(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x3(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x3(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -903,10 +919,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -928,7 +946,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -937,6 +954,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z2, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -946,7 +964,7 @@ In0end:
 
 // func ResampleFixedF32_16x4(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x4(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x4(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1001,10 +1019,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1027,7 +1047,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1039,6 +1058,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z3, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1048,7 +1068,7 @@ In0end:
 
 // func ResampleFixedF32_16x5(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x5(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x5(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1105,10 +1125,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1132,7 +1154,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1147,6 +1168,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z4, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1156,7 +1178,7 @@ In0end:
 
 // func ResampleFixedF32_16x6(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x6(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x6(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1215,10 +1237,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1243,7 +1267,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1261,6 +1284,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z5, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1270,7 +1294,7 @@ In0end:
 
 // func ResampleFixedF32_16x7(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x7(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x7(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1331,10 +1355,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1360,7 +1386,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1381,6 +1406,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z6, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1390,7 +1416,7 @@ In0end:
 
 // func ResampleFixedF32_16x8(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x8(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x8(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1453,10 +1479,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1483,7 +1511,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1507,6 +1534,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z7, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1516,7 +1544,7 @@ In0end:
 
 // func ResampleFixedF32_16x9(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x9(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x9(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1581,10 +1609,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1612,7 +1642,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1639,6 +1668,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z8, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1648,7 +1678,7 @@ In0end:
 
 // func ResampleFixedF32_16x10(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x10(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x10(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1715,10 +1745,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1747,7 +1779,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1777,6 +1808,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z9, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1786,7 +1818,7 @@ In0end:
 
 // func ResampleFixedF32_16x11(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x11(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x11(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -1855,10 +1887,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -1888,7 +1922,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -1921,6 +1954,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z10, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1930,7 +1964,7 @@ In0end:
 
 // func ResampleFixedF32_16x12(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x12(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x12(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2001,10 +2035,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2035,7 +2071,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -2071,6 +2106,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z11, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2080,7 +2116,7 @@ In0end:
 
 // func ResampleFixedF32_16x13(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x13(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x13(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2153,10 +2189,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2188,7 +2226,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -2227,6 +2264,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z12, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2236,7 +2274,7 @@ In0end:
 
 // func ResampleFixedF32_16x14(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x14(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x14(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2311,10 +2349,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2347,7 +2387,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -2389,6 +2428,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z13, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2398,7 +2438,7 @@ In0end:
 
 // func ResampleFixedF32_16x15(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x15(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x15(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2475,10 +2515,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2512,7 +2554,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -2557,6 +2598,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z14, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2566,7 +2608,7 @@ In0end:
 
 // func ResampleFixedF32_16x16(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 // Requires: AVX, AVX512DQ, AVX512F, CMOV
-TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $8-112
+TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $0-112
 	MOVQ Out_base+0(FP), AX
 	MOVQ In_base+24(FP), CX
 	MOVQ Coefs_base+48(FP), DX
@@ -2645,10 +2687,12 @@ In0:
 	// If incrementing the output index crosses a multiple of vectorLength,
 	// the lowest register is completely accumulated and can be stored while the rest
 	// are shifted down in its place
-	SHRQ    $+36, DI, R15
+	MOVQ    DI, R14
+	SHRQ    $+36, R14
 	ADDQ    R9, DI
-	SHRQ    $+36, DI, BP
-	CMPQ    R15, BP
+	MOVQ    DI, R15
+	SHRQ    $+36, R15
+	CMPQ    R14, R15
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
 	VMOVUPS Z1, Z0
@@ -2683,7 +2727,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
@@ -2731,6 +2774,7 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z15, (AX)(R10*4)
+	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls

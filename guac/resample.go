@@ -17,9 +17,11 @@ func resample_f32_64_avx() {
 	// minimum is two registers, including prev/next zero-padding
 	for i := range 8 - 1 {
 		fixed_resample_avx[float32, []float32](8, i+2)
+		//dummy_resample_avx[float32, []float32](8, i+2)
 	}
 	for i := range 16 - 1 {
 		fixed_resample_avx[float32, []float32](16, i+2)
+		//dummy_resample_avx[float32, []float32](16, i+2)
 	}
 	old_resample_f32_64_avx(8, 8)
 	old_resample_f32_64_avx(16, 16)
@@ -129,8 +131,10 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			"the lowest register is completely accumulated and can be stored while the rest",
 			"are shifted down in its place")
 		// TODO could probably do this with a bit test but const shifts might actually be faster
-		outIdx.CloneDef().BitRshift(outIdx, outIdxToOutVecShift).Compare(
-			outIdx.Add(outStep).CloneDef().BitRshift(outIdx, outIdxToOutVecShift)).
+		// NOTE three-argument SHRQ encodes seemingly as RORQ?
+		// that's why Copy() is used rather than CloneDef()
+		outIdx.Copy().BitRshift(outIdxToOutVecShift).Compare(
+			outIdx.Add(outStep).Copy().BitRshift(outIdxToOutVecShift)).
 			JumpE("no_store")
 		{
 			out.SwizzledUnrolls(0).Store()
@@ -152,9 +156,58 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		// TODO int constant in Add generates "bad operands" instead automatic convert or
 		// type error
 		out := out.ByteOffsetAllTo(0)
-		SetIndex(outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask),
+		SetIndex(outAlignedIdx.And(outLenMask),
 			out.SwizzledUnrolls(i).Store())
+		outAlignedIdx.Add(int32(simdVecLen))
 	}
+
+	ZeroUpper()
+	Comment("Return the latest phase and output index for reuse in future calls")
+	r.CoefIdxOut.Init().Addr().Load(coefIdx)
+	r.OutIdxOut.Init().Addr().Load(outIdx)
+
+	Ret()
+}
+
+func dummy_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls int) {
+	var p struct {
+		Out, In, Coefs  Reg[S]
+		CoefIdx         Reg[int]
+		OutIdx, OutStep Reg[int]
+	}
+
+	var r struct {
+		CoefIdxOut Reg[int]
+		OutIdxOut  Reg[int]
+	}
+
+	suffix := fmt.Sprintf("F%d_%dx%d", unsafe.Sizeof(*new(T))*8, simdVecLen, unrolls)
+
+	Func("dummyResampleFixed"+suffix, NOSPLIT, &p, &r)
+
+	in := Iter[T](&p.In)
+	coefIdx := p.CoefIdx.Init().Load()
+	outIdx := p.OutIdx.Init().Load()
+	outStep := p.OutStep.Init().Load()
+
+	RangeOver(in, func(i *Reg[int]) {
+		lg2vecLn := int8(tzcnt(simdVecLen))
+		outIdxToOutVecShift := fixedPointShift + lg2vecLn
+
+		Comment("If incrementing the output index crosses a multiple of vectorLength,",
+			"the lowest register is completely accumulated and can be stored while the rest",
+			"are shifted down in its place")
+		rs := outIdx.Copy().BitRshift(outIdxToOutVecShift)
+		rs2 := outIdx.Add(outStep).Copy().BitRshift(outIdxToOutVecShift)
+		rs.Compare(rs2).JumpE("no_store")
+		{
+			r.CoefIdxOut.Init().Addr().Load(rs)
+			r.OutIdxOut.Init().Addr().Load(rs2)
+			ZeroUpper()
+			Ret()
+		}
+		Label("no_store")
+	})
 
 	ZeroUpper()
 	Comment("Return the latest phase and output index for reuse in future calls")
