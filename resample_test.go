@@ -68,8 +68,8 @@ func TestApproximate(t *testing.T) {
 func TestSIMD(t *testing.T) {
 	type T = float32
 
-	const quantum = 4
-	const taps = 64
+	const quantum = 1
+	const taps = 16
 
 	const srIn, srOut, outOffset = 48111, 47892, quantum + taps
 	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
