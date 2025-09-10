@@ -3,6 +3,8 @@
 - BUGS SIMD
   - TODO need to quantize initial output vector reload to nearest vector bounds
     - dovetails with only recalculating offsets at the end of the loop
+  - TODO coef wrapping needs to reset to zero even during SIMD
+    - Causing segfaults and would be expected to when switching between over/under ratios between phases
   - TODO final output slice index doesn't update until loop entered, leading it to potentially (?) lag behind on final update?
   - Anyway, regardless of the cause, there's definitely something wrong there. Seems to skip a vector or something, shifting all output by one register of samples?
   - Output index seems to jump forward by a register length every two sets of input quanta, on both size 4 and 8 quanta with 16 taps filter
