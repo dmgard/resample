@@ -94,7 +94,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 
 	RangeOver(in, func(i *Reg[int]) {
 		Comment("Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2")
-		outMin := outIdx.CloneDef().BitRshift(outIdx, int8(fixedPointShift)).
+		outMin := outIdx.Copy().BitRshift(int8(fixedPointShift)).
 			Sub(int32(taps / 2))
 
 		Comment("Compute output vector index as ",
@@ -104,7 +104,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		outIdxToOutVecShift := fixedPointShift + lg2vecLn
 		// TODO somewhat redudnant to do this every time when it only shifts when
 		// the later CMOV test succeeds
-		outAlignedIdx.BitRshift(outIdx, outIdxToOutVecShift).
+		outAlignedIdx.Load(outIdx).BitRshift(outIdxToOutVecShift).
 			BitLshift(lg2vecLn).
 			And(outLenMask)
 		SetIndex(outAlignedIdx, out)
