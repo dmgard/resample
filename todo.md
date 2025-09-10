@@ -1,7 +1,12 @@
 - COMPILER/ASSEMBLER BUG?
   - Three-argument SHRQ `SHRQ $+36, R8, R9` encodes as `RORQ` somehow?
 - BUGS SIMD
-  - Intermediate registers seem to save and advance too often (every input sample) at very least at very close sample rates
+  - TODO need to quantize initial output vector reload to nearest vector bounds
+    - dovetails with only recalculating offsets at the end of the loop
+  - TODO final output slice index doesn't update until loop entered, leading it to potentially (?) lag behind on final update?
+  - Anyway, regardless of the cause, there's definitely something wrong there. Seems to skip a vector or something, shifting all output by one register of samples?
+  - Output index seems to jump forward by a register length every two sets of input quanta, on both size 4 and 8 quanta with 16 taps filter
+  - FIXED due to 3-arg SHRQ becoming RORQ somehow: Intermediate registers seem to save and advance too often (every input sample) at very least at very close sample rates
   - Final register save might advance by a full register in memory inappropriately/indiscriminately
 - TODO codify taps as input samples or output samples: currently, actual taps scale with resample ratio
 - TEST simd:

@@ -84,6 +84,8 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	outLenMask := Len[T, int](out).Init().Load().Sub(int32(1))
 
 	outStep := p.OutStep.Init().Load()
+
+	// TODO needs to be offset to vector-length quantized outIdx
 	Comment("Reload previous partially accumulated output samples")
 
 	out.Load()
