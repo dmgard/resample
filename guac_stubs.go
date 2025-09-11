@@ -16,6 +16,20 @@ func ResampleFixedF32_8x7(Out []float32, In []float32, Coefs []float32, CoefIdx 
 
 func ResampleFixedF32_8x8(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 
+func ResampleFixedF32_8x9(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_8x10(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_8x11(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_8x12(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_8x13(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_8x14(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_8x15(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
 func ResampleFixedF32_16x2(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 
 func ResampleFixedF32_16x3(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
@@ -45,6 +59,36 @@ func ResampleFixedF32_16x14(Out []float32, In []float32, Coefs []float32, CoefId
 func ResampleFixedF32_16x15(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 
 func ResampleFixedF32_16x16(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x17(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x18(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x19(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x20(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x21(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x22(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x23(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x24(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x25(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x26(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x27(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x28(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x29(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x30(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
+
+func ResampleFixedF32_16x31(Out []float32, In []float32, Coefs []float32, CoefIdx int, OutIdx int, OutStep int) (CoefIdxOut int, OutIdxOut int)
 
 func ResampleF32x64_8x8(Out []float32, In []float32, Coefs []float32, PhaseIdx int, Phases int, SubsampleIdx uint64, SubsampleDelta uint64, Taps int) (PhaseIdxOut int, SubsampleIdxOut uint64)
 

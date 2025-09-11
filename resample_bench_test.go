@@ -8,8 +8,8 @@ import (
 )
 
 func BenchmarkResampleAll(b *testing.B) {
-	BenchmarkScalarResample(b)
-	BenchmarkAvxResample(b)
+	b.Run("simd=scalar", BenchmarkScalarResample)
+	b.Run("simd=best", BenchmarkAvxResample)
 }
 
 func BenchmarkScalarResample(b *testing.B) {
@@ -21,11 +21,10 @@ func BenchmarkScalarResample(b *testing.B) {
 		)
 		s := make([]T, quantum)
 
-		for taps := 16; taps <= 256; taps += 8 {
+		for taps := 16; taps < 512; taps += 16 {
 			tail := printResampleSuffix(srIn, srOut, quantum, taps)
 			benchNode(b, "node=offlineSinc/"+tail, New[T](srIn, srOut, taps).Process, s)
 			benchNode(b, "node=integerSinc/"+tail, NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps).Process, s)
-			benchNode(b, "node=onlineSinc/"+tail, NewOnlineSincResampler[T](quantum, Ffdiv(srIn, srOut), taps).Process, s)
 		}
 	})
 	b.Run("48111_47892", func(b *testing.B) {
@@ -35,11 +34,10 @@ func BenchmarkScalarResample(b *testing.B) {
 		)
 		s := make([]T, quantum)
 
-		for taps := 16; taps <= 256; taps += 8 {
+		for taps := 16; taps < 512; taps += 16 {
 			tail := printResampleSuffix(srIn, srOut, quantum, taps)
 			benchNode(b, "node=offlineSinc/"+tail, New[T](srIn, srOut, taps).Process, s)
 			benchNode(b, "node=integerSinc/"+tail, NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps).Process, s)
-			benchNode(b, "node=onlineSinc/"+tail, NewOnlineSincResampler[T](quantum, Ffdiv(srIn, srOut), taps).Process, s)
 		}
 	})
 }
@@ -58,7 +56,7 @@ func BenchmarkAvxResample(b *testing.B) {
 		)
 		s := make([]T, quantum)
 
-		for taps := 16; taps <= 256; taps += 8 {
+		for taps := 16; taps < 512; taps += 16 {
 			tail := printResampleSuffix(srIn, srOut, quantum, taps)
 			benchNode(b, "node=avx512/"+tail, NewSIMD[T](srIn, srOut, taps).Process, s)
 		}
@@ -70,7 +68,7 @@ func BenchmarkAvxResample(b *testing.B) {
 		)
 		s := make([]T, quantum)
 
-		for taps := 16; taps <= 256; taps += 8 {
+		for taps := 16; taps < 512; taps += 16 {
 			tail := printResampleSuffix(srIn, srOut, quantum, taps)
 			benchNode(b, "node=avx512/"+tail, NewSIMD[T](srIn, srOut, taps).Process, s)
 		}

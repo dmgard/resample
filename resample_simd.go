@@ -33,8 +33,12 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 
 	srIn, srOut := int(_srIn), int(_srOut)
 
-	taps = CeiledDivide(taps, 2) * 2 // round taps to multiple of 2
-	// TODO for SIMD pad to multiple of vector length
+	// SIMD pad to multiple of vector length
+	vecLen := 1 << simdLevel
+	taps = RoundUpMultPow2(taps, vecLen) // round taps to multiple of 2
+	// TODO use fallback if too many taps requested
+	// TODO index "256" as maximum SIMD vector size
+	taps = min(taps, 256)
 
 	initConsts := func() {
 		s.ratio = ratio
@@ -75,9 +79,8 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 
 		// precompute coefficients for each unique phase of the windowed sinc filter
 		// round to nearest SIMD vector width
-		vecLen := 1 << simdLevel
 		// TODO bespoke routines for very small filter lengths?
-		s.taps = RoundUpMultPow2(2*s.delay+1, vecLen)
+		s.taps = taps
 		// and pad by two SIMD registers
 		s.coefs = make([]T, (s.taps+2*vecLen)*phases)
 
@@ -150,16 +153,24 @@ var resampleFuncsF32 = sliceOf(
 	nil,
 	nil,
 	nil,
-	sliceOf(nil, nil,
+	sliceOf(nil,
 		ResampleFixedF32_8x2, ResampleFixedF32_8x3, ResampleFixedF32_8x4,
 		ResampleFixedF32_8x5, ResampleFixedF32_8x6, ResampleFixedF32_8x7,
-		ResampleFixedF32_8x8),
-	sliceOf(nil, nil,
+		ResampleFixedF32_8x8, ResampleFixedF32_8x9, ResampleFixedF32_8x10,
+		ResampleFixedF32_8x11, ResampleFixedF32_8x12, ResampleFixedF32_8x13,
+		ResampleFixedF32_8x14, ResampleFixedF32_8x15),
+	sliceOf(nil,
 		ResampleFixedF32_16x2, ResampleFixedF32_16x3, ResampleFixedF32_16x4,
 		ResampleFixedF32_16x5, ResampleFixedF32_16x6, ResampleFixedF32_16x7,
 		ResampleFixedF32_16x8, ResampleFixedF32_16x9, ResampleFixedF32_16x10,
 		ResampleFixedF32_16x11, ResampleFixedF32_16x12, ResampleFixedF32_16x13,
-		ResampleFixedF32_16x14, ResampleFixedF32_16x15, ResampleFixedF32_16x16),
+		ResampleFixedF32_16x14, ResampleFixedF32_16x15, ResampleFixedF32_16x16,
+		ResampleFixedF32_16x17, ResampleFixedF32_16x18, ResampleFixedF32_16x19,
+		ResampleFixedF32_16x20, ResampleFixedF32_16x21, ResampleFixedF32_16x22,
+		ResampleFixedF32_16x23, ResampleFixedF32_16x24, ResampleFixedF32_16x25,
+		ResampleFixedF32_16x26, ResampleFixedF32_16x27, ResampleFixedF32_16x28,
+		ResampleFixedF32_16x29, ResampleFixedF32_16x30, ResampleFixedF32_16x31,
+	),
 )
 
 // var dummyFuncsF32 = sliceOf(

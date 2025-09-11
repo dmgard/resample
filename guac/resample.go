@@ -15,11 +15,11 @@ func resample() {
 // resample_f32_64_avx generates a windowed sinc interpolator operating on sets of 8-sample registers
 func resample_f32_64_avx() {
 	// minimum is two registers, including prev/next zero-padding
-	for i := range 8 - 1 {
+	for i := range 14 {
 		fixed_resample_avx[float32, []float32](8, i+2)
 		//dummy_resample_avx[float32, []float32](8, i+2)
 	}
-	for i := range 16 - 1 {
+	for i := range 30 {
 		fixed_resample_avx[float32, []float32](16, i+2)
 		//dummy_resample_avx[float32, []float32](16, i+2)
 	}
@@ -167,7 +167,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 
 		Comment("Update and wrap coefficient index")
 		phaseScratch := R[int]().Xor()
-		coefIdx.Add(int32(taps + 2*simdVecLen)).Compare(coefsLen)
+		coefIdx.Add(int32(taps + 1*simdVecLen)).Compare(coefsLen)
 		Comment("Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result")
 		coefIdx.Sub(phaseScratch.MoveIf_GE(coefsLen))
 	})
