@@ -89,12 +89,10 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y1, (AX)(R10*4)
-	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -194,7 +192,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
@@ -202,7 +199,6 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y2, (AX)(R10*4)
-	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -307,7 +303,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
@@ -318,7 +313,6 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y3, (AX)(R10*4)
-	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -428,7 +422,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
@@ -442,7 +435,6 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y4, (AX)(R10*4)
-	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -557,7 +549,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
@@ -574,7 +565,6 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y5, (AX)(R10*4)
-	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -694,7 +684,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
@@ -714,7 +703,6 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y6, (AX)(R10*4)
-	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -839,7 +827,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Y0, (AX)(R10*4)
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
@@ -862,7 +849,6 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y7, (AX)(R10*4)
-	ADDQ    $+8, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -957,12 +943,10 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z1, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1062,7 +1046,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -1070,7 +1053,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z2, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1175,7 +1157,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -1186,7 +1167,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z3, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1296,7 +1276,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -1310,7 +1289,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z4, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1425,7 +1403,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -1442,7 +1419,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z5, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1562,7 +1538,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -1582,7 +1557,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z6, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1707,7 +1681,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -1730,7 +1703,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z7, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1860,7 +1832,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -1886,7 +1857,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z8, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2021,7 +1991,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -2050,7 +2019,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z9, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2190,7 +2158,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -2222,7 +2189,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z10, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2367,7 +2333,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -2402,7 +2367,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z11, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2552,7 +2516,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -2590,7 +2553,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z12, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2745,7 +2707,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -2786,7 +2747,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z13, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2946,7 +2906,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -2990,7 +2949,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z14, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -3155,7 +3113,6 @@ no_store:
 In0end:
 	// Store each partially accumulated vector to the output slice
 	// taking care to wrap into output ringbuffer
-	ANDQ    R8, R10
 	VMOVUPS Z0, (AX)(R10*4)
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
@@ -3202,7 +3159,6 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z15, (AX)(R10*4)
-	ADDQ    $+16, R10
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
