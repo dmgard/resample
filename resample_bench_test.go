@@ -7,7 +7,7 @@ import (
 	"unsafe"
 )
 
-func BenchmarkResample(b *testing.B) {
+func BenchmarkResampleAll(b *testing.B) {
 	BenchmarkScalarResample(b)
 	BenchmarkAvxResample(b)
 }

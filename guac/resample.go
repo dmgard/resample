@@ -177,10 +177,11 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	for i := range unrolls {
 		// TODO int constant in Add generates "bad operands" instead automatic convert or
 		// type error
-		out := out.ByteOffsetAllTo(0)
-		SetIndex(outAlignedIdx.And(outLenMask),
-			out.SwizzledUnrolls(i).Store())
-		outAlignedIdx.Add(int32(simdVecLen))
+		out.ByteOffsetAllTo(0).SwizzledUnrolls(i).Store()
+		if i == unrolls-1 {
+			break
+		}
+		outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
 	}
 
 	ZeroUpper()

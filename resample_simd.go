@@ -150,11 +150,11 @@ var resampleFuncsF32 = sliceOf(
 	nil,
 	nil,
 	nil,
-	sliceOf(nil,
+	sliceOf(nil, nil,
 		ResampleFixedF32_8x2, ResampleFixedF32_8x3, ResampleFixedF32_8x4,
 		ResampleFixedF32_8x5, ResampleFixedF32_8x6, ResampleFixedF32_8x7,
 		ResampleFixedF32_8x8),
-	sliceOf(nil,
+	sliceOf(nil, nil,
 		ResampleFixedF32_16x2, ResampleFixedF32_16x3, ResampleFixedF32_16x4,
 		ResampleFixedF32_16x5, ResampleFixedF32_16x6, ResampleFixedF32_16x7,
 		ResampleFixedF32_16x8, ResampleFixedF32_16x9, ResampleFixedF32_16x10,
@@ -223,6 +223,7 @@ func (s *SimdResampler[T]) Process(in []T) {
 		s.drift += s.driftStep
 		if Sign(s.drift) == Sign(s.driftStep) { // TODO variable threshold?
 			s.consts, s.alt = s.alt, s.consts
+			s.coefsIdx = 0
 		}
 	}
 }
