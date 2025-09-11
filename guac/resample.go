@@ -88,28 +88,25 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	// TODO needs to be offset to vector-length quantized outIdx
 	Comment("Reload previous partially accumulated output samples")
 
-	out.Load()
-
 	outAlignedIdx := outIdx.CloneDef()
 
 	taps := simdVecLen * unrolls
 
-	RangeOver(in, func(i *Reg[int]) {
-		Comment("Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2")
-		outMin := outIdx.Copy().BitRshift(int8(fixedPointShift)).
-			Sub(int32(taps / 2))
+	Comment("Compute output vector index as ",
+		"(fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength",
+		"wraps within the output buffer and quantizes the nearest vector register multiple")
+	lg2vecLn := int8(tzcnt(simdVecLen))
+	outIdxToOutVecShift := fixedPointShift + lg2vecLn
+	// TODO somewhat redudnant to do this every time when it only shifts when
+	// the later CMOV test succeeds
+	outAlignedIdx.Load(outIdx).BitRshift(outIdxToOutVecShift).
+		BitLshift(lg2vecLn).
+		And(outLenMask)
+	SetIndex(outAlignedIdx, out)
 
-		Comment("Compute output vector index as ",
-			"(fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength",
-			"wraps within the output buffer and quantizes the nearest vector register multiple")
-		lg2vecLn := int8(tzcnt(simdVecLen))
-		outIdxToOutVecShift := fixedPointShift + lg2vecLn
-		// TODO somewhat redudnant to do this every time when it only shifts when
-		// the later CMOV test succeeds
-		outAlignedIdx.Load(outIdx).BitRshift(outIdxToOutVecShift).
-			BitLshift(lg2vecLn).
-			And(outLenMask)
-		SetIndex(outAlignedIdx, out)
+	out.Load()
+
+	RangeOver(in, func(i *Reg[int]) {
 
 		// TODO this might not work correctly or test/benchmark functions are not
 		// setting up coefficients slice properly
@@ -118,8 +115,11 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		Comment("This loads each coefficient set within a block with proper zero padding",
 			"so that multiple coefficient sets can be accumulated into one set of registers,",
 			"offset by the proper number of in-register samples")
-		Comment("TODO test and then re-enable")
-		SetIndex(coefIdx.Copy().Add(outAlignedIdx).Sub(outMin), coefs)
+		// TODO test then re-enable
+		//Comment("Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2")
+		//outMin := outIdx.Copy().BitRshift(int8(fixedPointShift)).
+		//	Sub(int32(taps / 2))
+		//SetIndex(coefIdx.Copy().Add(outAlignedIdx).Sub(outMin), coefs)
 		SetIndex(coefIdx, coefs)
 
 		Comment("Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range")
@@ -142,6 +142,8 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			out.SwizzledUnrolls(0).Store()
 			outShift.Store(out.SwizzledUnrolls(lowSwizzle...))
 			out.SwizzledUnrolls(unrolls - 1).Xor()
+			Comment("bump the vector-aligned output index by one vector and wrap")
+			outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
 		}
 		Label("no_store")
 
