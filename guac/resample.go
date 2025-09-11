@@ -102,12 +102,25 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	outAlignedIdx.Load(outIdx).BitRshift(outIdxToOutVecShift).
 		BitLshift(lg2vecLn).
 		And(outLenMask)
+
+	Comment("Re-load partially accumulated output samples, wrapping ringbuffer")
+	{
+		outAlignedIdx := outAlignedIdx.Copy()
+
+		for i := range unrolls {
+			out := out.ByteOffsetAllTo(0)
+			SetIndex(outAlignedIdx, out)
+			out.SwizzledUnrolls(i).Load()
+			if i == unrolls-1 {
+				break
+			}
+			outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
+		}
+	}
 	SetIndex(outAlignedIdx, out)
 
-	out.Load()
-
+	Comment("For each input sample:")
 	RangeOver(in, func(i *Reg[int]) {
-
 		// TODO this might not work correctly or test/benchmark functions are not
 		// setting up coefficients slice properly
 		Comment("The coefficient load index is (filtertaps+padding) * wrappedInputIndex",

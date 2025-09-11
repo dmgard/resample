@@ -19,15 +19,22 @@ TEXT ·ResampleFixedF32_8x2(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+35, R10
-	SHLQ    $+3, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Y0
-	VMOVUPS 32(AX)(R10*4), Y1
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+35, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Y0
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y1
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -112,16 +119,25 @@ TEXT ·ResampleFixedF32_8x3(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+35, R10
-	SHLQ    $+3, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Y0
-	VMOVUPS 32(AX)(R10*4), Y1
-	VMOVUPS 64(AX)(R10*4), Y2
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+35, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Y0
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y1
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y2
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -211,17 +227,28 @@ TEXT ·ResampleFixedF32_8x4(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+35, R10
-	SHLQ    $+3, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Y0
-	VMOVUPS 32(AX)(R10*4), Y1
-	VMOVUPS 64(AX)(R10*4), Y2
-	VMOVUPS 96(AX)(R10*4), Y3
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+35, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Y0
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y1
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y2
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y3
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -316,18 +343,31 @@ TEXT ·ResampleFixedF32_8x5(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+35, R10
-	SHLQ    $+3, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Y0
-	VMOVUPS 32(AX)(R10*4), Y1
-	VMOVUPS 64(AX)(R10*4), Y2
-	VMOVUPS 96(AX)(R10*4), Y3
-	VMOVUPS 128(AX)(R10*4), Y4
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+35, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Y0
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y1
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y2
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y3
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y4
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -427,19 +467,34 @@ TEXT ·ResampleFixedF32_8x6(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+35, R10
-	SHLQ    $+3, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Y0
-	VMOVUPS 32(AX)(R10*4), Y1
-	VMOVUPS 64(AX)(R10*4), Y2
-	VMOVUPS 96(AX)(R10*4), Y3
-	VMOVUPS 128(AX)(R10*4), Y4
-	VMOVUPS 160(AX)(R10*4), Y5
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+35, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Y0
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y1
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y2
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y3
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y4
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y5
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -544,20 +599,37 @@ TEXT ·ResampleFixedF32_8x7(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+35, R10
-	SHLQ    $+3, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Y0
-	VMOVUPS 32(AX)(R10*4), Y1
-	VMOVUPS 64(AX)(R10*4), Y2
-	VMOVUPS 96(AX)(R10*4), Y3
-	VMOVUPS 128(AX)(R10*4), Y4
-	VMOVUPS 160(AX)(R10*4), Y5
-	VMOVUPS 192(AX)(R10*4), Y6
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+35, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Y0
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y1
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y2
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y3
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y4
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y5
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y6
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -667,21 +739,40 @@ TEXT ·ResampleFixedF32_8x8(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+35, R10
-	SHLQ    $+3, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Y0
-	VMOVUPS 32(AX)(R10*4), Y1
-	VMOVUPS 64(AX)(R10*4), Y2
-	VMOVUPS 96(AX)(R10*4), Y3
-	VMOVUPS 128(AX)(R10*4), Y4
-	VMOVUPS 160(AX)(R10*4), Y5
-	VMOVUPS 192(AX)(R10*4), Y6
-	VMOVUPS 224(AX)(R10*4), Y7
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+35, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Y0
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y1
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y2
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y3
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y4
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y5
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y6
+	ADDQ    $+8, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Y7
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -796,15 +887,22 @@ TEXT ·ResampleFixedF32_16x2(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -889,16 +987,25 @@ TEXT ·ResampleFixedF32_16x3(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -988,17 +1095,28 @@ TEXT ·ResampleFixedF32_16x4(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1093,18 +1211,31 @@ TEXT ·ResampleFixedF32_16x5(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1204,19 +1335,34 @@ TEXT ·ResampleFixedF32_16x6(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1321,20 +1467,37 @@ TEXT ·ResampleFixedF32_16x7(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1444,21 +1607,40 @@ TEXT ·ResampleFixedF32_16x8(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1573,22 +1755,43 @@ TEXT ·ResampleFixedF32_16x9(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1708,23 +1911,46 @@ TEXT ·ResampleFixedF32_16x10(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	VMOVUPS 576(AX)(R10*4), Z9
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z9
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1849,24 +2075,49 @@ TEXT ·ResampleFixedF32_16x11(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	VMOVUPS 576(AX)(R10*4), Z9
-	VMOVUPS 640(AX)(R10*4), Z10
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z9
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z10
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -1996,25 +2247,52 @@ TEXT ·ResampleFixedF32_16x12(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	VMOVUPS 576(AX)(R10*4), Z9
-	VMOVUPS 640(AX)(R10*4), Z10
-	VMOVUPS 704(AX)(R10*4), Z11
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z9
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z10
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z11
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -2149,26 +2427,55 @@ TEXT ·ResampleFixedF32_16x13(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	VMOVUPS 576(AX)(R10*4), Z9
-	VMOVUPS 640(AX)(R10*4), Z10
-	VMOVUPS 704(AX)(R10*4), Z11
-	VMOVUPS 768(AX)(R10*4), Z12
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z9
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z10
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z11
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z12
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -2308,27 +2615,58 @@ TEXT ·ResampleFixedF32_16x14(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	VMOVUPS 576(AX)(R10*4), Z9
-	VMOVUPS 640(AX)(R10*4), Z10
-	VMOVUPS 704(AX)(R10*4), Z11
-	VMOVUPS 768(AX)(R10*4), Z12
-	VMOVUPS 832(AX)(R10*4), Z13
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z9
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z10
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z11
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z12
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z13
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -2473,28 +2811,61 @@ TEXT ·ResampleFixedF32_16x15(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	VMOVUPS 576(AX)(R10*4), Z9
-	VMOVUPS 640(AX)(R10*4), Z10
-	VMOVUPS 704(AX)(R10*4), Z11
-	VMOVUPS 768(AX)(R10*4), Z12
-	VMOVUPS 832(AX)(R10*4), Z13
-	VMOVUPS 896(AX)(R10*4), Z14
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z9
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z10
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z11
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z12
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z13
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z14
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
@@ -2644,29 +3015,64 @@ TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $0-112
 	// Compute output vector index as 
 	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
 	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ    DI, R10
-	SHRQ    $+36, R10
-	SHLQ    $+4, R10
-	ANDQ    R8, R10
-	VMOVUPS (AX)(R10*4), Z0
-	VMOVUPS 64(AX)(R10*4), Z1
-	VMOVUPS 128(AX)(R10*4), Z2
-	VMOVUPS 192(AX)(R10*4), Z3
-	VMOVUPS 256(AX)(R10*4), Z4
-	VMOVUPS 320(AX)(R10*4), Z5
-	VMOVUPS 384(AX)(R10*4), Z6
-	VMOVUPS 448(AX)(R10*4), Z7
-	VMOVUPS 512(AX)(R10*4), Z8
-	VMOVUPS 576(AX)(R10*4), Z9
-	VMOVUPS 640(AX)(R10*4), Z10
-	VMOVUPS 704(AX)(R10*4), Z11
-	VMOVUPS 768(AX)(R10*4), Z12
-	VMOVUPS 832(AX)(R10*4), Z13
-	VMOVUPS 896(AX)(R10*4), Z14
-	VMOVUPS 960(AX)(R10*4), Z15
-	XORQ    R11, R11
-	MOVQ    In_len+32(FP), R12
-	SUBQ    $0x00000001, R12
+	MOVQ DI, R10
+	SHRQ $+36, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
+	// Re-load partially accumulated output samples, wrapping ringbuffer
+	MOVQ    R10, R11
+	VMOVUPS (AX)(R11*4), Z0
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z1
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z2
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z3
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z4
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z5
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z6
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z7
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z8
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z9
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z10
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z11
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z12
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z13
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z14
+	ADDQ    $+16, R11
+	ANDQ    R8, R11
+	VMOVUPS (AX)(R11*4), Z15
+
+	// For each input sample:
+	XORQ R11, R11
+	MOVQ In_len+32(FP), R12
+	SUBQ $0x00000001, R12
 
 In0:
 	CMPQ R12, R11
