@@ -130,29 +130,34 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		)
 
 		Comment("If incrementing the output index crosses a multiple of vectorLength,",
-			"the lowest register is completely accumulated and can be stored while the rest",
-			"are shifted down in its place")
+			"the lowest register is completely accumulated and can be stored while",
+			"the rest are shifted down in its place")
 		// TODO could probably do this with a bit test but const shifts might actually be faster
 		// NOTE three-argument SHRQ encodes seemingly as RORQ?
 		// that's why Copy() is used rather than CloneDef()
-		outIdx.Copy().BitRshift(outIdxToOutVecShift).Compare(
-			outIdx.Add(outStep).Copy().BitRshift(outIdxToOutVecShift)).
-			JumpE("no_store")
+		Comment("Compute current register index")
+		oldOutVec := outIdx.Copy().BitRshift(outIdxToOutVecShift)
+
+		Comment("Increment current output sample index and compute next register index")
+		newOutVec := outIdx.Add(outStep).Copy().BitRshift(outIdxToOutVecShift)
+
+		Comment("Store and shift registers if a register transition has happened")
+		oldOutVec.Compare(newOutVec).JumpE("no_store")
 		{
 			out.SwizzledUnrolls(0).Store()
 			outShift.Store(out.SwizzledUnrolls(lowSwizzle...))
 			out.SwizzledUnrolls(unrolls - 1).Xor()
-			Comment("bump the vector-aligned output index by one vector and wrap")
-			outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
 		}
 		Label("no_store")
+		Comment("Update and wrap the vector-aligned output index")
+		outAlignedIdx.Load(newOutVec).BitLshift(lg2vecLn).And(outLenMask)
 
 		Comment("Update and wrap coefficient index")
 		phaseScratch := R[int]().Xor()
 		coefIdx.Add(int32(taps + 2*simdVecLen)).Compare(coefsLen)
 		Comment("Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result")
 		coefIdx.Sub(phaseScratch.MoveIf_GE(coefsLen))
-	}, out)
+	})
 
 	Comment("Store each partially accumulated vector to the output slice")
 	Comment("taking care to wrap into output ringbuffer")

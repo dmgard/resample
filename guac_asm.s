@@ -16,8 +16,15 @@ TEXT ·ResampleFixedF32_8x2(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Y0
-	VMOVUPS 32(AX), Y1
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+35, R10
+	SHLQ    $+3, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Y0
+	VMOVUPS 32(AX)(R10*4), Y1
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -26,42 +33,29 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+8, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+35, R10
-	SHLQ $+3, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y2
 	VFMADD231PS  (DX)(BX*4), Y2, Y0
 	VFMADD231PS  32(DX)(BX*4), Y2, Y1
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+35, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+35, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+35, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -69,6 +63,11 @@ In0:
 	VXORPS  Y1, Y1, Y1
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+32, BX
@@ -110,9 +109,16 @@ TEXT ·ResampleFixedF32_8x3(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Y0
-	VMOVUPS 32(AX), Y1
-	VMOVUPS 64(AX), Y2
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+35, R10
+	SHLQ    $+3, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Y0
+	VMOVUPS 32(AX)(R10*4), Y1
+	VMOVUPS 64(AX)(R10*4), Y2
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -121,29 +127,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+12, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+35, R10
-	SHLQ $+3, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y3
 	VFMADD231PS  (DX)(BX*4), Y3, Y0
@@ -151,13 +139,18 @@ In0:
 	VFMADD231PS  64(DX)(BX*4), Y3, Y2
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+35, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+35, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+35, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -166,6 +159,11 @@ In0:
 	VXORPS  Y2, Y2, Y2
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+40, BX
@@ -210,10 +208,17 @@ TEXT ·ResampleFixedF32_8x4(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Y0
-	VMOVUPS 32(AX), Y1
-	VMOVUPS 64(AX), Y2
-	VMOVUPS 96(AX), Y3
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+35, R10
+	SHLQ    $+3, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Y0
+	VMOVUPS 32(AX)(R10*4), Y1
+	VMOVUPS 64(AX)(R10*4), Y2
+	VMOVUPS 96(AX)(R10*4), Y3
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -222,29 +227,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+16, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+35, R10
-	SHLQ $+3, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y4
 	VFMADD231PS  (DX)(BX*4), Y4, Y0
@@ -253,13 +240,18 @@ In0:
 	VFMADD231PS  96(DX)(BX*4), Y4, Y3
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+35, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+35, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+35, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -269,6 +261,11 @@ In0:
 	VXORPS  Y3, Y3, Y3
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+48, BX
@@ -316,11 +313,18 @@ TEXT ·ResampleFixedF32_8x5(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Y0
-	VMOVUPS 32(AX), Y1
-	VMOVUPS 64(AX), Y2
-	VMOVUPS 96(AX), Y3
-	VMOVUPS 128(AX), Y4
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+35, R10
+	SHLQ    $+3, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Y0
+	VMOVUPS 32(AX)(R10*4), Y1
+	VMOVUPS 64(AX)(R10*4), Y2
+	VMOVUPS 96(AX)(R10*4), Y3
+	VMOVUPS 128(AX)(R10*4), Y4
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -329,29 +333,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+20, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+35, R10
-	SHLQ $+3, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y5
 	VFMADD231PS  (DX)(BX*4), Y5, Y0
@@ -361,13 +347,18 @@ In0:
 	VFMADD231PS  128(DX)(BX*4), Y5, Y4
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+35, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+35, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+35, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -378,6 +369,11 @@ In0:
 	VXORPS  Y4, Y4, Y4
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+56, BX
@@ -428,12 +424,19 @@ TEXT ·ResampleFixedF32_8x6(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Y0
-	VMOVUPS 32(AX), Y1
-	VMOVUPS 64(AX), Y2
-	VMOVUPS 96(AX), Y3
-	VMOVUPS 128(AX), Y4
-	VMOVUPS 160(AX), Y5
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+35, R10
+	SHLQ    $+3, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Y0
+	VMOVUPS 32(AX)(R10*4), Y1
+	VMOVUPS 64(AX)(R10*4), Y2
+	VMOVUPS 96(AX)(R10*4), Y3
+	VMOVUPS 128(AX)(R10*4), Y4
+	VMOVUPS 160(AX)(R10*4), Y5
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -442,29 +445,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+24, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+35, R10
-	SHLQ $+3, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y6
 	VFMADD231PS  (DX)(BX*4), Y6, Y0
@@ -475,13 +460,18 @@ In0:
 	VFMADD231PS  160(DX)(BX*4), Y6, Y5
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+35, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+35, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+35, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -493,6 +483,11 @@ In0:
 	VXORPS  Y5, Y5, Y5
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+64, BX
@@ -546,13 +541,20 @@ TEXT ·ResampleFixedF32_8x7(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Y0
-	VMOVUPS 32(AX), Y1
-	VMOVUPS 64(AX), Y2
-	VMOVUPS 96(AX), Y3
-	VMOVUPS 128(AX), Y4
-	VMOVUPS 160(AX), Y5
-	VMOVUPS 192(AX), Y6
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+35, R10
+	SHLQ    $+3, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Y0
+	VMOVUPS 32(AX)(R10*4), Y1
+	VMOVUPS 64(AX)(R10*4), Y2
+	VMOVUPS 96(AX)(R10*4), Y3
+	VMOVUPS 128(AX)(R10*4), Y4
+	VMOVUPS 160(AX)(R10*4), Y5
+	VMOVUPS 192(AX)(R10*4), Y6
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -561,29 +563,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+28, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+35, R10
-	SHLQ $+3, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y7
 	VFMADD231PS  (DX)(BX*4), Y7, Y0
@@ -595,13 +579,18 @@ In0:
 	VFMADD231PS  192(DX)(BX*4), Y7, Y6
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+35, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+35, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+35, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -614,6 +603,11 @@ In0:
 	VXORPS  Y6, Y6, Y6
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+72, BX
@@ -670,14 +664,21 @@ TEXT ·ResampleFixedF32_8x8(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Y0
-	VMOVUPS 32(AX), Y1
-	VMOVUPS 64(AX), Y2
-	VMOVUPS 96(AX), Y3
-	VMOVUPS 128(AX), Y4
-	VMOVUPS 160(AX), Y5
-	VMOVUPS 192(AX), Y6
-	VMOVUPS 224(AX), Y7
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+35, R10
+	SHLQ    $+3, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Y0
+	VMOVUPS 32(AX)(R10*4), Y1
+	VMOVUPS 64(AX)(R10*4), Y2
+	VMOVUPS 96(AX)(R10*4), Y3
+	VMOVUPS 128(AX)(R10*4), Y4
+	VMOVUPS 160(AX)(R10*4), Y5
+	VMOVUPS 192(AX)(R10*4), Y6
+	VMOVUPS 224(AX)(R10*4), Y7
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -686,29 +687,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+32, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+35, R10
-	SHLQ $+3, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y8
 	VFMADD231PS  (DX)(BX*4), Y8, Y0
@@ -721,13 +704,18 @@ In0:
 	VFMADD231PS  224(DX)(BX*4), Y8, Y7
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+35, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+35, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+35, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+35, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Y0, (AX)(R10*4)
@@ -741,6 +729,11 @@ In0:
 	VXORPS  Y7, Y7, Y7
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+3, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+80, BX
@@ -800,8 +793,15 @@ TEXT ·ResampleFixedF32_16x2(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -810,42 +810,29 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+16, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z2
 	VFMADD231PS  (DX)(BX*4), Z2, Z0
 	VFMADD231PS  64(DX)(BX*4), Z2, Z1
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -853,6 +840,11 @@ In0:
 	VXORPS  Z1, Z1, Z1
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+64, BX
@@ -894,9 +886,16 @@ TEXT ·ResampleFixedF32_16x3(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -905,29 +904,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+24, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z3
 	VFMADD231PS  (DX)(BX*4), Z3, Z0
@@ -935,13 +916,18 @@ In0:
 	VFMADD231PS  128(DX)(BX*4), Z3, Z2
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -950,6 +936,11 @@ In0:
 	VXORPS  Z2, Z2, Z2
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+80, BX
@@ -994,10 +985,17 @@ TEXT ·ResampleFixedF32_16x4(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1006,29 +1004,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+32, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z4
 	VFMADD231PS  (DX)(BX*4), Z4, Z0
@@ -1037,13 +1017,18 @@ In0:
 	VFMADD231PS  192(DX)(BX*4), Z4, Z3
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1053,6 +1038,11 @@ In0:
 	VXORPS  Z3, Z3, Z3
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+96, BX
@@ -1100,11 +1090,18 @@ TEXT ·ResampleFixedF32_16x5(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1113,29 +1110,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+40, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z5
 	VFMADD231PS  (DX)(BX*4), Z5, Z0
@@ -1145,13 +1124,18 @@ In0:
 	VFMADD231PS  256(DX)(BX*4), Z5, Z4
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1162,6 +1146,11 @@ In0:
 	VXORPS  Z4, Z4, Z4
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+112, BX
@@ -1212,12 +1201,19 @@ TEXT ·ResampleFixedF32_16x6(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1226,29 +1222,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+48, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z6
 	VFMADD231PS  (DX)(BX*4), Z6, Z0
@@ -1259,13 +1237,18 @@ In0:
 	VFMADD231PS  320(DX)(BX*4), Z6, Z5
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1277,6 +1260,11 @@ In0:
 	VXORPS  Z5, Z5, Z5
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+128, BX
@@ -1330,13 +1318,20 @@ TEXT ·ResampleFixedF32_16x7(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1345,29 +1340,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+56, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z7
 	VFMADD231PS  (DX)(BX*4), Z7, Z0
@@ -1379,13 +1356,18 @@ In0:
 	VFMADD231PS  384(DX)(BX*4), Z7, Z6
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1398,6 +1380,11 @@ In0:
 	VXORPS  Z6, Z6, Z6
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+144, BX
@@ -1454,14 +1441,21 @@ TEXT ·ResampleFixedF32_16x8(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1470,29 +1464,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+64, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z8
 	VFMADD231PS  (DX)(BX*4), Z8, Z0
@@ -1505,13 +1481,18 @@ In0:
 	VFMADD231PS  448(DX)(BX*4), Z8, Z7
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1525,6 +1506,11 @@ In0:
 	VXORPS  Z7, Z7, Z7
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+160, BX
@@ -1584,15 +1570,22 @@ TEXT ·ResampleFixedF32_16x9(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1601,29 +1594,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+72, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z9
 	VFMADD231PS  (DX)(BX*4), Z9, Z0
@@ -1637,13 +1612,18 @@ In0:
 	VFMADD231PS  512(DX)(BX*4), Z9, Z8
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1658,6 +1638,11 @@ In0:
 	VXORPS  Z8, Z8, Z8
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+176, BX
@@ -1720,16 +1705,23 @@ TEXT ·ResampleFixedF32_16x10(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
-	VMOVUPS 576(AX), Z9
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
+	VMOVUPS 576(AX)(R10*4), Z9
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1738,29 +1730,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+80, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z10
 	VFMADD231PS  (DX)(BX*4), Z10, Z0
@@ -1775,13 +1749,18 @@ In0:
 	VFMADD231PS  576(DX)(BX*4), Z10, Z9
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1797,6 +1776,11 @@ In0:
 	VXORPS  Z9, Z9, Z9
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+192, BX
@@ -1862,17 +1846,24 @@ TEXT ·ResampleFixedF32_16x11(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
-	VMOVUPS 576(AX), Z9
-	VMOVUPS 640(AX), Z10
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
+	VMOVUPS 576(AX)(R10*4), Z9
+	VMOVUPS 640(AX)(R10*4), Z10
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -1881,29 +1872,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+88, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z11
 	VFMADD231PS  (DX)(BX*4), Z11, Z0
@@ -1919,13 +1892,18 @@ In0:
 	VFMADD231PS  640(DX)(BX*4), Z11, Z10
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -1942,6 +1920,11 @@ In0:
 	VXORPS  Z10, Z10, Z10
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+208, BX
@@ -2010,18 +1993,25 @@ TEXT ·ResampleFixedF32_16x12(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
-	VMOVUPS 576(AX), Z9
-	VMOVUPS 640(AX), Z10
-	VMOVUPS 704(AX), Z11
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
+	VMOVUPS 576(AX)(R10*4), Z9
+	VMOVUPS 640(AX)(R10*4), Z10
+	VMOVUPS 704(AX)(R10*4), Z11
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -2030,29 +2020,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+96, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z12
 	VFMADD231PS  (DX)(BX*4), Z12, Z0
@@ -2069,13 +2041,18 @@ In0:
 	VFMADD231PS  704(DX)(BX*4), Z12, Z11
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2093,6 +2070,11 @@ In0:
 	VXORPS  Z11, Z11, Z11
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+224, BX
@@ -2164,19 +2146,26 @@ TEXT ·ResampleFixedF32_16x13(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
-	VMOVUPS 576(AX), Z9
-	VMOVUPS 640(AX), Z10
-	VMOVUPS 704(AX), Z11
-	VMOVUPS 768(AX), Z12
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
+	VMOVUPS 576(AX)(R10*4), Z9
+	VMOVUPS 640(AX)(R10*4), Z10
+	VMOVUPS 704(AX)(R10*4), Z11
+	VMOVUPS 768(AX)(R10*4), Z12
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -2185,29 +2174,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+104, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z13
 	VFMADD231PS  (DX)(BX*4), Z13, Z0
@@ -2225,13 +2196,18 @@ In0:
 	VFMADD231PS  768(DX)(BX*4), Z13, Z12
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2250,6 +2226,11 @@ In0:
 	VXORPS  Z12, Z12, Z12
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+240, BX
@@ -2324,20 +2305,27 @@ TEXT ·ResampleFixedF32_16x14(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
-	VMOVUPS 576(AX), Z9
-	VMOVUPS 640(AX), Z10
-	VMOVUPS 704(AX), Z11
-	VMOVUPS 768(AX), Z12
-	VMOVUPS 832(AX), Z13
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
+	VMOVUPS 576(AX)(R10*4), Z9
+	VMOVUPS 640(AX)(R10*4), Z10
+	VMOVUPS 704(AX)(R10*4), Z11
+	VMOVUPS 768(AX)(R10*4), Z12
+	VMOVUPS 832(AX)(R10*4), Z13
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -2346,29 +2334,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+112, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z14
 	VFMADD231PS  (DX)(BX*4), Z14, Z0
@@ -2387,13 +2357,18 @@ In0:
 	VFMADD231PS  832(DX)(BX*4), Z14, Z13
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2413,6 +2388,11 @@ In0:
 	VXORPS  Z13, Z13, Z13
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+256, BX
@@ -2490,21 +2470,28 @@ TEXT ·ResampleFixedF32_16x15(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
-	VMOVUPS 576(AX), Z9
-	VMOVUPS 640(AX), Z10
-	VMOVUPS 704(AX), Z11
-	VMOVUPS 768(AX), Z12
-	VMOVUPS 832(AX), Z13
-	VMOVUPS 896(AX), Z14
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
+	VMOVUPS 576(AX)(R10*4), Z9
+	VMOVUPS 640(AX)(R10*4), Z10
+	VMOVUPS 704(AX)(R10*4), Z11
+	VMOVUPS 768(AX)(R10*4), Z12
+	VMOVUPS 832(AX)(R10*4), Z13
+	VMOVUPS 896(AX)(R10*4), Z14
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -2513,29 +2500,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+120, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z15
 	VFMADD231PS  (DX)(BX*4), Z15, Z0
@@ -2555,13 +2524,18 @@ In0:
 	VFMADD231PS  896(DX)(BX*4), Z15, Z14
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2582,6 +2556,11 @@ In0:
 	VXORPS  Z14, Z14, Z14
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+272, BX
@@ -2662,22 +2641,29 @@ TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $0-112
 	MOVQ OutStep+88(FP), R9
 
 	// Reload previous partially accumulated output samples
-	VMOVUPS (AX), Z0
-	VMOVUPS 64(AX), Z1
-	VMOVUPS 128(AX), Z2
-	VMOVUPS 192(AX), Z3
-	VMOVUPS 256(AX), Z4
-	VMOVUPS 320(AX), Z5
-	VMOVUPS 384(AX), Z6
-	VMOVUPS 448(AX), Z7
-	VMOVUPS 512(AX), Z8
-	VMOVUPS 576(AX), Z9
-	VMOVUPS 640(AX), Z10
-	VMOVUPS 704(AX), Z11
-	VMOVUPS 768(AX), Z12
-	VMOVUPS 832(AX), Z13
-	VMOVUPS 896(AX), Z14
-	VMOVUPS 960(AX), Z15
+	// Compute output vector index as 
+	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
+	// wraps within the output buffer and quantizes the nearest vector register multiple
+	MOVQ    DI, R10
+	SHRQ    $+36, R10
+	SHLQ    $+4, R10
+	ANDQ    R8, R10
+	VMOVUPS (AX)(R10*4), Z0
+	VMOVUPS 64(AX)(R10*4), Z1
+	VMOVUPS 128(AX)(R10*4), Z2
+	VMOVUPS 192(AX)(R10*4), Z3
+	VMOVUPS 256(AX)(R10*4), Z4
+	VMOVUPS 320(AX)(R10*4), Z5
+	VMOVUPS 384(AX)(R10*4), Z6
+	VMOVUPS 448(AX)(R10*4), Z7
+	VMOVUPS 512(AX)(R10*4), Z8
+	VMOVUPS 576(AX)(R10*4), Z9
+	VMOVUPS 640(AX)(R10*4), Z10
+	VMOVUPS 704(AX)(R10*4), Z11
+	VMOVUPS 768(AX)(R10*4), Z12
+	VMOVUPS 832(AX)(R10*4), Z13
+	VMOVUPS 896(AX)(R10*4), Z14
+	VMOVUPS 960(AX)(R10*4), Z15
 	XORQ    R11, R11
 	MOVQ    In_len+32(FP), R12
 	SUBQ    $0x00000001, R12
@@ -2686,29 +2672,11 @@ In0:
 	CMPQ R12, R11
 	JL   In0end
 
-	// Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2
-	MOVQ DI, R13
-	SHRQ $+32, R13
-	SUBQ $+128, R13
-
-	// Compute output vector index as 
-	// (fixedPointIndex / fixedPointScale / vectorLength * vectorLength) % outBufferLength
-	// wraps within the output buffer and quantizes the nearest vector register multiple
-	MOVQ DI, R10
-	SHRQ $+36, R10
-	SHLQ $+4, R10
-	ANDQ R8, R10
-
 	// The coefficient load index is (filtertaps+padding) * wrappedInputIndex
 	// + (outAlignedIdx*vectorLength - outSampleIdx
 	// This loads each coefficient set within a block with proper zero padding
 	// so that multiple coefficient sets can be accumulated into one set of registers,
 	// offset by the proper number of in-register samples
-	// TODO test and then re-enable
-	MOVQ BX, R14
-	ADDQ R10, R14
-	SUBQ R13, R14
-
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z16
 	VFMADD231PS  (DX)(BX*4), Z16, Z0
@@ -2729,13 +2697,18 @@ In0:
 	VFMADD231PS  960(DX)(BX*4), Z16, Z15
 
 	// If incrementing the output index crosses a multiple of vectorLength,
-	// the lowest register is completely accumulated and can be stored while the rest
-	// are shifted down in its place
-	MOVQ    DI, R13
-	SHRQ    $+36, R13
-	ADDQ    R9, DI
-	MOVQ    DI, R14
-	SHRQ    $+36, R14
+	// the lowest register is completely accumulated and can be stored while
+	// the rest are shifted down in its place
+	// Compute current register index
+	MOVQ DI, R13
+	SHRQ $+36, R13
+
+	// Increment current output sample index and compute next register index
+	ADDQ R9, DI
+	MOVQ DI, R14
+	SHRQ $+36, R14
+
+	// Store and shift registers if a register transition has happened
 	CMPQ    R13, R14
 	JE      no_store
 	VMOVUPS Z0, (AX)(R10*4)
@@ -2757,6 +2730,11 @@ In0:
 	VXORPS  Z15, Z15, Z15
 
 no_store:
+	// Update and wrap the vector-aligned output index
+	MOVQ R14, R10
+	SHLQ $+4, R10
+	ANDQ R8, R10
+
 	// Update and wrap coefficient index
 	XORQ R13, R13
 	ADDQ $+288, BX
