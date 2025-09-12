@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	main_48_441[float32]()
-	main_48_441[float64]()
+	//main_48_441[float32]()
+	//main_48_441[float64]()
 	main_96_441[float32]()
 	main_96_441[float64]()
 }
@@ -40,7 +40,7 @@ func main_96_441[T float32 | float64]() {
 		log.Println(err)
 	}
 
-	sweepBytes, err := os.ReadFile("infinitewave_sweep.f4")
+	sweepBytes, err := os.ReadFile("infinitewave_sweep" + pcmExt)
 	if err != nil {
 		log.Println(err)
 	} else {
@@ -54,7 +54,7 @@ func main_96_441[T float32 | float64]() {
 
 	out := resample.DupSized(lss)
 
-	for taps := 16; taps <= 256; taps <<= 1 {
+	for taps := 16; taps <= 512; taps <<= 1 {
 		r := resample.New[T](inSr, outSr, taps)
 		buf := out
 

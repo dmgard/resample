@@ -82,12 +82,19 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 		// TODO bespoke routines for very small filter lengths?
 		s.taps = taps
 		// and pad by two SIMD registers
-		s.coefs = make([]T, (s.taps+2*vecLen)*phases)
+		paddedTaps := s.taps + 2*vecLen
+		s.coefs = make([]T, paddedTaps*phases)
 
 		// TODO temporary for testing
-		for i := range s.coefs {
-			s.coefs[i] = 1
+		// set to 1s padded with zeros
+		for i := vecLen; i < len(s.coefs); i += paddedTaps {
+			for j := i; j < i+s.taps; j++ {
+				s.coefs[j] = 1
+			}
 		}
+		//for i := range s.coefs {
+		//	s.coefs[i] = 1
+		//}
 
 		return
 		var outIdx fixed64
@@ -173,23 +180,6 @@ var resampleFuncsF32 = sliceOf(
 	),
 )
 
-// var dummyFuncsF32 = sliceOf(
-//
-//	nil,
-//	nil,
-//	nil,
-//	sliceOf(nil,
-//		dummyResampleFixedF32_8x2, dummyResampleFixedF32_8x3, dummyResampleFixedF32_8x4,
-//		dummyResampleFixedF32_8x5, dummyResampleFixedF32_8x6, dummyResampleFixedF32_8x7,
-//		dummyResampleFixedF32_8x8),
-//	sliceOf(nil,
-//		dummyResampleFixedF32_16x2, dummyResampleFixedF32_16x3, dummyResampleFixedF32_16x4,
-//		dummyResampleFixedF32_16x5, dummyResampleFixedF32_16x6, dummyResampleFixedF32_16x7,
-//		dummyResampleFixedF32_16x8, dummyResampleFixedF32_16x9, dummyResampleFixedF32_16x10,
-//		dummyResampleFixedF32_16x11, dummyResampleFixedF32_16x12, dummyResampleFixedF32_16x13,
-//		dummyResampleFixedF32_16x14, dummyResampleFixedF32_16x15, dummyResampleFixedF32_16x16),
-//
-// )
 var simdLevel = func() int {
 	switch {
 	case CPU.Supports(AVX, AVX512DQ, AVX512F, CMOV):
@@ -213,7 +203,6 @@ func (s *SimdResampler[T]) Process(in []T) {
 	switch unsafe.Sizeof(*new(T)) * 8 {
 	case 32:
 		fn := resampleFuncsF32[simdLevel][s.taps>>simdLevel]
-		//fn := dummyFuncsF32[simdLevel][s.taps>>simdLevel]
 
 		coefIdx, outIdx := fn(
 			SliceCast[float32](s.out),
