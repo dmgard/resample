@@ -3,6 +3,7 @@
 - BUGS SIMD
 	- DONE-ISH sub-register phase coefficient filter alignment
     - ISSUE Initial coefficient read should be +vecLen but wraps to zero
+    - BUG periodic errors in output
   - TODO coef wrapping needs to reset to zero even during SIMD
 		- Causing segfaults and would be expected to when switching between over/under ratios between phases
   - DONE? need to quantize initial output vector reload to nearest vector bounds
