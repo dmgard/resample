@@ -123,17 +123,24 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	RangeOver(in, func(i *Reg[int]) {
 		// TODO this might not work correctly or test/benchmark functions are not
 		// setting up coefficients slice properly
-		Comment("The coefficient load index is (filtertaps+padding) * wrappedInputIndex",
-			"+ (outAlignedIdx*vectorLength - outSampleIdx")
-		Comment("This loads each coefficient set within a block with proper zero padding",
-			"so that multiple coefficient sets can be accumulated into one set of registers,",
-			"offset by the proper number of in-register samples")
-		// TODO test then re-enable
-		//Comment("Compute left output sample index as fixedPointIndex / fixedPointScale - taps/2")
-		//outMin := outIdx.Copy().BitRshift(int8(fixedPointShift)).
-		//	Sub(int32(taps / 2))
-		//SetIndex(coefIdx.Copy().Add(outAlignedIdx).Sub(outMin), coefs)
-		SetIndex(coefIdx, coefs)
+		Comment("Coefficients are padded with zeroes",
+			"|0000|xxxx|0000 for instance, loaded as",
+			"|____|xxxx|0000 then",
+			"|___0|xxxx|000_ then",
+			"|__00|xxxx|00__ and so on as more registers are accumulated",
+			"these sum as",
+			"xxxx|0000 +",
+			"0xxx|x000 +",
+			"00xx|xx00 +",
+			"000x|xxx0 and so on, a moving patch within the active register set",
+		)
+		Comment("As the output index increases, the base output location is quantized",
+			"to the nearest vector multiple.",
+			"Do (coefficientIndex - outIdx) % vectorLength to compute",
+			"vecLen-numPaddedZeros and offset coefficient load by this amount",
+			"thus padding with numPaddedZeros")
+		SetIndex(coefIdx.Copy().Sub(outIdx.Copy().BitRshift(int8(fixedPointShift))).And(int32(simdVecLen-1)), coefs)
+		//SetIndex(coefIdx, coefs)
 
 		Comment("Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range")
 		bcst.Broadcast(in.Addr())

@@ -1,7 +1,8 @@
 - COMPILER/ASSEMBLER BUG?
   - Three-argument SHRQ `SHRQ $+36, R8, R9` encodes as `RORQ` somehow?
 - BUGS SIMD
-	- TODO sub-register phase coefficient filter alignment
+	- DONE-ISH sub-register phase coefficient filter alignment
+    - ISSUE Initial coefficient read should be +vecLen but wraps to zero
   - TODO coef wrapping needs to reset to zero even during SIMD
 		- Causing segfaults and would be expected to when switching between over/under ratios between phases
   - DONE? need to quantize initial output vector reload to nearest vector bounds
