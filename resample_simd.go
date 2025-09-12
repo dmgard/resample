@@ -87,23 +87,20 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 
 		// TODO temporary for testing
 		// set to 1s padded with zeros
-		for i := vecLen; i < len(s.coefs); i += paddedTaps {
-			for j := i; j < i+s.taps; j++ {
-				s.coefs[j] = 1
-			}
-		}
-		//for i := range s.coefs {
-		//	s.coefs[i] = 1
+		//for i := vecLen; i < len(s.coefs); i += paddedTaps {
+		//	for j := i; j < i+s.taps; j++ {
+		//		s.coefs[j] = 1
+		//	}
 		//}
 
-		return
 		var outIdx fixed64
 		// one unique set of filter taps per reduced output sample rate index
 		for i := range phases {
 			outPos := float64(outIdx) / float64(fixedPointOne)
 			//outPos := float64(outIdx >> fixedPointShift)
 
-			ci := i * s.taps
+			// deposit as |padding|coefficients|padding|
+			ci := i*paddedTaps + vecLen
 			for fi := range s.coefs[ci:][:s.taps] {
 				// center a sinc on each outPos within the filter spread and compute coefficients
 				coef := T(windowedSinc(

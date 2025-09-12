@@ -121,8 +121,6 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 
 	Comment("For each input sample:")
 	RangeOver(in, func(i *Reg[int]) {
-		// TODO this might not work correctly or test/benchmark functions are not
-		// setting up coefficients slice properly
 		Comment("Coefficients are padded with zeroes",
 			"|0000|xxxx|0000 for instance, loaded as",
 			"|____|xxxx|0000 then",
