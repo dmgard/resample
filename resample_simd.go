@@ -203,6 +203,7 @@ var simdLevel = func() int {
 
 func (s *SimdResampler[T]) Process(in []T) {
 	// TODO chunk input to avoid overflowing output buffer
+	// TODO and coefficient slice
 
 	// TODO kludge to detect when phase wrap occurred
 	coefIn := s.coefsIdx
