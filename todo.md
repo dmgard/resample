@@ -4,6 +4,8 @@
   - TODO single method "resample all"
   - TODO SIMD sinc coefficient generation
   - TODO coefficient reset alignment
+    - Limit input read to output buffer space
+    - While `len(in) * phases + s.coefsIdx > len(s.coefs)`... do something to limit input samples even though `s.coefsIdx` is premultiplied by tapcount...
   - TODO F64
   - TODO general conversions?
     - Small conversion buffer for incoming+outgoing data, ASM convert+quantize routines
@@ -12,6 +14,7 @@
     - Accept N output slices to `Read`, copy and wrap each
   - TODO quality presets, auto-quality based on filter params
   - TODO fallback "slow" SSE/AVX/512 paths for unlimited length impulses
+  - TODO quality tests
 - BUGS SIMD
 	- DONE-ISH sub-register phase coefficient filter alignment
     - ISSUE Initial coefficient read should be +vecLen but wraps to zero

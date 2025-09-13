@@ -16,9 +16,9 @@ func TestApproximate(t *testing.T) {
 	const taps = 64
 
 	//const srIn, srOut, outOffset = 48111, 47892, quantum + taps
-	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
+	const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
 	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
-	const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
+	//const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
 	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
@@ -68,13 +68,13 @@ func TestApproximate(t *testing.T) {
 func TestSIMD(t *testing.T) {
 	type T = float32
 
-	const quantum = 32
-	const taps = 480
+	const quantum = 512
+	const taps = 128
 
-	const srIn, srOut, outOffset = 48111, 47892, taps/2 + 1
-	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
-	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
-	//const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
+	const srIn, srOut, outOffset = 48111, 47892, taps / 2
+	//const srIn, srOut, outOffset = 48111, 44111, taps / 2
+	//const srIn, srOut, outOffset = 40971, 21131, taps / 2
+	//const srIn, srOut, outOffset = 40971, 7131, taps / 2
 	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
@@ -82,8 +82,8 @@ func TestSIMD(t *testing.T) {
 	rs := NewSIMD[T](srIn, srOut, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
-	samples = cosSignal[T](quantum, 1.)
-	//samples = LogSweptSine[T](quantum, 0., 10.)
+	//samples = cosSignal[T](quantum, 1.)
+	samples = LogSweptSine[T](quantum, 0., 10.)
 	//samples = Const[T](quantum, 1)
 
 	const numQuanta = 100 * 2048
@@ -116,7 +116,7 @@ func TestSIMD(t *testing.T) {
 	}
 }
 
-func TestFareySearch(t *testing.T) {
+func TestInspectFareySearch(t *testing.T) {
 	for range 100 {
 		r := rand.Float64()
 
