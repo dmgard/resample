@@ -4,7 +4,8 @@
 	- DONE-ISH sub-register phase coefficient filter alignment
     - ISSUE Initial coefficient read should be +vecLen but wraps to zero
     - BUG periodic errors in output
-  - URGENT sub-register offset calculation needs improvements and/or bounds checks
+  - FIXED-ISH sub-register offset calculation needs improvements and/or bounds checks
+    - Offset coefIdx in assembly by one vector length before and after each resample loop
   - TODO coef wrapping needs to reset to zero even during SIMD
 		- Causing segfaults and would be expected to when switching between over/under ratios between phases
   - TODO always-odd resample taps for SIMD

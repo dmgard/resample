@@ -119,6 +119,10 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	}
 	SetIndex(outAlignedIdx, out)
 
+	Comment("Temporarily offset base coefficient index by one register")
+	Comment("so that sub-register alignment can be simplified")
+	coefIdx.Add(int32(simdVecLen))
+
 	Comment("For each input sample:")
 	RangeOver(in, func(i *Reg[int]) {
 		Comment("Coefficients are padded with zeroes",
@@ -190,6 +194,9 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		}
 		outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
 	}
+
+	Comment("Undo temporary offset")
+	coefIdx.Sub(int32(simdVecLen))
 
 	ZeroUpper()
 	Comment("Return the latest phase and output index for reuse in future calls")
