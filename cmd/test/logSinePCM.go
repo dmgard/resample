@@ -15,11 +15,20 @@ import (
 func main() {
 	//main_48_441[float32]()
 	//main_48_441[float64]()
-	main_96_441[float32]()
-	main_96_441[float64]()
+	main_96_441[*resample.OfflineSincResampler[float32]](resample.New, ".scalar")
+	main_96_441[*resample.OfflineSincResampler[float64]](resample.New, ".scalar")
+	main_96_441[*resample.SimdResampler[float32]](resample.NewSIMD, ".simd")
+	//main_96_441[*resample.SimdResampler[float64]](resample.NewSIMD, ".simd")
 }
 
-func main_96_441[T float32 | float64]() {
+type newFn[T resample.Sample, R Processor[T]] func(int, int, int) R
+
+type Processor[T resample.Sample] interface {
+	Process([]T)
+	Read([]T) int
+}
+
+func main_96_441[R Processor[T], T float32 | float64](New newFn[T, R], suffix string) {
 	const inSr = 96000
 	const outSr = 44100
 	const secs = 8
@@ -28,7 +37,7 @@ func main_96_441[T float32 | float64]() {
 	lss := resample.LogSweptSine2[T](inSr, secs*time.Second)
 
 	filename := "groundTruth96k"
-	pcmExt := fmt.Sprintf(".f%d", unsafe.Sizeof(*new(T)))
+	pcmExt := fmt.Sprintf(suffix+".f%d", unsafe.Sizeof(*new(T)))
 
 	os.WriteFile(filename+pcmExt, resample.SliceCast[byte](lss), 0666)
 
@@ -55,7 +64,7 @@ func main_96_441[T float32 | float64]() {
 	out := resample.DupSized(lss)
 
 	for taps := 16; taps <= 512; taps <<= 1 {
-		r := resample.New[T](inSr, outSr, taps)
+		r := New(inSr, outSr, taps)
 		buf := out
 
 		for i := 0; i < len(lss); i += taps {
