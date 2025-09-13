@@ -1,0 +1,245 @@
+/ratio: 48000_44100
+        │                                                                                                                      │
+        │                          AVX                          │                            AVX512                            │
+        │       2       │                   1                   │                   2                    │          1          │
+        │      B/s      │     B/s       vs base                 │      B/s       vs base                 │     B/s       vs base   │
+16        2.567Gi ± 15%
+24        2.610Gi ±  2%
+32        2.719Gi ±  9%                                           2.850Gi ±  5%   +4.82% (p=0.026 n=6)
+40        2.754Gi ±  3%
+48        2.449Gi ± 11%                                           2.882Gi ± 12%  +17.72% (p=0.002 n=6)
+56        2.512Gi ±  4%
+64        2.150Gi ±  0%   3.505Gi ± 1%  +63.08% (p=0.002 n=6)     2.548Gi ±  3%  +18.54% (p=0.002 n=6)
+80                                                                2.092Gi ±  0%
+96                                                                1.928Gi ±  7%
+112                                                               1.731Gi ±  1%
+128                                                               1.646Gi ±  2%
+144                                                               1.510Gi ±  0%
+160                                                               1.373Gi ±  1%
+176                                                               1.244Gi ±  2%
+192                                                               1.152Gi ±  0%
+208                                                               1.074Gi ±  1%
+224                                                               940.6Mi ± 12%
+240                                                               971.0Mi ±  0%
+256                                                               915.6Mi ±  0%                            909.9Mi ± 1%
+geomean   2.530Gi         3.505Gi       +63.08%               ¹   1.531Gi        +13.51%               ¹   909.9Mi       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                                                                                                  │
+        │                         AVX                         │                           AVX512                           │
+        │      2       │                  1                   │                   2                   │         1          │
+        │  sec/sample  │ sec/sample   vs base                 │  sec/sample   vs base                 │ sec/sample   vs base   │
+16        1.452n ± 17%
+24        1.427n ±  2%
+32        1.370n ± 10%                                          1.307n ±  6%   -4.56% (p=0.028 n=6)
+40        1.353n ±  3%
+48        1.522n ± 12%                                          1.292n ± 13%  -15.05% (p=0.002 n=6)
+56        1.483n ±  4%
+64        1.733n ±  0%   1.062n ± 1%  -38.69% (p=0.002 n=6)     1.462n ±  3%  -15.64% (p=0.002 n=6)
+80                                                              1.780n ±  0%
+96                                                              1.932n ±  8%
+112                                                             2.151n ±  1%
+128                                                             2.264n ±  2%
+144                                                             2.467n ±  0%
+160                                                             2.713n ±  1%
+176                                                             2.995n ±  2%
+192                                                             3.234n ±  0%
+208                                                             3.469n ±  1%
+224                                                             4.056n ± 14%
+240                                                             3.929n ±  0%
+256                                                             4.167n ±  0%                            4.192n ± 1%
+geomean   1.472n         1.062n       -38.69%               ¹   2.433n        -11.89%               ¹   4.192n       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                                                                                                  │
+        │                         AVX                         │                           AVX512                           │
+        │      2       │                  1                   │                   2                   │         1          │
+        │   xRt_48k    │   xRt_48k    vs base                 │   xRt_48k     vs base                 │   xRt_48k    vs base   │
+16        14.36k ± 15%
+24        14.60k ±  2%
+32        15.21k ±  9%                                          15.94k ±  5%   +4.82% (p=0.026 n=6)
+40        15.40k ±  3%
+48        13.69k ± 11%                                          16.12k ± 12%  +17.72% (p=0.002 n=6)
+56        14.05k ±  4%
+64        12.02k ±  0%   19.60k ± 1%  +63.09% (p=0.002 n=6)     14.25k ±  3%  +18.54% (p=0.002 n=6)
+80                                                              11.70k ±  0%
+96                                                              10.78k ±  7%
+112                                                             9.682k ±  1%
+128                                                             9.203k ±  2%
+144                                                             8.444k ±  0%
+160                                                             7.678k ±  1%
+176                                                             6.956k ±  2%
+192                                                             6.442k ±  0%
+208                                                             6.006k ±  1%
+224                                                             5.137k ± 12%
+240                                                             5.303k ±  0%
+256                                                             5.000k ±  0%                            4.970k ± 1%
+geomean   14.15k         19.60k       +63.09%               ¹   8.564k        +13.52%               ¹   4.970k       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+/ratio: 48000_44000
+        │                                                                                                                       │
+        │                          AVX                          │                            AVX512                             │
+        │       2       │                   1                   │                   2                    │          1           │
+        │      B/s      │     B/s       vs base                 │      B/s       vs base                 │      B/s       vs base   │
+16        2.208Gi ± 22%
+24        2.701Gi ± 36%
+32        2.787Gi ±  5%                                           2.939Gi ±  1%   +5.46% (p=0.002 n=6)
+40        2.847Gi ±  1%
+48        2.577Gi ±  4%                                           2.974Gi ±  0%  +15.40% (p=0.002 n=6)
+56        2.550Gi ±  3%
+64        2.162Gi ± 18%   3.547Gi ± 1%  +64.08% (p=0.002 n=6)     2.743Gi ±  1%  +26.90% (p=0.002 n=6)
+80                                                                2.143Gi ±  2%
+96                                                                1.954Gi ±  1%
+112                                                               1.719Gi ±  1%
+128                                                               1.653Gi ±  5%
+144                                                               1.450Gi ± 12%
+160                                                               1.370Gi ±  3%
+176                                                               1.231Gi ±  1%
+192                                                               1.147Gi ± 11%
+208                                                               1.069Gi ±  4%
+224                                                               1.001Gi ±  1%
+240                                                               971.4Mi ±  4%
+256                                                               919.4Mi ±  1%                            2305.2Mi ± 1%
+geomean   2.535Gi         3.547Gi       +64.08%               ¹   1.552Gi        +15.59%               ¹    2.251Gi       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                                                                                                  │
+        │                         AVX                         │                           AVX512                           │
+        │      2       │                  1                   │                   2                   │         1          │
+        │  sec/sample  │ sec/sample   vs base                 │  sec/sample   vs base                 │ sec/sample   vs base   │
+16        1.688n ± 29%
+24        1.379n ± 57%
+32        1.337n ±  5%                                          1.267n ±  1%   -5.16% (p=0.002 n=6)
+40        1.309n ±  1%
+48        1.446n ±  4%                                          1.252n ±  0%  -13.35% (p=0.002 n=6)
+56        1.460n ±  3%
+64        1.723n ± 22%   1.050n ± 1%  -39.03% (p=0.002 n=6)     1.359n ±  1%  -21.15% (p=0.002 n=6)
+80                                                              1.738n ±  2%
+96                                                              1.906n ±  1%
+112                                                             2.167n ±  1%
+128                                                             2.253n ±  6%
+144                                                             2.571n ± 14%
+160                                                             2.719n ±  3%
+176                                                             3.025n ±  1%
+192                                                             3.248n ± 13%
+208                                                             3.483n ±  4%
+224                                                             3.720n ±  1%
+240                                                             3.927n ±  4%
+256                                                             4.149n ±  1%                            1.654n ± 1%
+geomean   1.470n         1.050n       -39.03%               ¹   2.400n        -13.47%               ¹   1.654n       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                                                                                                   │
+        │                         AVX                         │                           AVX512                            │
+        │      2       │                  1                   │                   2                   │          1          │
+        │   xRt_48k    │   xRt_48k    vs base                 │   xRt_48k     vs base                 │   xRt_48k     vs base   │
+16        12.35k ± 22%
+24        15.11k ± 36%
+32        15.59k ±  5%                                          16.44k ±  1%   +5.46% (p=0.002 n=6)
+40        15.92k ±  1%
+48        14.41k ±  4%                                          16.63k ±  0%  +15.41% (p=0.002 n=6)
+56        14.26k ±  3%
+64        12.09k ± 18%   19.84k ± 1%  +64.07% (p=0.002 n=6)     15.34k ±  1%  +26.90% (p=0.002 n=6)
+80                                                              11.99k ±  2%
+96                                                              10.93k ±  1%
+112                                                             9.612k ±  1%
+128                                                             9.245k ±  5%
+144                                                             8.107k ± 12%
+160                                                             7.664k ±  3%
+176                                                             6.887k ±  1%
+192                                                             6.415k ± 11%
+208                                                             5.981k ±  4%
+224                                                             5.599k ±  1%
+240                                                             5.305k ±  4%
+256                                                             5.021k ±  1%                            12.591k ± 1%
+geomean   14.18k         19.83k       +64.07%               ¹   8.680k        +15.59%               ¹    12.59k       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+/ratio: 48000_48000
+        │                                                                                                                      │
+        │                          AVX                          │                            AVX512                            │
+        │       2       │                   1                   │                   2                   │          1           │
+        │      B/s      │     B/s       vs base                 │     B/s       vs base                 │      B/s       vs base   │
+16        2.625Gi ± 16%
+24        2.715Gi ±  5%
+32        2.655Gi ± 19%                                           2.928Gi ± 1%  +10.27% (p=0.002 n=6)
+40        2.852Gi ±  1%
+48        2.555Gi ±  1%                                           2.901Gi ± 2%  +13.57% (p=0.002 n=6)
+56        2.534Gi ±  1%
+64        2.487Gi ± 21%   3.573Gi ± 0%  +43.64% (p=0.002 n=6)     2.749Gi ± 1%  +10.53% (p=0.002 n=6)
+80                                                                1.818Gi ± 7%
+96                                                                1.969Gi ± 1%
+112                                                               1.686Gi ± 7%
+128                                                               1.673Gi ± 4%
+144                                                               1.515Gi ± 1%
+160                                                               1.382Gi ± 0%
+176                                                               1.253Gi ± 8%
+192                                                               1.155Gi ± 1%
+208                                                               1.067Gi ± 1%
+224                                                               1.008Gi ± 2%
+240                                                               975.9Mi ± 4%
+256                                                               918.1Mi ± 4%                            2281.6Mi ± 3%
+geomean   2.629Gi         3.573Gi       +43.64%               ¹   1.541Gi       +11.45%               ¹    2.228Gi       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                                                                                                 │
+        │                         AVX                         │                          AVX512                           │
+        │      2       │                  1                   │                  2                   │         1          │
+        │  sec/sample  │ sec/sample   vs base                 │ sec/sample   vs base                 │ sec/sample   vs base   │
+16        1.419n ± 20%
+24        1.373n ±  5%
+32        1.404n ± 24%                                          1.272n ± 1%   -9.37% (p=0.002 n=6)
+40        1.306n ±  1%
+48        1.459n ±  1%                                          1.283n ± 2%  -12.00% (p=0.002 n=6)
+56        1.470n ±  1%
+64        1.498n ± 27%   1.042n ± 0%  -30.38% (p=0.002 n=6)     1.355n ± 1%   -9.52% (p=0.002 n=6)
+80                                                              2.050n ± 6%
+96                                                              1.891n ± 1%
+112                                                             2.210n ± 7%
+128                                                             2.225n ± 5%
+144                                                             2.458n ± 1%
+160                                                             2.696n ± 0%
+176                                                             2.974n ± 9%
+192                                                             3.226n ± 1%
+208                                                             3.491n ± 1%
+224                                                             3.696n ± 2%
+240                                                             3.909n ± 4%
+256                                                             4.155n ± 4%                            1.672n ± 3%
+geomean   1.417n         1.043n       -30.38%               ¹   2.417n       -10.30%               ¹   1.672n       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean
+
+        │                                                                                                                  │
+        │                         AVX                         │                           AVX512                           │
+        │      2       │                  1                   │                  2                   │          1          │
+        │   xRt_48k    │   xRt_48k    vs base                 │   xRt_48k    vs base                 │   xRt_48k     vs base   │
+16        14.68k ± 16%
+24        15.18k ±  5%
+32        14.85k ± 19%                                          16.37k ± 1%  +10.27% (p=0.002 n=6)
+40        15.95k ±  1%
+48        14.29k ±  1%                                          16.23k ± 2%  +13.57% (p=0.002 n=6)
+56        14.17k ±  1%
+64        13.91k ± 21%   19.98k ± 0%  +43.64% (p=0.002 n=6)     15.38k ± 1%  +10.53% (p=0.002 n=6)
+80                                                              10.17k ± 7%
+96                                                              11.01k ± 1%
+112                                                             9.428k ± 7%
+128                                                             9.359k ± 4%
+144                                                             8.475k ± 1%
+160                                                             7.729k ± 0%
+176                                                             7.006k ± 8%
+192                                                             6.459k ± 1%
+208                                                             5.968k ± 1%
+224                                                             5.636k ± 2%
+240                                                             5.330k ± 4%
+256                                                             5.014k ± 4%                            12.461k ± 3%
+geomean   14.71k         19.98k       +43.64%               ¹   8.619k       +11.45%               ¹    12.46k       ? ¹ ²
+¹ benchmark set differs from baseline; geomeans may not be comparable
+² ratios must be >0 to compute geomean

@@ -1,0 +1,10 @@
+github.com/dmgard/resample v0.0.0-20250912131257-f674d11b69e9 h1:Qs+z46FxPwkVgGOKueIbo1X7/YXj0XEZ+2EszHSkujM=
+github.com/dmgard/resample v0.0.0-20250912131257-f674d11b69e9/go.mod h1:L3FBhhp8MeFM3ELKZQXlsQtuisuLDW2F4dCpbML16YM=
+github.com/klauspost/cpuid/v2 v2.3.0 h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y=
+github.com/klauspost/cpuid/v2 v2.3.0/go.mod h1:hqwkgyIinND0mEev00jJYCxPNVRVXFQeu1XKlok6oO0=
+github.com/zaf/resample v1.5.0 h1:c3yumHrV1cJoED8ZY2Ai3cehS8s0mJSroA9/vMaUcho=
+github.com/zaf/resample v1.5.0/go.mod h1:e4yWalfgRccQrnZSrkIxTqmMCOPhTi1xvYpNpRIB13k=
+github.com/zeozeozeo/gomplerate v0.0.0-20250404113140-0fbb236df825 h1:rViu1xhQRtdJogc39jF46PS01xHVD736JowXl2qOcPM=
+github.com/zeozeozeo/gomplerate v0.0.0-20250404113140-0fbb236df825/go.mod h1:ASuMFHITnaVdPvMkoDGI4tTwYG9fW7Mxv2j5AuvTo8Q=
+golang.org/x/sys v0.35.0 h1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=
+golang.org/x/sys v0.35.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=

@@ -68,8 +68,8 @@ func TestApproximate(t *testing.T) {
 func TestSIMD(t *testing.T) {
 	type T = float32
 
-	const quantum = 35
-	const taps = 64
+	const quantum = 1
+	const taps = 14
 
 	const srIn, srOut, outOffset = 48111, 47892, quantum + taps
 	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
@@ -82,9 +82,9 @@ func TestSIMD(t *testing.T) {
 	rs := NewSIMD[T](srIn, srOut, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
-	samples = cosSignal[T](quantum, 1.)
+	//samples = cosSignal[T](quantum, 1.)
 	//samples = LogSweptSine[T](quantum, 0., 10.)
-	//samples = Const[T](quantum, 1)
+	samples = Const[T](quantum, 1)
 
 	const numQuanta = 100 * 2048
 

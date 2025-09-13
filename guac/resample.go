@@ -137,7 +137,9 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			"Do (coefficientIndex - outIdx) % vectorLength to compute",
 			"vecLen-numPaddedZeros and offset coefficient load by this amount",
 			"thus padding with numPaddedZeros")
-		SetIndex(coefIdx.Copy().Sub(outIdx.Copy().BitRshift(int8(fixedPointShift))).And(int32(simdVecLen-1)), coefs)
+		SetIndex(coefIdx.Copy().Sub(
+			outIdx.Copy().BitRshift(int8(fixedPointShift)).
+				And(int32(simdVecLen-1))), coefs)
 		//SetIndex(coefIdx, coefs)
 
 		Comment("Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range")
