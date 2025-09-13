@@ -68,10 +68,10 @@ func TestApproximate(t *testing.T) {
 func TestSIMD(t *testing.T) {
 	type T = float32
 
-	const quantum = 15
-	const taps = 14
+	const quantum = 32
+	const taps = 480
 
-	const srIn, srOut, outOffset = 48111, 47892, quantum + taps
+	const srIn, srOut, outOffset = 48111, 47892, taps/2 + 1
 	//const srIn, srOut, outOffset = 48111, 44111, quantum + taps + 3
 	//const srIn, srOut, outOffset = 40971, 21131, quantum + taps + taps/2 - 2
 	//const srIn, srOut, outOffset = 40971, 7131, quantum*4 + taps/3 + 3
@@ -82,9 +82,9 @@ func TestSIMD(t *testing.T) {
 	rs := NewSIMD[T](srIn, srOut, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
-	//samples = cosSignal[T](quantum, 1.)
+	samples = cosSignal[T](quantum, 1.)
 	//samples = LogSweptSine[T](quantum, 0., 10.)
-	samples = Const[T](quantum, 1)
+	//samples = Const[T](quantum, 1)
 
 	const numQuanta = 100 * 2048
 
@@ -98,7 +98,7 @@ func TestSIMD(t *testing.T) {
 	ln := len(output) - len(recovered)
 	recovered = output
 
-	trimmed := recovered[:ln]
+	trimmed := recovered[outOffset:ln]
 	if idxs, deltas, avg := MaxErrorsVsRepeat(0.001, 10,
 		trimmed, samples); len(idxs) > 0 {
 		t.Log("Errors at: ", idxs)

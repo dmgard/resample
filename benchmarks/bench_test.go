@@ -10,8 +10,9 @@ import (
 )
 
 func BenchmarkResampleAll(b *testing.B) {
-	b.Run("simd=scalar", BenchmarkScalarResample)
-	b.Run("simd=best", BenchmarkAvxResample)
+	b.Run("simd=scalar/pkg=resample", BenchmarkScalarResample)
+	b.Run("simd=best/pkg=resample", BenchmarkAvxResample)
+	b.Run("simd=scalar/pkg=gomplerate", BenchmarkGomplerate)
 }
 
 func BenchmarkScalarResample(b *testing.B) {
