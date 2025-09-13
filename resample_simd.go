@@ -35,10 +35,10 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 
 	// SIMD pad to multiple of vector length
 	vecLen := 1 << simdLevel
-	taps = RoundUpMultPow2(taps, vecLen) // round taps to multiple of 2
+	taps = RoundUpMultPow2(taps, vecLen) // may as well use the entire register
 	// TODO use fallback if too many taps requested
 	// TODO index "256" as maximum SIMD vector size
-	taps = min(taps, 256)
+	taps = min(taps, 480)
 
 	initConsts := func() {
 		s.ratio = ratio
@@ -85,13 +85,23 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 		paddedTaps := s.taps + 2*vecLen
 		s.coefs = make([]T, paddedTaps*phases)
 
-		// TODO temporary for testing
-		// set to 1s padded with zeros
-		//for i := vecLen; i < len(s.coefs); i += paddedTaps {
-		//	for j := i; j < i+s.taps; j++ {
-		//		s.coefs[j] = 1
-		//	}
-		//}
+		if true { // TODO temporary for testing
+			// set to 1s padded with zeros
+			//for i := vecLen; i < len(s.coefs); i += paddedTaps {
+			//	for j := i; j < i+s.taps; j++ {
+			//		s.coefs[j] = 1
+			//	}
+			//}
+
+			var idx T
+			for i := vecLen; i < len(s.coefs); i += paddedTaps {
+				idx++
+				s.coefs[i] = idx
+				//s.coefs[i+1] = idx
+				//s.coefs[i+2] = idx
+			}
+			return
+		}
 
 		var outIdx fixed64
 		// one unique set of filter taps per reduced output sample rate index

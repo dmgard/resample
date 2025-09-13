@@ -58,8 +58,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y2
@@ -175,8 +175,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y3
@@ -300,8 +300,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y4
@@ -433,8 +433,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y5
@@ -574,8 +574,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y6
@@ -723,8 +723,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y7
@@ -880,8 +880,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y8
@@ -1045,8 +1045,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y9
@@ -1218,8 +1218,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y10
@@ -1399,8 +1399,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y11
@@ -1588,8 +1588,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y12
@@ -1785,8 +1785,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y13
@@ -1990,8 +1990,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y14
@@ -2203,8 +2203,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+7, R14
 	SUBQ R14, R13
-	ANDQ $+7, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Y15
@@ -2382,8 +2382,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z2
@@ -2499,8 +2499,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z3
@@ -2624,8 +2624,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z4
@@ -2757,8 +2757,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z5
@@ -2898,8 +2898,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z6
@@ -3047,8 +3047,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z7
@@ -3204,8 +3204,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z8
@@ -3369,8 +3369,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z9
@@ -3542,8 +3542,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z10
@@ -3723,8 +3723,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z11
@@ -3912,8 +3912,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z12
@@ -4109,8 +4109,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z13
@@ -4314,8 +4314,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z14
@@ -4527,8 +4527,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z15
@@ -4748,8 +4748,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z16
@@ -4977,8 +4977,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z17
@@ -5214,8 +5214,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z18
@@ -5459,8 +5459,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z19
@@ -5712,8 +5712,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z20
@@ -5973,8 +5973,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z21
@@ -6242,8 +6242,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z22
@@ -6519,8 +6519,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z23
@@ -6804,8 +6804,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z24
@@ -7097,8 +7097,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z25
@@ -7398,8 +7398,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z26
@@ -7707,8 +7707,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z27
@@ -8024,8 +8024,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z28
@@ -8349,8 +8349,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z29
@@ -8682,8 +8682,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z30
@@ -9023,8 +9023,8 @@ In0:
 	MOVQ BX, R13
 	MOVQ DI, R14
 	SHRQ $+32, R14
+	ANDQ $+15, R14
 	SUBQ R14, R13
-	ANDQ $+15, R13
 
 	// Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range
 	VBROADCASTSS (CX)(R11*4), Z31
