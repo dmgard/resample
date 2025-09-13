@@ -85,7 +85,7 @@ func NewSIMD[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *SimdResampler[T]
 		paddedTaps := s.taps + 2*vecLen
 		s.coefs = make([]T, paddedTaps*phases)
 
-		if true { // TODO temporary for testing
+		if false { // TODO temporary for testing
 			// set to 1s padded with zeros
 			//for i := vecLen; i < len(s.coefs); i += paddedTaps {
 			//	for j := i; j < i+s.taps; j++ {
