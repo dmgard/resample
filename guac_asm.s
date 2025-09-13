@@ -31,6 +31,10 @@ TEXT ·ResampleFixedF32_8x2(SB), NOSPLIT, $0-112
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y1
 
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
+
 	// For each input sample:
 	XORQ R11, R11
 	MOVQ In_len+32(FP), R12
@@ -109,6 +113,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y1, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -147,6 +154,10 @@ TEXT ·ResampleFixedF32_8x3(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y2
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -231,6 +242,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y2, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -272,6 +286,10 @@ TEXT ·ResampleFixedF32_8x4(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y3
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -361,6 +379,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y3, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -405,6 +426,10 @@ TEXT ·ResampleFixedF32_8x5(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y4
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -499,6 +524,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y4, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -546,6 +574,10 @@ TEXT ·ResampleFixedF32_8x6(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y5
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -645,6 +677,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y5, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -695,6 +730,10 @@ TEXT ·ResampleFixedF32_8x7(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y6
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -799,6 +838,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y6, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -852,6 +894,10 @@ TEXT ·ResampleFixedF32_8x8(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y7
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -961,6 +1007,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y7, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1017,6 +1066,10 @@ TEXT ·ResampleFixedF32_8x9(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y8
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -1131,6 +1184,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y8, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1190,6 +1246,10 @@ TEXT ·ResampleFixedF32_8x10(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y9
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -1309,6 +1369,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y9, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1371,6 +1434,10 @@ TEXT ·ResampleFixedF32_8x11(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y10
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -1495,6 +1562,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y10, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1560,6 +1630,10 @@ TEXT ·ResampleFixedF32_8x12(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y11
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -1689,6 +1763,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y11, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1757,6 +1834,10 @@ TEXT ·ResampleFixedF32_8x13(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y12
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -1891,6 +1972,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y12, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -1962,6 +2046,10 @@ TEXT ·ResampleFixedF32_8x14(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y13
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -2101,6 +2189,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y13, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2175,6 +2266,10 @@ TEXT ·ResampleFixedF32_8x15(SB), NOSPLIT, $0-112
 	ADDQ    $+8, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Y14
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+8, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -2319,6 +2414,9 @@ In0end:
 	ADDQ    $+8, R10
 	ANDQ    R8, R10
 	VMOVUPS Y14, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+8, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2354,6 +2452,10 @@ TEXT ·ResampleFixedF32_16x2(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z1
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -2433,6 +2535,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z1, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2471,6 +2576,10 @@ TEXT ·ResampleFixedF32_16x3(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z2
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -2555,6 +2664,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z2, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2596,6 +2708,10 @@ TEXT ·ResampleFixedF32_16x4(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z3
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -2685,6 +2801,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z3, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2729,6 +2848,10 @@ TEXT ·ResampleFixedF32_16x5(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z4
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -2823,6 +2946,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z4, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -2870,6 +2996,10 @@ TEXT ·ResampleFixedF32_16x6(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z5
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -2969,6 +3099,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z5, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -3019,6 +3152,10 @@ TEXT ·ResampleFixedF32_16x7(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z6
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -3123,6 +3260,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z6, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -3176,6 +3316,10 @@ TEXT ·ResampleFixedF32_16x8(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z7
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -3285,6 +3429,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z7, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -3341,6 +3488,10 @@ TEXT ·ResampleFixedF32_16x9(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z8
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -3455,6 +3606,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z8, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -3514,6 +3668,10 @@ TEXT ·ResampleFixedF32_16x10(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z9
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -3633,6 +3791,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z9, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -3695,6 +3856,10 @@ TEXT ·ResampleFixedF32_16x11(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z10
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -3819,6 +3984,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z10, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -3884,6 +4052,10 @@ TEXT ·ResampleFixedF32_16x12(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z11
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -4013,6 +4185,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z11, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -4081,6 +4256,10 @@ TEXT ·ResampleFixedF32_16x13(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z12
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -4215,6 +4394,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z12, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -4286,6 +4468,10 @@ TEXT ·ResampleFixedF32_16x14(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z13
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -4425,6 +4611,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z13, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -4499,6 +4688,10 @@ TEXT ·ResampleFixedF32_16x15(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z14
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -4643,6 +4836,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z14, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -4720,6 +4916,10 @@ TEXT ·ResampleFixedF32_16x16(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z15
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -4869,6 +5069,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z15, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -4949,6 +5152,10 @@ TEXT ·ResampleFixedF32_16x17(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z16
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -5103,6 +5310,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z16, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -5186,6 +5396,10 @@ TEXT ·ResampleFixedF32_16x18(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z17
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -5345,6 +5559,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z17, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -5431,6 +5648,10 @@ TEXT ·ResampleFixedF32_16x19(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z18
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -5595,6 +5816,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z18, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -5684,6 +5908,10 @@ TEXT ·ResampleFixedF32_16x20(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z19
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -5853,6 +6081,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z19, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -5945,6 +6176,10 @@ TEXT ·ResampleFixedF32_16x21(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z20
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -6119,6 +6354,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z20, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -6214,6 +6452,10 @@ TEXT ·ResampleFixedF32_16x22(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z21
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -6393,6 +6635,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z21, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -6491,6 +6736,10 @@ TEXT ·ResampleFixedF32_16x23(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z22
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -6675,6 +6924,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z22, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -6776,6 +7028,10 @@ TEXT ·ResampleFixedF32_16x24(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z23
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -6965,6 +7221,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z23, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -7069,6 +7328,10 @@ TEXT ·ResampleFixedF32_16x25(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z24
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -7263,6 +7526,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z24, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -7370,6 +7636,10 @@ TEXT ·ResampleFixedF32_16x26(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z25
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -7569,6 +7839,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z25, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -7679,6 +7952,10 @@ TEXT ·ResampleFixedF32_16x27(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z26
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -7883,6 +8160,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z26, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -7996,6 +8276,10 @@ TEXT ·ResampleFixedF32_16x28(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z27
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -8205,6 +8489,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z27, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -8321,6 +8608,10 @@ TEXT ·ResampleFixedF32_16x29(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z28
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -8535,6 +8826,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z28, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -8654,6 +8948,10 @@ TEXT ·ResampleFixedF32_16x30(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z29
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -8873,6 +9171,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z29, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
@@ -8995,6 +9296,10 @@ TEXT ·ResampleFixedF32_16x31(SB), NOSPLIT, $0-112
 	ADDQ    $+16, R11
 	ANDQ    R8, R11
 	VMOVUPS (AX)(R11*4), Z30
+
+	// Temporarily offset base coefficient index by one register
+	// so that sub-register alignment can be simplified
+	ADDQ $+16, BX
 
 	// For each input sample:
 	XORQ R11, R11
@@ -9219,6 +9524,9 @@ In0end:
 	ADDQ    $+16, R10
 	ANDQ    R8, R10
 	VMOVUPS Z30, (AX)(R10*4)
+
+	// Undo temporary offset
+	SUBQ $+16, BX
 	VZEROUPPER
 
 	// Return the latest phase and output index for reuse in future calls
