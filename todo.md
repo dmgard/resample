@@ -1,5 +1,17 @@
 - COMPILER/ASSEMBLER BUG?
   - Three-argument SHRQ `SHRQ $+36, R8, R9` encodes as `RORQ` somehow?
+- MVP
+  - TODO single method "resample all"
+  - TODO SIMD sinc coefficient generation
+  - TODO coefficient reset alignment
+  - TODO F64
+  - TODO general conversions?
+    - Small conversion buffer for incoming+outgoing data, ASM convert+quantize routines
+  - TODO multichannel
+    - Optional channel count parameter, create N input/output buffers, accept N input slices, process to each buffer
+    - Accept N output slices to `Read`, copy and wrap each
+  - TODO quality presets, auto-quality based on filter params
+  - TODO fallback "slow" SSE/AVX/512 paths for unlimited length impulses
 - BUGS SIMD
 	- DONE-ISH sub-register phase coefficient filter alignment
     - ISSUE Initial coefficient read should be +vecLen but wraps to zero
