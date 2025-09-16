@@ -2,12 +2,32 @@ package resample
 
 import (
 	"math"
+	"unsafe"
+
+	. "github.com/klauspost/cpuid/v2"
 )
+
+type Resampler[T Sample] struct {
+	out []T
+
+	// output time in fixed-point ratio of input samples
+	outIdx fixed64
+	// last read output sample location
+	readIdx int
+	// input sample count for selecting output phases
+	coefsIdx int
+	// accumulated output-time drift due to rational sample ratio approximation
+	drift float64
+
+	*consts[T]
+	alt *consts[T]
+}
 
 type fixed64 int64
 
 const fixedPointShift = 32
 const fixedPointOne = 1 << fixedPointShift
+const maxPhases = 512
 
 type Sample interface {
 	float32 | float64 | int8 | int16 | int32 | int64
@@ -35,34 +55,23 @@ type consts[T Sample] struct {
 	driftStep float64
 }
 
-var maxPhases = 512
-
-type OfflineSincResampler[T Sample] struct {
-	out []T
-
-	// output time in fixed-point ratio of input samples
-	outIdx fixed64
-	// last read output sample location
-	readIdx int
-	// input sample count for selecting output phases
-	coefsIdx int
-	// accumulated output-time drift due to rational sample ratio approximation
-	drift float64
-
-	*consts[T]
-	alt *consts[T]
-}
-
 // New constructs a resampler with precomputed sinc coefficients
-func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler[T]) {
-	s = &OfflineSincResampler[T]{consts: new(consts[T])}
+func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
+	s = &Resampler[T]{consts: new(consts[T])}
 
 	ratio := Ffdiv(_srIn, _srOut)
 
 	srIn, srOut := int(_srIn), int(_srOut)
 
-	taps = CeiledDivide(taps, 2) * 2 // round taps to multiple of 2
-	// TODO for SIMD pad to multiple of vector length
+	// SIMD pad to multiple of vector length
+	vecLen := 1 << simdLevel
+	if simdLevel <= slSSE {
+		vecLen = 0
+	} else {
+		taps = RoundUpMultPow2(taps, vecLen) // may as well use the entire register
+	}
+	// TODO use fallback if too many taps requested
+	//taps = min(taps, simdMaxFiltLens[simdLevel])
 
 	initConsts := func() {
 		s.ratio = ratio
@@ -77,10 +86,6 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 		// avoids aliasing
 		s.sincFactor = min(s.ratio, 1)
 
-		// TODO does taps need to scale up when sinc is widened due to resample ratio?
-		//taps = Fmul(taps, s.ratio)
-
-		// TODO there is no real need to process exclusively in chunks of quanta, is there?
 		// output is a power of two ringbuffer, padded and scaled up for upsampling many more
 		// output samples than were input
 		s.out = make([]T,
@@ -106,8 +111,12 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 		phases := srIn
 
 		// precompute coefficients for each unique phase of the windowed sinc filter
-		s.taps = 2*s.delay + 1
-		s.coefs = make([]T, s.taps*phases)
+		// round to nearest SIMD vector width
+		// TODO bespoke routines for very small filter lengths?
+		s.taps = taps
+		// and pad by two SIMD registers
+		paddedTaps := s.taps + 2*vecLen
+		s.coefs = make([]T, paddedTaps*phases)
 
 		var outIdx fixed64
 		// one unique set of filter taps per reduced output sample rate index
@@ -115,7 +124,10 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 			outPos := float64(outIdx) / float64(fixedPointOne)
 			//outPos := float64(outIdx >> fixedPointShift)
 
-			ci := i * s.taps
+			// TODO shouldn't this just be offset to the proper zero padding directly?
+			// TODO why calculate that in assembly?
+			// deposit as |padding|coefficients|padding|
+			ci := i*paddedTaps + vecLen
 			for fi := range s.coefs[ci:][:s.taps] {
 				// center a sinc on each outPos within the filter spread and compute coefficients
 				coef := T(windowedSinc(
@@ -168,7 +180,103 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *OfflineSincResampler
 	return s
 }
 
-func (s *OfflineSincResampler[T]) Process(in []T) {
+var resampleFuncsF32 = sliceOf(
+	nil,
+	nil, // Scalar
+	nil, // SSE TODO
+	sliceOf(nil,
+		ResampleFixedF32_8x2, ResampleFixedF32_8x3, ResampleFixedF32_8x4,
+		ResampleFixedF32_8x5, ResampleFixedF32_8x6, ResampleFixedF32_8x7,
+		ResampleFixedF32_8x8, ResampleFixedF32_8x9, ResampleFixedF32_8x10,
+		ResampleFixedF32_8x11, ResampleFixedF32_8x12, ResampleFixedF32_8x13,
+		ResampleFixedF32_8x14, ResampleFixedF32_8x15),
+	sliceOf(nil,
+		ResampleFixedF32_16x2, ResampleFixedF32_16x3, ResampleFixedF32_16x4,
+		ResampleFixedF32_16x5, ResampleFixedF32_16x6, ResampleFixedF32_16x7,
+		ResampleFixedF32_16x8, ResampleFixedF32_16x9, ResampleFixedF32_16x10,
+		ResampleFixedF32_16x11, ResampleFixedF32_16x12, ResampleFixedF32_16x13,
+		ResampleFixedF32_16x14, ResampleFixedF32_16x15, ResampleFixedF32_16x16,
+		ResampleFixedF32_16x17, ResampleFixedF32_16x18, ResampleFixedF32_16x19,
+		ResampleFixedF32_16x20, ResampleFixedF32_16x21, ResampleFixedF32_16x22,
+		ResampleFixedF32_16x23, ResampleFixedF32_16x24, ResampleFixedF32_16x25,
+		ResampleFixedF32_16x26, ResampleFixedF32_16x27, ResampleFixedF32_16x28,
+		ResampleFixedF32_16x29, ResampleFixedF32_16x30, ResampleFixedF32_16x31,
+	),
+)
+
+const (
+	slInvalid = iota
+	slScalar
+	slSSE
+	slAVX
+	sl512
+)
+
+var simdLevel = func() int {
+	switch {
+	case CPU.Supports(AVX, AVX512DQ, AVX512F, CMOV):
+
+		return sl512
+	case CPU.Supports(AVX, CMOV, FMA3):
+		return slAVX
+	case CPU.Supports(SSE2, CMOV): // TODO
+		return slSSE
+	}
+
+	return slScalar
+}()
+
+var simdMaxFiltLens = []int{
+	slInvalid: math.MaxInt,
+	slScalar:  math.MaxInt,
+	slSSE:     math.MaxInt,
+	slAVX:     8*16 - 8*2,
+	sl512:     16*32 - 16*2,
+}
+
+func (s *Resampler[T]) Process(in []T) {
+	// TODO chunk input to avoid overflowing output buffer
+	// TODO and coefficient slice
+
+	// scalar fallback
+	if simdLevel < slSSE || s.taps > simdMaxFiltLens[simdLevel] {
+		// TODO fallback to unlimited length SIMD filter routines
+		s.processScalar(in)
+		return
+	}
+
+	// TODO kludge to detect when phase wrap occurred
+	coefIn := s.coefsIdx
+
+	switch unsafe.Sizeof(*new(T)) * 8 {
+	case 32:
+		fn := resampleFuncsF32[simdLevel][s.taps>>simdLevel]
+
+		coefIdx, outIdx := fn(
+			SliceCast[float32](s.out),
+			SliceCast[float32](in),
+			SliceCast[float32](s.coefs), s.coefsIdx, int(s.outIdx), int(s.outStep))
+		s.coefsIdx = coefIdx
+		s.outIdx = fixed64(outIdx)
+	case 64:
+		fallthrough
+	default:
+		panic("TODO")
+	}
+
+	// IFF this is a rational-approximation resampler,
+	// accumulate drift relative to ideal sample rate
+	// swap to alternate undershoot/overshoot resampler if clock drift is too high
+	if s.driftStep != 0 && s.coefsIdx < coefIn {
+		s.drift += s.driftStep
+		if Sign(s.drift) == Sign(s.driftStep) { // TODO variable threshold?
+			s.consts, s.alt = s.alt, s.consts
+			s.coefsIdx = 0
+		}
+	}
+}
+
+func (s *Resampler[T]) processScalar(in []T) {
 	for _, input := range in {
 		// weight contribution of this input sample to a patch the size of the filter
 		// and accumulate to output samples at integer output slice indices
@@ -201,7 +309,7 @@ func (s *OfflineSincResampler[T]) Process(in []T) {
 	}
 }
 
-func (s *OfflineSincResampler[T]) Read(into []T) int {
+func (s *Resampler[T]) Read(into []T) int {
 	n := len(into)
 	ln := min(int(s.outIdx>>fixedPointShift)-s.readIdx, n)
 	nextOutIdx := s.readIdx + ln
@@ -222,42 +330,6 @@ func (s *OfflineSincResampler[T]) Read(into []T) int {
 	s.readIdx = nextOutIdx
 
 	return ln
-}
-
-func (s *OfflineSincResampler[T]) putCoefs() {
-	looped := false
-	for {
-		// convert fixed point output sample time to floating point approximation
-		outPos := float64(s.outIdx) / float64(fixedPointOne)
-		// TODO is filter length in input samples or output samples?
-		// accumulate contribution of this input sample to a patch the size of the filter
-		// and deposit output samples at integer slice indices
-		outMin, outMax := int((s.outIdx-s.halfTapsFixedPoint)>>fixedPointShift), int((s.outIdx+s.halfTapsFixedPoint)>>fixedPointShift)
-
-		// TODO wrap output index to avoid float precision issues at very high counts
-		s.outIdx += s.outStep
-
-		// center a windowed sinc on each output sample and calculate the weighted
-		// contribution of the current input sample against that sinc window
-		for oi := outMin; oi <= outMax; oi++ {
-			coef := T(windowedSinc(
-				(outPos-float64(oi))*s.sincFactor,
-				float64(s.delay)*s.sincFactor,
-				s.invFilterWidth),
-			)
-
-			s.coefs[s.coefsIdx+oi-outMin] = coef * T(s.scaleFactor)
-		}
-
-		// increment sample coefficients index, wrap
-		if s.coefsIdx += s.taps; s.coefsIdx >= len(s.coefs) {
-			s.coefsIdx = 0
-			if looped {
-				return
-			}
-			looped = true
-		}
-	}
 }
 
 func FareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
@@ -297,192 +369,6 @@ func _fareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, 
 	}
 }
 
-type IntegerTimedSincResampler[T Sample] struct {
-	out []T
-
-	// output time in fixed-point ratio of input samples
-	outIdx  fixed64
-	outStep fixed64
-
-	ratio, invRatio,
-	scaleFactor, sincFactor float64
-	halfTaps       fixed64
-	delay          int
-	invFilterWidth float64
-
-	quantum    int
-	logQuantum int
-
-	// last processed full chunk of quantum samples
-	quantumIdx int
-}
-
-func NewIntegerTimedSincResampler[T Sample](srIn, srOut, quantum, taps int) (s *IntegerTimedSincResampler[T]) {
-	if quantum != RoundUpPow2(quantum) {
-		panic("quantum must be a power of 2")
-	}
-
-	s = new(IntegerTimedSincResampler[T])
-	ratio := Ffdiv(srIn, srOut)
-	s.ratio = ratio
-	s.invRatio = 1 / ratio
-	s.outStep = fixed64(s.invRatio * fixedPointOne)
-	// downsampling accumulates ratio input samples per output sample
-	// rescale output to maintain unity gain
-	s.scaleFactor = min(s.invRatio, 1)
-	// when upsampling, scale sinc inputs to low-pass at lower input rate
-	// avoids aliasing
-	s.sincFactor = min(s.ratio, 1)
-
-	// TODO does taps need to scale up when sinc is widened due to resample ratio?
-	//taps = Fmul(taps, s.ratio)
-
-	s.out = make([]T, RoundUpPow2(max(taps, quantum)*4))
-	s.delay = CeiledDivide(taps, 2)
-	s.halfTaps = CeiledDivide(fixed64(taps<<fixedPointShift), 2)
-	s.invFilterWidth = 1 / float64(taps) / s.sincFactor
-	s.quantum = quantum
-	s.logQuantum = tzcnt(quantum)
-	return s
-}
-
-func (s *IntegerTimedSincResampler[T]) Process(in []T) {
-	for _, input := range in {
-		_ = input // TODO remove
-		// convert fixed point output sample time to floating point approximation
-		outPos := float64(s.outIdx) / float64(fixedPointOne)
-
-		// TODO is filter length in input samples or output samples?
-		// accumulate contribution of this input sample to a patch the size of the filter
-		// and deposit output samples at integer slice indices
-		outMin, outMax := int((s.outIdx-s.halfTaps)>>fixedPointShift), int((s.outIdx+s.halfTaps)>>fixedPointShift)
-
-		// TODO wrap output index to avoid float precision issues at very high counts
-		s.outIdx += s.outStep
-
-		// center a windowed sinc on each output sample and calculate the weighted
-		// contribution of the current input sample against that sinc window
-		for oi := outMin; oi <= outMax; oi++ {
-			filt := T(windowedSinc(
-				(outPos-float64(oi))*s.sincFactor,
-				float64(s.delay)*s.sincFactor,
-				s.invFilterWidth),
-			)
-			// wrap into output buffer
-			// TODO consider proper delay offset
-			s.out[(oi+s.delay)&(len(s.out)-1)] += filt * input * T(s.scaleFactor)
-		}
-	}
-}
-
-func (s *IntegerTimedSincResampler[T]) Read(into []T) int {
-	n := len(into)
-	for nextOutChunkIdx := int(s.outIdx >> s.logQuantum >> fixedPointShift); s.quantumIdx < nextOutChunkIdx && len(into) >= s.quantum; s.quantumIdx++ {
-		wrapped := (s.quantumIdx << s.logQuantum) & (len(s.out) - 1)
-		chunk := s.out[wrapped:][:s.quantum]
-		into = into[copy(into, chunk):]
-		_memClr(chunk)
-	}
-	return n - len(into)
-}
-
-type OnlineSincResampler[T Sample] struct {
-	out    []T
-	inIdx  int
-	outIdx float64
-	ratio, invRatio,
-	scaleFactor, sincFactor float64
-	halfTaps       int
-	invFilterWidth float64
-
-	quantum    int
-	invQuantum float64
-}
-
-func NewOnlineSincResampler[T Sample](quantum int, ratio float64, taps int) (s *OnlineSincResampler[T]) {
-	if quantum != RoundUpPow2(quantum) {
-		panic("quantum must be a power of 2")
-	}
-
-	s = new(OnlineSincResampler[T])
-	s.ratio = ratio
-	s.invRatio = 1 / ratio
-	// downsampling accumulates ratio input samples per output sample
-	// rescale output to maintain unity gain
-	s.scaleFactor = min(s.invRatio, 1)
-	// when upsampling, scale sinc inputs to low-pass at lower input rate
-	// avoids aliasing
-	s.sincFactor = min(s.ratio, 1)
-
-	// TODO does taps need to scale up when sinc is widened due to resample ratio?
-	//taps = Fmul(taps, s.ratio)
-
-	s.out = make([]T, RoundUpPow2(max(taps, quantum)*4))
-	s.halfTaps = CeiledDivide(taps, 2)
-	s.invFilterWidth = 1 / float64(taps) / s.sincFactor
-	s.quantum = quantum
-	s.invQuantum = 1 / float64(quantum)
-	return s
-}
-
-func (s *OnlineSincResampler[T]) Process(in []T) {
-	// for each input sample:
-	// rescale input into output float coordinates
-	// convert copy to integer to get unwrapped nearest output sample (nos) index
-	// for range outputSamples in nos - filtWidth/2 to nos + filtWidth/2
-	// compute float distance between input and output float coordinates
-	// compute windowed sinc coefficient for sinc window centered at output sample
-	// scale input value by coefficient, add to output sample
-	// output is delayed by filtWidth/2 samples, maybe +1
-	// each output sample linearly combines ~len(in) input history samples
-	// with the same number of computed sinc coefficients
-	for _, input := range in {
-		_ = input // TODO remove
-		// scale from input sample locations to output locations
-		outPos := float64(s.inIdx) * s.invRatio
-		// deposit output samples at integer slice indices
-		outIdx := int(outPos)
-		s.inIdx++ // keep track of running input sample index
-
-		// accumulate contribution of this input sample to a patch the size of the filter
-		// TODO is filter length in input samples or output samples?
-		outMin, outMax := outIdx-s.halfTaps, outIdx+s.halfTaps
-
-		// center a windowed sinc on each output sample and calculate the weighted
-		// contribution of the current input sample against that sinc window
-		for oi := outMin; oi <= outMax; oi++ {
-			filt := T(windowedSinc(
-				(outPos-float64(oi))*s.sincFactor,
-				float64(s.halfTaps)*s.sincFactor,
-				s.invFilterWidth),
-			)
-			// wrap into output buffer
-			// TODO consider proper delay offset
-			s.out[(oi+s.halfTaps)&(len(s.out)-1)] += filt * input * T(s.scaleFactor)
-		}
-	}
-	// TODO wrap input/output indices to avoid float precision issues at very high counts
-}
-
-func (s *OnlineSincResampler[T]) Read(into []T) int {
-	n := len(into)
-	nextOutPos := float64(s.inIdx) * s.invRatio
-	nextOutChunkIdx := int(nextOutPos * s.invQuantum)
-
-pushOutput:
-	lastOutChunkIdx := int(s.outIdx * s.invQuantum)
-
-	if lastOutChunkIdx < nextOutChunkIdx && len(into) >= s.quantum {
-		wrapped := (lastOutChunkIdx * s.quantum) & (len(s.out) - 1)
-		chunk := s.out[wrapped:][:s.quantum]
-		into = into[copy(into, chunk):]
-		_memClr(chunk) // TODO clearing inappropriately or something, still
-		s.outIdx += float64(s.quantum)
-		goto pushOutput
-	}
-	return n - len(into)
-}
-
 func windowedSinc[T Float](x, widthHalf, widthInverse T) T {
 	sinc := normalizedSinc(x)
 
@@ -510,28 +396,4 @@ func blackmanHarris[T Scalar](_in T) T {
 		0.14128*math.Cos(4*math.Pi*in) -
 		0.01168*math.Cos(6*math.Pi*in)
 	return T(windowed)
-}
-
-func (s *OnlineSincResampler[T]) putCoefs(in int) {
-	oi := 0
-inLoop:
-	for range in {
-		outPos := float64(s.inIdx) * s.invRatio
-		base := float64(int(outPos) - s.halfTaps)
-		outMax := oi + s.halfTaps*2
-
-		s.inIdx++
-
-		// center a windowed sinc on each output sample and calculate the weighted
-		// contribution of the current input sample against that sinc window
-		for ; oi <= outMax; oi++ {
-			if oi >= len(s.out) {
-				break inLoop
-			}
-			filt := T(windowedSinc(outPos-base, float64(s.halfTaps), s.invFilterWidth))
-			// wrap into output buffer
-			s.out[oi] = filt
-			base++
-		}
-	}
 }

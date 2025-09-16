@@ -23,8 +23,8 @@ func TestApproximate(t *testing.T) {
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
 
-	rs := New[T](srIn, srOut, taps)
-	us := New[T](srOut, srIn, taps)
+	rs := NewScalar[T](srIn, srOut, taps)
+	us := NewScalar[T](srOut, srIn, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
 	samples = cosSignal[T](quantum, 1.)
@@ -79,7 +79,60 @@ func TestSIMD(t *testing.T) {
 	// TODO total delay seems to shift with resample ratio,
 	// TODO probably multiple of taps, not quantum?
 
-	rs := NewSIMD[T](srIn, srOut, taps)
+	rs := New[T](srIn, srOut, taps)
+
+	samples := YeqX[T](quantum + 1)[1:]
+	//samples = cosSignal[T](quantum, 1.)
+	samples = LogSweptSine[T](quantum, 0., 10.)
+	//samples = Const[T](quantum, 1)
+
+	const numQuanta = 100 * 2048
+
+	output := make([]T, quantum*numQuanta)
+	recovered := output
+
+	for range numQuanta {
+		rs.Process(samples)
+		recovered = recovered[rs.Read(recovered):]
+	}
+	ln := len(output) - len(recovered)
+	recovered = output
+
+	trimmed := recovered[outOffset:ln]
+	if idxs, deltas, avg := MaxErrorsVsRepeat(0.001, 10,
+		trimmed, samples); len(idxs) > 0 {
+		t.Log("Errors at: ", idxs)
+		t.Logf("Errors: %3.3f", deltas)
+		t.Logf("%3.3f average error. Ground truth:", avg)
+		plot(t, samples)
+
+		for i, loc := range idxs {
+			t.Logf("@%d: %3.3f", loc, deltas[i])
+			chunk := safeSlice(trimmed, loc/quantum*quantum, quantum)
+			plot(t, chunk)
+		}
+
+		t.Fail()
+	}
+}
+func TestScalarFallback(t *testing.T) {
+	type T = float32
+
+	const quantum = 64
+	const taps = 64
+
+	const srIn, srOut, outOffset = 48111, 47892, taps / 2
+	//const srIn, srOut, outOffset = 48111, 44111, taps / 2
+	//const srIn, srOut, outOffset = 40971, 21131, taps / 2
+	//const srIn, srOut, outOffset = 40971, 7131, taps / 2
+	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
+	// TODO total delay seems to shift with resample ratio,
+	// TODO probably multiple of taps, not quantum?
+
+	old := simdLevel
+	simdLevel = slScalar
+	defer func() { simdLevel = old }()
+	rs := New[T](srIn, srOut, taps)
 
 	samples := YeqX[T](quantum + 1)[1:]
 	//samples = cosSignal[T](quantum, 1.)
@@ -170,8 +223,8 @@ func TestPlotSincResample(t *testing.T) {
 	const quantum = 64
 	const taps = 8
 
-	rs := New[T](srIn, srOut, taps)
-	us := New[T](srOut, srIn, taps)
+	rs := NewScalar[T](srIn, srOut, taps)
+	us := NewScalar[T](srOut, srIn, taps)
 
 	rs2 := NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps)
 	us2 := NewIntegerTimedSincResampler[T](srOut, srIn, quantum, taps)
@@ -242,7 +295,7 @@ func TestOfflineSincResampleCoefs(t *testing.T) {
 	// filter coefficients seem to sum to oscillating values
 	// maybe sum coefficients in parallel array and then scale down by coefs
 
-	rs := New[T](srIn, srOut, taps)
+	rs := NewScalar[T](srIn, srOut, taps)
 
 	t.Log("pre-coefs:\n" + TextPlot(plotWidth, plotHeight,
 		lerpPlotter[T](rs.coefs).Plot, 0, -.25,
