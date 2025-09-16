@@ -80,12 +80,10 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	coefsLen := Len[T, int](coefs).Init().Load()
 	outIdx := p.OutIdx.Init().Load()
 
-	// TODO this throws bad operands
+	// TODO this throws bad operands when not casting to int32
 	outLenMask := Len[T, int](out).Init().Load().Sub(int32(1))
-
 	outStep := p.OutStep.Init().Load()
 
-	// TODO needs to be offset to vector-length quantized outIdx
 	Comment("Reload previous partially accumulated output samples")
 
 	outAlignedIdx := outIdx.CloneDef()
@@ -136,9 +134,10 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 			"00xx|xx00 +",
 			"000x|xxx0 and so on, a moving patch within the active register set",
 		)
+		// TODO consider pregenerating at expected offsets
 		Comment("As the output index increases, the base output location is quantized",
 			"to the nearest vector multiple.",
-			"Do (coefficientIndex - outIdx) % vectorLength to compute",
+			"Do coefficientIndex - outIdx/fixedPointScale % vectorLength to compute",
 			"vecLen-numPaddedZeros and offset coefficient load by this amount",
 			"thus padding with numPaddedZeros")
 		SetIndex(coefIdx.Copy().Sub(
@@ -146,7 +145,9 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 				And(int32(simdVecLen-1))), coefs)
 		//SetIndex(coefIdx, coefs)
 
-		Comment("Broadcast the current input sample and contribute and accumulate its output-phase-specific-coefficient-scaled individual contribution to every output sample in range")
+		Comment("Broadcast the current input sample and contribute and accumulate",
+			" its output-phase-specific-coefficient-scaled individual contribution to every",
+			"output sample in range")
 		bcst.Broadcast(in.Addr())
 		out.AddProductOf(
 			bcst.BroadcastUnrolled(unrolls),

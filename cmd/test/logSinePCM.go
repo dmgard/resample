@@ -15,10 +15,8 @@ import (
 func main() {
 	//main_48_441[float32]()
 	//main_48_441[float64]()
-	main_96_441[*resample.OfflineSincResampler[float32]](resample.New, ".scalar")
-	main_96_441[*resample.OfflineSincResampler[float64]](resample.New, ".scalar")
-	main_96_441[*resample.SimdResampler[float32]](resample.NewSIMD, ".simd")
-	//main_96_441[*resample.SimdResampler[float64]](resample.NewSIMD, ".simd")
+	main_96_441[*resample.Resampler[float32]](resample.New, ".simd")
+	//main_96_441[*resample.Resampler[float64]](resample.New, ".simd")
 }
 
 type newFn[T resample.Sample, R Processor[T]] func(int, int, int) R
@@ -87,12 +85,27 @@ func main_96_441[R Processor[T], T float32 | float64](New newFn[T, R], suffix st
 }
 
 /*
-sox -r 96000 -c 1 groundTruth96k.f4 -n spectrogram -o "groundTruth96k.png" -z 180
-sox -r 44100 -c 1 96to441x16.f4 -n spectrogram -o "96to441x16.png" -z 180
-sox -r 44100 -c 1 96to441x32.f4 -n spectrogram -o "96to441x32.png" -z 180
-sox -r 44100 -c 1 96to441x64.f4 -n spectrogram -o "96to441x64.png" -z 180
-sox -r 44100 -c 1 96to441x128.f4 -n spectrogram -o "96to441x128.png" -z 180
-sox -r 44100 -c 1 96to441x256.f4 -n spectrogram -o "96to441x256.png" -z 180
+sox.exe -r 96000 -c 1 groundTruth96k.scalar.f4 -n spectrogram -o "groundTruth96k.png" -z 180
+sox.exe -r 44100 -c 1 96to441x16.scalar.f4 -n spectrogram -o "96to441x16.scalar.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x32.scalar.f4 -n spectrogram -o "96to441x32.scalar.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x64.scalar.f4 -n spectrogram -o "96to441x64.scalar.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x128.scalar.f4 -n spectrogram -o "96to441x128.scalar.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x256.scalar.f4 -n spectrogram -o "96to441x256.scalar.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x512.scalar.f4 -n spectrogram -o "96to441x512.scalar.f4.png" -z 180
+sox.exe -r 96000 -c 1 groundTruth96k.scalar.f8 -n spectrogram -o "groundTruth96k.png" -z 180
+sox.exe -r 44100 -c 1 96to441x16.scalar.f8 -n spectrogram -o "96to441x16.scalar.f8.png" -z 180
+sox.exe -r 44100 -c 1 96to441x32.scalar.f8 -n spectrogram -o "96to441x32.scalar.f8.png" -z 180
+sox.exe -r 44100 -c 1 96to441x64.scalar.f8 -n spectrogram -o "96to441x64.scalar.f8.png" -z 180
+sox.exe -r 44100 -c 1 96to441x128.scalar.f8 -n spectrogram -o "96to441x128.scalar.f8.png" -z 180
+sox.exe -r 44100 -c 1 96to441x256.scalar.f8 -n spectrogram -o "96to441x256.scalar.f8.png" -z 180
+sox.exe -r 44100 -c 1 96to441x512.scalar.f8 -n spectrogram -o "96to441x512.scalar.f8.png" -z 180
+sox.exe -r 96000 -c 1 groundTruth96k.simd.f4 -n spectrogram -o "groundTruth96k.png" -z 180
+sox.exe -r 44100 -c 1 96to441x16.simd.f4 -n spectrogram -o "96to441x16.simd.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x32.simd.f4 -n spectrogram -o "96to441x32.simd.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x64.simd.f4 -n spectrogram -o "96to441x64.simd.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x128.simd.f4 -n spectrogram -o "96to441x128.simd.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x256.simd.f4 -n spectrogram -o "96to441x256.simd.f4.png" -z 180
+sox.exe -r 44100 -c 1 96to441x512.simd.f4 -n spectrogram -o "96to441x512.simd.f4.png" -z 180 -y 1200 -x 2050
 */
 
 func main_48_441[T float32 | float64]() {

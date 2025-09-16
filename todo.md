@@ -1,6 +1,7 @@
 - COMPILER/ASSEMBLER BUG?
   - Three-argument SHRQ `SHRQ $+36, R8, R9` encodes as `RORQ` somehow?
 - MVP
+  - DONE combine SIMD into regular resampler, deprecate/private online resampler
   - TODO single method "resample all"
   - TODO SIMD sinc coefficient generation
   - TODO coefficient reset alignment
