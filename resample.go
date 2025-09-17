@@ -121,7 +121,17 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 		s.coefs = make([]T, paddedTaps*phases)
 
 		var outIdx fixed64
+		if false { // TODO temporary for testing
+			var idx T
+			for i := 0; i < len(s.coefs); i += paddedTaps {
+				outPos := int(outIdx>>fixedPointShift) & (vecLen - 1)
 
+				s.coefs[i+outPos], idx = idx+1, idx+1
+
+				outIdx += s.outStep
+			}
+			return
+		}
 		// one unique set of filter taps per reduced output sample rate index
 		for i := range phases {
 			// only care about the fractional part
@@ -144,10 +154,6 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 				ci += int(outIdx>>fixedPointShift) & (vecLen - 1)
 			}
 			for fi := range s.coefs[ci:][:s.taps] {
-				s.coefs[ci+fi] = 1
-				continue
-				//s.coefs[ci] = T(i + 1)
-				//break
 				// center a sinc on each outPos within the filter spread and compute coefficients
 				coef := T(windowedSinc(
 					(outPos-float64(fi-s.delay))*s.sincFactor,

@@ -451,6 +451,16 @@ func (s *OfflineSincResampler[T]) putCoefs() {
 	if true { // TODO temporary for testing
 		var idx T
 		for i := 0; i < len(s.coefs); i += paddedTaps {
+			//	Coefficients are padded with zeroes
+			//	|0000|xxxx|0000 for instance, loaded as
+			//	|____|xxxx|0000 then
+			//	|___0|xxxx|000_ then
+			//	|__00|xxxx|00__ and so on as more registers are accumulated
+			//	these sum as
+			//	xxxx|0000 +
+			//	0xxx|x000 +
+			//	00xx|xx00 +
+			//	000x|xxx0 and so on a moving patch within the active register set
 			outPos := int(outIdx>>fixedPointShift) & (vecLen - 1)
 
 			s.coefs[i+outPos], idx = idx+1, idx+1
