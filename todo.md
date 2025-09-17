@@ -10,9 +10,10 @@
   - TODO F64
   - TODO general conversions?
     - Small conversion buffer for incoming+outgoing data, ASM convert+quantize routines
-  - TODO multichannel
-    - Optional channel count parameter, create N input/output buffers, accept N input slices, process to each buffer
-    - Accept N output slices to `Read`, copy and wrap each
+  - DONE? multichannel
+    - Just clone buffers and offsets but share pointers to coefficients, one resampler per channel
+    - ~~Optional channel count parameter, create N input/output buffers, accept N input slices, process to each buffer~~
+    - ~~Accept N output slices to `Read`, copy and wrap each~~
   - TODO quality presets, auto-quality based on filter params
   - TODO fallback "slow" SSE/AVX/512 paths for unlimited length impulses
   - TODO quality tests

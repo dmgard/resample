@@ -65,7 +65,7 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 
 	// SIMD pad to multiple of vector length
 	vecLen := 1 << simdLevel
-	if simdLevel <= slSSE {
+	if simdLevel <= slSSE || RoundUpMultPow2(taps, vecLen) > simdMaxFiltLens[simdLevel] {
 		vecLen = 0
 	} else {
 		taps = RoundUpMultPow2(taps, vecLen) // may as well use the entire register
@@ -168,7 +168,9 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 			srIn, srOut, srInAlt, srOutAlt = srInAlt, srOutAlt, srIn, srOut
 			ratio = Ffdiv(srIn, srOut)
 			initConsts()
-			s.alt.driftStep = F64mul(s.alt.invRatio-idealOutPerIn, srInAlt)
+			s.consts.driftStep = F64mul(s.consts.invRatio-idealOutPerIn, srIn)
+
+			//s.alt.driftStep = F64mul(s.alt.invRatio-idealOutPerIn, srInAlt)
 		}
 
 		return s
@@ -178,6 +180,14 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 	}
 
 	return s
+}
+
+// Clone duplicates buffers and offsets but reuses filter coefficients.
+// Use it to create a bank of identical resamplers for multichannel resampling.
+func (s *Resampler[T]) Clone() *Resampler[T] {
+	r := *s
+	r.out = Dup(s.out)
+	return &r
 }
 
 var resampleFuncsF32 = sliceOf(
@@ -226,6 +236,7 @@ var simdLevel = func() int {
 	return slScalar
 }()
 
+// TODO separate for float64
 var simdMaxFiltLens = []int{
 	slInvalid: math.MaxInt,
 	slScalar:  math.MaxInt,
@@ -237,6 +248,8 @@ var simdMaxFiltLens = []int{
 func (s *Resampler[T]) Process(in []T) {
 	// TODO chunk input to avoid overflowing output buffer
 	// TODO and coefficient slice
+
+	// TODO input conversion for int sample types
 
 	// scalar fallback
 	if simdLevel < slSSE || s.taps > simdMaxFiltLens[simdLevel] {
@@ -311,6 +324,9 @@ func (s *Resampler[T]) processScalar(in []T) {
 
 func (s *Resampler[T]) Read(into []T) int {
 	n := len(into)
+
+	// TODO doesn't this have issues when s.readIdx overflows and is greater than s.outIdx?
+
 	ln := min(int(s.outIdx>>fixedPointShift)-s.readIdx, n)
 	nextOutIdx := s.readIdx + ln
 	wrapped := s.readIdx & (len(s.out) - 1)
