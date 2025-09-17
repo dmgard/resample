@@ -1,6 +1,7 @@
 - COMPILER/ASSEMBLER BUG?
   - Three-argument SHRQ `SHRQ $+36, R8, R9` encodes as `RORQ` somehow?
 - MVP
+  - TODO readme
   - DONE combine SIMD into regular resampler, deprecate/private online resampler
   - TODO single method "resample all"
   - TODO SIMD sinc coefficient generation
@@ -10,9 +11,10 @@
   - TODO F64
   - TODO general conversions?
     - Small conversion buffer for incoming+outgoing data, ASM convert+quantize routines
-  - TODO multichannel
-    - Optional channel count parameter, create N input/output buffers, accept N input slices, process to each buffer
-    - Accept N output slices to `Read`, copy and wrap each
+  - DONE? multichannel
+    - Just clone buffers and offsets but share pointers to coefficients, one resampler per channel
+    - ~~Optional channel count parameter, create N input/output buffers, accept N input slices, process to each buffer~~
+    - ~~Accept N output slices to `Read`, copy and wrap each~~
   - TODO quality presets, auto-quality based on filter params
   - TODO fallback "slow" SSE/AVX/512 paths for unlimited length impulses
   - TODO quality tests
@@ -24,7 +26,6 @@
     - Offset coefIdx in assembly by one vector length before and after each resample loop
   - TODO coef wrapping needs to reset to zero even during SIMD
 		- Causing segfaults and would be expected to when switching between over/under ratios between phases
-  - TODO always-odd resample taps for SIMD
   - DONE? need to quantize initial output vector reload to nearest vector bounds
     - dovetails with only recalculating offsets at the end of the loop
     - TODO initial load also needs to wrap output buffer

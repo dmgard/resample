@@ -64,8 +64,9 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 	srIn, srOut := int(_srIn), int(_srOut)
 
 	// SIMD pad to multiple of vector length
+	// TODO SIMD arbitrary-length fallbacks will benefit from padding to register length
 	vecLen := 1 << simdLevel
-	if simdLevel <= slSSE {
+	if simdLevel <= slSSE || RoundUpMultPow2(taps, vecLen) > simdMaxFiltLens[simdLevel] {
 		vecLen = 0
 	} else {
 		taps = RoundUpMultPow2(taps, vecLen) // may as well use the entire register
@@ -115,19 +116,33 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 		// TODO bespoke routines for very small filter lengths?
 		s.taps = taps
 		// and pad by two SIMD registers
-		paddedTaps := s.taps + 2*vecLen
+		//paddedTaps := s.taps + 2*vecLen
+		paddedTaps := s.taps + vecLen
 		s.coefs = make([]T, paddedTaps*phases)
 
 		var outIdx fixed64
+
 		// one unique set of filter taps per reduced output sample rate index
 		for i := range phases {
-			outPos := float64(outIdx) / float64(fixedPointOne)
+			// only care about the fractional part
+			outPos := float64(outIdx&(fixedPointOne-1)) / float64(fixedPointOne)
 			//outPos := float64(outIdx >> fixedPointShift)
 
-			// TODO shouldn't this just be offset to the proper zero padding directly?
-			// TODO why calculate that in assembly?
-			// deposit as |padding|coefficients|padding|
-			ci := i*paddedTaps + vecLen
+			// deposit as |padding|coefficients|
+			//	Coefficients are padded with zeroes
+			//	|0000|xxxx|0000 for instance, loaded as
+			//	|____|xxxx|0000 then
+			//	|___0|xxxx|000_ then
+			//	|__00|xxxx|00__ and so on as more registers are accumulated
+			//	these sum as
+			//	xxxx|0000 +
+			//	0xxx|x000 +
+			//	00xx|xx00 +
+			//	000x|xxx0 and so on a moving patch within the active register set
+			ci := i * paddedTaps
+			if vecLen != 0 {
+				ci += int(outIdx>>fixedPointShift) & (vecLen - 1)
+			}
 			for fi := range s.coefs[ci:][:s.taps] {
 				// center a sinc on each outPos within the filter spread and compute coefficients
 				coef := T(windowedSinc(
@@ -138,7 +153,6 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 				s.coefs[ci+fi] = coef * T(s.scaleFactor)
 			}
 			outIdx += s.outStep
-			outIdx &= fixedPointOne - 1 // only care about the fractional part
 		}
 	}
 
@@ -178,6 +192,14 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 	}
 
 	return s
+}
+
+// Clone duplicates buffers and offsets but reuses filter coefficients.
+// Use it to create a bank of identical resamplers for multichannel resampling.
+func (s *Resampler[T]) Clone() *Resampler[T] {
+	r := *s
+	r.out = Dup(s.out)
+	return &r
 }
 
 var resampleFuncsF32 = sliceOf(
@@ -226,6 +248,7 @@ var simdLevel = func() int {
 	return slScalar
 }()
 
+// TODO separate for float64
 var simdMaxFiltLens = []int{
 	slInvalid: math.MaxInt,
 	slScalar:  math.MaxInt,
@@ -237,6 +260,8 @@ var simdMaxFiltLens = []int{
 func (s *Resampler[T]) Process(in []T) {
 	// TODO chunk input to avoid overflowing output buffer
 	// TODO and coefficient slice
+
+	// TODO input conversion for int sample types
 
 	// scalar fallback
 	if simdLevel < slSSE || s.taps > simdMaxFiltLens[simdLevel] {
