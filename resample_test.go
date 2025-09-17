@@ -68,12 +68,14 @@ func TestApproximate(t *testing.T) {
 func TestSIMD(t *testing.T) {
 	type T = float32
 
-	const quantum = 512
-	const taps = 256
+	// TODO without chunking quantum >>> taps overwrites output ringbuffer
+	const quantum = 1
+	const taps = 16
 
+	const srIn, srOut, outOffset = 96000, 44100, taps / 2
 	//const srIn, srOut, outOffset = 48111, 47892, taps / 2
 	//const srIn, srOut, outOffset = 48111, 44111, taps / 2
-	const srIn, srOut, outOffset = 40971, 21131, taps / 2
+	//const srIn, srOut, outOffset = 40971, 21131, taps / 2
 	//const srIn, srOut, outOffset = 40971, 7131, taps / 2
 	//const srIn, srOut, outOffset = 42, 7, quantum*4 + taps/2
 	// TODO total delay seems to shift with resample ratio,
@@ -83,8 +85,8 @@ func TestSIMD(t *testing.T) {
 
 	samples := YeqX[T](quantum + 1)[1:]
 	//samples = cosSignal[T](quantum, 1.)
-	samples = LogSweptSine[T](quantum, 0., 10.)
-	//samples = Const[T](quantum, 1)
+	//samples = LogSweptSine[T](quantum, 0., 10.)
+	samples = Const[T](quantum, 1)
 
 	const numQuanta = 100 * 2048
 
