@@ -117,9 +117,33 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	}
 	SetIndex(outAlignedIdx, out)
 
+	Comment("Temporarily offset base coefficient index by one register")
+	Comment("so that sub-register alignment can be simplified")
+	coefIdx.Add(int32(simdVecLen))
+
 	Comment("For each input sample:")
 	RangeOver(in, func(i *Reg[int]) {
-		SetIndex(coefIdx, coefs)
+		Comment("Coefficients are padded with zeroes",
+			"|0000|xxxx|0000 for instance, loaded as",
+			"|____|xxxx|0000 then",
+			"|___0|xxxx|000_ then",
+			"|__00|xxxx|00__ and so on as more registers are accumulated",
+			"these sum as",
+			"xxxx|0000 +",
+			"0xxx|x000 +",
+			"00xx|xx00 +",
+			"000x|xxx0 and so on, a moving patch within the active register set",
+		)
+		// TODO consider pregenerating at expected offsets
+		Comment("As the output index increases, the base output location is quantized",
+			"to the nearest vector multiple.",
+			"Do coefficientIndex - outIdx/fixedPointScale % vectorLength to compute",
+			"vecLen-numPaddedZeros and offset coefficient load by this amount",
+			"thus padding with numPaddedZeros")
+		SetIndex(coefIdx.Copy().Sub(
+			outIdx.Copy().BitRshift(int8(fixedPointShift)).
+				And(int32(simdVecLen-1))), coefs)
+		//SetIndex(coefIdx, coefs)
 
 		Comment("Broadcast the current input sample and contribute and accumulate",
 			" its output-phase-specific-coefficient-scaled individual contribution to every",
@@ -155,7 +179,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 
 		Comment("Update and wrap coefficient index")
 		phaseScratch := R[int]().Xor()
-		coefIdx.Add(int32(taps)).Compare(coefsLen)
+		coefIdx.Add(int32(taps + 1*simdVecLen)).Compare(coefsLen)
 		Comment("Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result")
 		coefIdx.Sub(phaseScratch.MoveIf_GE(coefsLen))
 	})
@@ -171,6 +195,9 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		}
 		outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
 	}
+
+	Comment("Undo temporary offset")
+	coefIdx.Sub(int32(simdVecLen))
 
 	ZeroUpper()
 	Comment("Return the latest phase and output index for reuse in future calls")
