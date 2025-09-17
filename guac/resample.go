@@ -122,7 +122,7 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 		SetIndex(coefIdx, coefs)
 
 		Comment("Broadcast the current input sample and contribute and accumulate",
-			" its output-phase-specific-coefficient-scaled individual contribution to every",
+			"its output-phase-specific-coefficient-scaled individual contribution to every",
 			"output sample in range")
 		bcst.Broadcast(in.Addr())
 		out.AddProductOf(

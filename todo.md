@@ -4,6 +4,10 @@
   - TODO readme
   - URGENT BUG
     - Extremely distorted/aliased output from pre-offset SIMD coefficients version
+    - Probable cause: dynamic sub-register offset wasn't unnecessary:
+      - Sub-register offset doesn't cycle with the number of phases. In something like 48k/44.1k, phase coefficients repeat after 160 (reduced numerator of ratio) inputs but the output register will be shifted by a fractional number of elements. This fraction doesn't line up until 160*147 inputs.
+      - Dynamically calculating the offset shift in assembly routine is required if avoiding duplicating coefficients hundreds of times is desired.
+    - OBSERVED coefficient index offset and output index register changeover seem to grow progressively out of sync?
     - Not sure if it's a delay issue but sweep generator seems to be accumulating to output location _after_ data is read and zeroed
     - Maybe it's a register off-by-one? Maybe the initial coefficient set is being given an offset of +0 instead of +regLen, or the final set is?
   - DONE combine SIMD into regular resampler, deprecate/private online resampler
