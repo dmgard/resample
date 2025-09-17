@@ -46,6 +46,8 @@ func BenchmarkResample(b *testing.B) {
 	}
 	doFn(48000, 44100, 64)
 	doFn(48111, 47892, 64)
+	doFn(48000, 44100, 512)
+	doFn(48111, 47892, 512)
 }
 
 func BenchmarkNew(b *testing.B) {

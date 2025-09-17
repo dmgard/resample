@@ -190,64 +190,39 @@ func (s *Resampler[T]) Clone() *Resampler[T] {
 	return &r
 }
 
-var resampleFuncsF32 = sliceOf(
-	nil,
-	nil, // Scalar
-	nil, // SSE TODO
-	sliceOf(nil,
-		ResampleFixedF32_8x2, ResampleFixedF32_8x3, ResampleFixedF32_8x4,
-		ResampleFixedF32_8x5, ResampleFixedF32_8x6, ResampleFixedF32_8x7,
-		ResampleFixedF32_8x8, ResampleFixedF32_8x9, ResampleFixedF32_8x10,
-		ResampleFixedF32_8x11, ResampleFixedF32_8x12, ResampleFixedF32_8x13,
-		ResampleFixedF32_8x14, ResampleFixedF32_8x15),
-	sliceOf(nil,
-		ResampleFixedF32_16x2, ResampleFixedF32_16x3, ResampleFixedF32_16x4,
-		ResampleFixedF32_16x5, ResampleFixedF32_16x6, ResampleFixedF32_16x7,
-		ResampleFixedF32_16x8, ResampleFixedF32_16x9, ResampleFixedF32_16x10,
-		ResampleFixedF32_16x11, ResampleFixedF32_16x12, ResampleFixedF32_16x13,
-		ResampleFixedF32_16x14, ResampleFixedF32_16x15, ResampleFixedF32_16x16,
-		ResampleFixedF32_16x17, ResampleFixedF32_16x18, ResampleFixedF32_16x19,
-		ResampleFixedF32_16x20, ResampleFixedF32_16x21, ResampleFixedF32_16x22,
-		ResampleFixedF32_16x23, ResampleFixedF32_16x24, ResampleFixedF32_16x25,
-		ResampleFixedF32_16x26, ResampleFixedF32_16x27, ResampleFixedF32_16x28,
-		ResampleFixedF32_16x29, ResampleFixedF32_16x30, ResampleFixedF32_16x31,
-	),
-)
-
-const (
-	slInvalid = iota
-	slScalar
-	slSSE
-	slAVX
-	sl512
-)
-
-var simdLevel = func() int {
-	switch {
-	case CPU.Supports(AVX, AVX512DQ, AVX512F, CMOV):
-
-		return sl512
-	case CPU.Supports(AVX, CMOV, FMA3):
-		return slAVX
-	case CPU.Supports(SSE2, CMOV): // TODO
-		return slSSE
-	}
-
-	return slScalar
-}()
-
-// TODO separate for float64
-var simdMaxFiltLens = []int{
-	slInvalid: math.MaxInt,
-	slScalar:  math.MaxInt,
-	slSSE:     math.MaxInt,
-	slAVX:     8*16 - 8*2,
-	sl512:     16*32 - 16*2,
+// ResampleAll allocates a buffer large enough to store the resampled output
+// of the given input and resamples all input samples
+func (s *Resampler[T]) ResampleAll(in []T) []T {
+	out, _ := s.ResampleInto(s.MakeBufferFor(in), in)
+	return out
 }
 
-func (s *Resampler[T]) Process(in []T) {
+// MakeBufferFor computes the size required for a buffer based on the input length
+// and resamping ratio and then allocates it
+func (s *Resampler[T]) MakeBufferFor(in []T) []T {
+	return make([]T, FmulCeiled(len(in), s.invRatio))
+}
+
+// ResampleInto resamples as much input as possible into a user-allocated output buffer
+func (s *Resampler[T]) ResampleInto(out []T, in []T) ([]T, []T) {
+	orig := out
+	for ; len(in) > 0 && len(out) > 0; in = in[s.Write(in):] {
+		out = out[s.Read(out):]
+	}
+	// TODO write zeroes to guarantee consuming all input
+	return orig[:len(orig)-len(out)], in
+}
+
+// Process is a method for writing without checking how much input was consumed
+// Deprecated: unchecked writes can just use Write and ignore "n"
+func (s *Resampler[T]) Process(in []T) { s.Write(in) }
+
+func (s *Resampler[T]) Write(in []T) (n int) {
 	// TODO chunk input to avoid overflowing output buffer
-	// TODO and coefficient slice
+	// TODO and coefficient slice: keep parallel input-time offset
+	// and clamp input to boundary-crossing
+	// then also clamp to (outIdx+len(in)*ratio)-readIdx < len(out)
+	// require user to call "ResampleInto/All" if they want to resample everything
 
 	// TODO input conversion for int sample types
 
@@ -287,6 +262,8 @@ func (s *Resampler[T]) Process(in []T) {
 			s.coefsIdx = 0
 		}
 	}
+
+	return len(in) // TODO chunk etc.
 }
 
 func (s *Resampler[T]) processScalar(in []T) {
@@ -346,6 +323,61 @@ func (s *Resampler[T]) Read(into []T) int {
 	s.readIdx = nextOutIdx
 
 	return ln
+}
+
+var resampleFuncsF32 = sliceOf(
+	nil,
+	nil, // Scalar
+	nil, // SSE TODO
+	sliceOf(nil,
+		ResampleFixedF32_8x2, ResampleFixedF32_8x3, ResampleFixedF32_8x4,
+		ResampleFixedF32_8x5, ResampleFixedF32_8x6, ResampleFixedF32_8x7,
+		ResampleFixedF32_8x8, ResampleFixedF32_8x9, ResampleFixedF32_8x10,
+		ResampleFixedF32_8x11, ResampleFixedF32_8x12, ResampleFixedF32_8x13,
+		ResampleFixedF32_8x14, ResampleFixedF32_8x15),
+	sliceOf(nil,
+		ResampleFixedF32_16x2, ResampleFixedF32_16x3, ResampleFixedF32_16x4,
+		ResampleFixedF32_16x5, ResampleFixedF32_16x6, ResampleFixedF32_16x7,
+		ResampleFixedF32_16x8, ResampleFixedF32_16x9, ResampleFixedF32_16x10,
+		ResampleFixedF32_16x11, ResampleFixedF32_16x12, ResampleFixedF32_16x13,
+		ResampleFixedF32_16x14, ResampleFixedF32_16x15, ResampleFixedF32_16x16,
+		ResampleFixedF32_16x17, ResampleFixedF32_16x18, ResampleFixedF32_16x19,
+		ResampleFixedF32_16x20, ResampleFixedF32_16x21, ResampleFixedF32_16x22,
+		ResampleFixedF32_16x23, ResampleFixedF32_16x24, ResampleFixedF32_16x25,
+		ResampleFixedF32_16x26, ResampleFixedF32_16x27, ResampleFixedF32_16x28,
+		ResampleFixedF32_16x29, ResampleFixedF32_16x30, ResampleFixedF32_16x31,
+	),
+)
+
+const (
+	slInvalid = iota
+	slScalar
+	slSSE
+	slAVX
+	sl512
+)
+
+var simdLevel = func() int {
+	switch {
+	case CPU.Supports(AVX, AVX512DQ, AVX512F, CMOV):
+
+		return sl512
+	case CPU.Supports(AVX, CMOV, FMA3):
+		return slAVX
+	case CPU.Supports(SSE2, CMOV): // TODO
+		return slSSE
+	}
+
+	return slScalar
+}()
+
+// TODO separate for float64
+var simdMaxFiltLens = []int{
+	slInvalid: math.MaxInt,
+	slScalar:  math.MaxInt,
+	slSSE:     math.MaxInt,
+	slAVX:     8*16 - 8*2,
+	sl512:     16*32 - 16*2,
 }
 
 func FareySearch[T Scalar, F Float](target F, maxNum, maxDenom T) (num, denom, numAlt, denomAlt T) {
