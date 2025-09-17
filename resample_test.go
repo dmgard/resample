@@ -71,7 +71,7 @@ func TestSIMD(t *testing.T) {
 	const quantum = 512
 	const taps = 128
 
-	const srIn, srOut, outOffset = 48111, 47892, taps / 2
+	const srIn, srOut, outOffset = 48111, 47892, 0
 	//const srIn, srOut, outOffset = 48111, 44111, taps / 2
 	//const srIn, srOut, outOffset = 40971, 21131, taps / 2
 	//const srIn, srOut, outOffset = 40971, 7131, taps / 2
