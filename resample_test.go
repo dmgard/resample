@@ -121,7 +121,7 @@ func TestScalarFallback(t *testing.T) {
 	const quantum = 64
 	const taps = 64
 
-	const srIn, srOut, outOffset = 48111, 47892, taps / 2
+	const srIn, srOut, outOffset = 48111, 47892, taps
 	//const srIn, srOut, outOffset = 48111, 44111, taps / 2
 	//const srIn, srOut, outOffset = 40971, 21131, taps / 2
 	//const srIn, srOut, outOffset = 40971, 7131, taps / 2

@@ -346,6 +346,11 @@ func (s *Resampler[T]) processScalar(in []T) {
 
 func (s *Resampler[T]) Read(into []T) int {
 	n := len(into)
+
+	// TODO doesn't this have issues when s.readIdx overflows and is greater than s.outIdx?
+
+	// TODO need to read from -delay?
+
 	ln := min(int(s.outIdx>>fixedPointShift)-s.readIdx, n)
 	nextOutIdx := s.readIdx + ln
 	wrapped := s.readIdx & (len(s.out) - 1)
