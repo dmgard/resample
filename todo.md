@@ -5,18 +5,29 @@
   - DONE? single method "resample all"
   - TODO SIMD sinc coefficient generation
   - TODO coefficient reset alignment
-    - Limit input read to output buffer space
-    - While `len(in) * phases + s.coefsIdx > len(s.coefs)`... do something to limit input samples even though `s.coefsIdx` is premultiplied by tapcount...
+    - Keep parallel phase/phases count and fragment input at `len(in)+phase-phases` if needed. Loop, checking drift at `phase==0` until input consumed or
+      - When limited by `availableOutputBuffer*invRatio < len(in)`
+        - Output buffer is limited by its length, distance between read and write head and filter delay taps
+      - Really, limit input by available output buffer, simple `min`, then fragment in loop at phase-reset boundaries
   - TODO F64
-  - TODO general conversions?
+  - DON'T ~~TODO general conversions?~~ conversions can be a separate package/functionality - users may want to keep things in the float domain for further processing and/or want their own dithering
     - Small conversion buffer for incoming+outgoing data, ASM convert+quantize routines
   - DONE? multichannel
     - Just clone buffers and offsets but share pointers to coefficients, one resampler per channel
     - ~~Optional channel count parameter, create N input/output buffers, accept N input slices, process to each buffer~~
     - ~~Accept N output slices to `Read`, copy and wrap each~~
   - TODO quality presets, auto-quality based on filter params
+    - Use ripple/transition/rejection approximation equations to deduce number of taps, convert into output taps
+    - TODO consider configurable lowpass cutoff 
   - TODO fallback "slow" SSE/AVX/512 paths for unlimited length impulses
   - TODO quality tests
+    - FFT to examine stop-band, pass-band width, rejection, frequency ripple
+  - TODO per-resampler SIMD level selection below max
+  - DONE-ish faiface/beep resampler comparison for benchmarks module
+    - Scalar/SSE/AVX/512 external restriction via package method
+- CONSIDER
+  - Pre-aligned coefficients seem to have been significantly faster for fewer taps. Might there be a way to hybridize both methods, offsetting by a macro-phase offset statically for each of the 147 sets of 160 micro-phase coefficients in e.g. 48k/44.1k? Tbh, there might be offset variance that's both micro and macro-phase dependent, so this could be a non-starter.
+  - Though... sub-sample offset _does_ cycle at the micro-phase (current standard) cycle ratio... right? If not, even online-computation of phase coefficient offsets per-macro-phase would be incorrect and create subsample drift. Pretty sure by construction/definition the subsample offset loops when the micro-phase loops - it's just an artefact of register-packing that causes sub-_register_ coefficient offsets to cycle on the macro-phase.
 - BUGS SIMD
 	- DONE-ISH sub-register phase coefficient filter alignment
     - ISSUE Initial coefficient read should be +vecLen but wraps to zero

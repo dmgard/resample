@@ -6,76 +6,33 @@ import (
 	"unsafe"
 
 	"github.com/dmgard/resample"
+	"github.com/faiface/beep"
 	"github.com/zeozeozeo/gomplerate"
 )
 
 func BenchmarkResampleAll(b *testing.B) {
-	b.Run("simd=scalar/pkg=resample", BenchmarkScalarResample)
-	b.Run("simd=best/pkg=resample", BenchmarkAvxResample)
+	b.Run("simd=scalar/pkg=beep", BenchmarkBeep)
+	b.Run("simd=best/pkg=resample", BenchmarkResample)
 	b.Run("simd=scalar/pkg=gomplerate", BenchmarkGomplerate)
 }
 
-func BenchmarkScalarResample(b *testing.B) {
+func BenchmarkResample(b *testing.B) {
 	type T = float32
-	b.Run("48_441", func(b *testing.B) {
-		const (
-			srIn, srOut = 48000, 44100
-			quantum     = 64
-		)
-		s := make([]T, quantum)
 
-		for taps := 16; taps < 496; taps += 16 {
-			tail := printResampleSuffix(srIn, srOut, quantum, taps)
-			benchNode(b, "node=offlineSinc/"+tail, resample.New[T](srIn, srOut, taps).Process, s)
-			benchNode(b, "node=integerSinc/"+tail, resample.NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps).Process, s)
-		}
-	})
-	b.Run("48111_47892", func(b *testing.B) {
-		const (
-			srIn, srOut = 48111, 47892
-			quantum     = 64
-		)
-		s := make([]T, quantum)
+	doFn := func(srIn, srOut, quantum int) {
+		b.Run(fmt.Sprintf("ratio=%d_%d/quantum=%d", srIn, srOut, quantum), func(b *testing.B) {
+			s := make([]T, quantum)
 
-		for taps := 16; taps < 496; taps += 16 {
-			tail := printResampleSuffix(srIn, srOut, quantum, taps)
-			benchNode(b, "node=offlineSinc/"+tail, resample.New[T](srIn, srOut, taps).Process, s)
-			benchNode(b, "node=integerSinc/"+tail, resample.NewIntegerTimedSincResampler[T](srIn, srOut, quantum, taps).Process, s)
-		}
-	})
-}
-
-func BenchmarkAvxResample(b *testing.B) {
-	type T = float32
-	defer func() {
-		if err := recover(); err != nil {
-			b.Fatal(err)
-		}
-	}()
-	b.Run("48_441", func(b *testing.B) {
-		const (
-			srIn, srOut = 48000, 44100
-			quantum     = 64
-		)
-		s := make([]T, quantum)
-
-		for taps := 16; taps < 496; taps += 16 {
-			tail := printResampleSuffix(srIn, srOut, quantum, taps)
-			benchNode(b, "node=avx512/"+tail, resample.NewSIMD[T](srIn, srOut, taps).Process, s)
-		}
-	})
-	b.Run("48111_47892", func(b *testing.B) {
-		const (
-			srIn, srOut = 48111, 47892
-			quantum     = 64
-		)
-		s := make([]T, quantum)
-
-		for taps := 16; taps < 496; taps += 16 {
-			tail := printResampleSuffix(srIn, srOut, quantum, taps)
-			benchNode(b, "node=avx512/"+tail, resample.NewSIMD[T](srIn, srOut, taps).Process, s)
-		}
-	})
+			for taps := 16; taps <= 480; taps += 16 {
+				tail := fmt.Sprintf("taps=%d", taps)
+				benchNode(b, "node=avx512/"+tail, resample.New[T](srIn, srOut, taps).Process, s)
+			}
+		})
+	}
+	doFn(48000, 44100, 64)
+	doFn(48111, 47892, 64)
+	//doFn(48000, 44100, 512)
+	//doFn(48111, 47892, 512)
 }
 
 func BenchmarkGomplerate(b *testing.B) {
@@ -92,11 +49,38 @@ func BenchmarkGomplerate(b *testing.B) {
 		process := func(d []T) {
 			gr.ResampleFloat64(d)
 		}
-		tail := fmt.Sprintf("sr=%d_%d/", srIn, srOut)
+		tail := fmt.Sprintf("ratio=%d_%d/quantum=%d/", srIn, srOut, quantum)
 		benchNode(b, "node=gomplerate/"+tail, process, s)
 	}
-	doGomple(48000, 44100, 1<<17)
-	doGomple(48111, 47892, 1<<17)
+	doGomple(48000, 44100, 64)
+	doGomple(48111, 47892, 64)
+}
+
+func BenchmarkBeep(b *testing.B) {
+	type T = float64
+	do := func(srIn, srOut, quantum, quality int) {
+		s := make([]T, quantum)
+
+		gr := beep.Resample(quality, beep.SampleRate(srIn), beep.SampleRate(srOut), beep.Silence(-1))
+
+		samples := make([][2]float64, quantum)
+
+		process := func(d []T) {
+			gr.Stream(samples)
+		}
+
+		// TODO do real quality comparisons to establish principled relationship between
+		// quality and taps. Intuition is that an N-quality lagrangian interpolation
+		// performs N*N computations and increasingly approximates a windowed sinc with
+		// N*N zero-crossings/taps
+
+		tail := fmt.Sprintf("ratio=%d_%d/taps=%d/quantum=%d", srIn, srOut, quality*quality, quantum)
+		benchNode(b, "node=beep/"+tail, process, s)
+	}
+	for quality := 1; quality <= 16; quality <<= 1 {
+		do(48000, 44100, 64, quality)
+		do(48111, 47892, 64, quality)
+	}
 }
 
 //func BenchmarkZafResample(b *testing.B) {
@@ -113,7 +97,7 @@ func BenchmarkGomplerate(b *testing.B) {
 //		process := func(d []T) {
 //			gr.Write(resample.SliceCast[byte](d))
 //		}
-//		tail := fmt.Sprintf("sr=%d_%d/taps=%d/", srIn, srOut, []int{
+//		tail := fmt.Sprintf("ratio=%d_%d/taps=%d/", srIn, srOut, []int{
 //			zafResample.Quick:     16,
 //			zafResample.LowQ:      32,
 //			zafResample.MediumQ:   64,
@@ -132,11 +116,6 @@ func BenchmarkGomplerate(b *testing.B) {
 //	}
 //}
 
-func printResampleSuffix(srIn int, srOut int, quantum int, taps int) string {
-	return fmt.Sprintf("ratio=%d_%d/quantum=%d/taps=%d",
-		srIn, srOut, quantum, taps)
-}
-
 func benchNode[T float32 | float64](b *testing.B, name string, process func([]T), samples []T) {
 	b.Run(name, func(b *testing.B) {
 		var t T
@@ -146,7 +125,15 @@ func benchNode[T float32 | float64](b *testing.B, name string, process func([]T)
 			process(samples)
 		}
 
-		nsPerSample := float64(b.Elapsed().Nanoseconds()) / float64(b.N) / float64(len(samples))
+		lnScale := 1
+		switch any(*new(T)).(type) {
+		case [2]float64:
+			lnScale = 2
+		}
+
+		scaledLn := len(samples) * lnScale
+
+		nsPerSample := float64(b.Elapsed().Nanoseconds()) / float64(b.N) / float64(scaledLn)
 		b.ReportMetric(nsPerSample, "ns/sample")
 		b.ReportMetric(1000000000./48000./nsPerSample, "xRt_48k")
 	})

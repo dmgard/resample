@@ -16,6 +16,8 @@ type Resampler[T Sample] struct {
 	readIdx int
 	// input sample count for selecting output phases
 	coefsIdx int
+	// input samples processed since last phase reset TODO
+	phase int
 	// accumulated output-time drift due to rational sample ratio approximation
 	drift float64
 
@@ -50,6 +52,9 @@ type consts[T Sample] struct {
 
 	// precomputed sinc coefficients
 	coefs []T
+
+	// number of phases, len(coefs)/(taps+vecLen?) TODO
+	phases int
 
 	// output clock drift per input sample
 	driftStep float64
