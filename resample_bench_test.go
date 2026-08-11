@@ -106,7 +106,7 @@ func BenchmarkNew(b *testing.B) {
 	doFn(48111, 47892, 64)
 }
 
-func benchNode[T Sample](b *testing.B, name string, process func([]T), samples []T) {
+func benchNode[T Sample](b *testing.B, name string, process func(...[]T), samples []T) {
 	b.Run(name, func(b *testing.B) {
 		var t T
 		b.SetBytes(int64(len(samples)) * int64(unsafe.Sizeof(t)))

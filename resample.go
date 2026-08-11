@@ -8,7 +8,7 @@ import (
 )
 
 type Resampler[T Sample] struct {
-	out []T
+	out [][]T
 
 	// output time in fixed-point ratio of input samples
 	outIdx fixed64
@@ -61,7 +61,7 @@ type consts[T Sample] struct {
 }
 
 // New constructs a resampler with precomputed sinc coefficients
-func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
+func New[T Sample, S Scalar](_srIn, _srOut S, taps int, channels ...int) (s *Resampler[T]) {
 	s = &Resampler[T]{consts: new(consts[T])}
 
 	ratio := Ffdiv(_srIn, _srOut)
@@ -93,13 +93,24 @@ func New[T Sample, S Scalar](_srIn, _srOut S, taps int) (s *Resampler[T]) {
 
 		// output is a power of two ringbuffer, padded and scaled up for upsampling many more
 		// output samples than were input
-		s.out = make([]T,
-			RoundUpPow2(
-				FmulCeiled(
-					taps*4,
-					max(s.invRatio, 1)),
-			),
+
+		numCh := 1
+		if len(channels) == 1 {
+			numCh = channels[0]
+		} else if len(channels) > 1 {
+			panic("provide one or no channel counts")
+		}
+
+		s.out = make([][]T, numCh)
+		outBufLn := RoundUpPow2(
+			FmulCeiled(
+				taps*4,
+				max(s.invRatio, 1)),
 		)
+
+		for i := range s.out {
+			s.out[i] = make([]T, outBufLn)
+		}
 
 		// convolved samples need to be output half the filter length ahead
 		// this way they accumulate just in time to be read with a minimal delay
@@ -197,8 +208,8 @@ func (s *Resampler[T]) Clone() *Resampler[T] {
 
 // ResampleAll allocates a buffer large enough to store the resampled output
 // of the given input and resamples all input samples
-func (s *Resampler[T]) ResampleAll(in []T) []T {
-	out, _ := s.ResampleInto(s.MakeBufferFor(in), in)
+func (s *Resampler[T]) ResampleAll(in [][]T) [][]T {
+	out, _ := s.ResampleInto(s.MakeBuffersFor(in...), in...)
 	return out
 }
 
@@ -208,21 +219,50 @@ func (s *Resampler[T]) MakeBufferFor(in []T) []T {
 	return make([]T, FmulCeiled(len(in), s.invRatio))
 }
 
-// ResampleInto resamples as much input as possible into a user-allocated output buffer
-func (s *Resampler[T]) ResampleInto(out []T, in []T) ([]T, []T) {
-	orig := out
-	for ; len(in) > 0 && len(out) > 0; in = in[s.Write(in):] {
-		out = out[s.Read(out):]
+// MakeBuffersFor runs MakeBufferFor for each channel
+func (s *Resampler[T]) MakeBuffersFor(in ...[]T) [][]T {
+	out := make([][]T, len(in))
+	for i := range out {
+		out[i] = s.MakeBufferFor(in[i])
 	}
-	// TODO write zeroes to guarantee consuming all input
+	return out
+}
+
+// ResampleInto resamples as much input as possible into a user-allocated output buffer
+func (s *Resampler[T]) ResampleInto(out [][]T, in ...[]T) ([][]T, [][]T) {
+	orig := out
+
+loop:
+	if n := s.Write(in...); n > 0 {
+		// truncate already resampled input data
+		for i := range in {
+			in[i] = in[i][n:]
+		}
+	}
+
+	if on := s.Read(out...); on > 0 {
+		// truncate already resampled output buffer
+		for i := range out {
+			out[i] = out[i][on:]
+		}
+
+		goto loop
+	}
+
+	// return the actually-used portion of the output buffers
+	for i := range out {
+		orig[i] = orig[i][:len(orig[i])-len(out[i])]
+	}
+
+	// TODO write zeroes to guarantee consuming all input?
 	return orig[:len(orig)-len(out)], in
 }
 
 // Process is a method for writing without checking how much input was consumed
 // Deprecated: unchecked writes can just use Write and ignore "n"
-func (s *Resampler[T]) Process(in []T) { s.Write(in) }
+func (s *Resampler[T]) Process(in ...[]T) { s.Write(in...) }
 
-func (s *Resampler[T]) Write(in []T) (n int) {
+func (s *Resampler[T]) Write(in ...[]T) (n int) {
 	// TODO chunk input to avoid overflowing output buffer
 	// TODO and coefficient slice: keep parallel input-time offset
 	// and clamp input to boundary-crossing
@@ -234,7 +274,7 @@ func (s *Resampler[T]) Write(in []T) (n int) {
 	// scalar fallback
 	if simdLevel < slSSE || s.taps > simdMaxFiltLens[simdLevel] {
 		// TODO fallback to unlimited length SIMD filter routines
-		s.processScalar(in)
+		s.processScalar(in...)
 		return
 	}
 
@@ -245,12 +285,15 @@ func (s *Resampler[T]) Write(in []T) (n int) {
 	case 32:
 		fn := resampleFuncsF32[simdLevel][s.taps>>simdLevel]
 
-		coefIdx, outIdx := fn(
-			SliceCast[float32](s.out),
-			SliceCast[float32](in),
-			SliceCast[float32](s.coefs), s.coefsIdx, int(s.outIdx), int(s.outStep))
-		s.coefsIdx = coefIdx
-		s.outIdx = fixed64(outIdx)
+		nextCoefs, nextOut := s.coefsIdx, s.outIdx
+		for i := range s.out {
+			coefIdx, outIdx := fn(
+				SliceCast[float32](s.out[i]),
+				SliceCast[float32](in[i]),
+				SliceCast[float32](s.coefs), s.coefsIdx, int(s.outIdx), int(s.outStep))
+			nextCoefs, nextOut = coefIdx, fixed64(outIdx)
+		}
+		s.coefsIdx, s.outIdx = nextCoefs, nextOut
 	case 64:
 		fallthrough
 	default:
@@ -271,8 +314,8 @@ func (s *Resampler[T]) Write(in []T) (n int) {
 	return len(in) // TODO chunk etc.
 }
 
-func (s *Resampler[T]) processScalar(in []T) {
-	for _, input := range in {
+func (s *Resampler[T]) processScalar(in ...[]T) {
+	for i := range in[0] {
 		// weight contribution of this input sample to a patch the size of the filter
 		// and accumulate to output samples at integer output slice indices
 		// TODO might be off by one relative to floating point calculation
@@ -281,12 +324,16 @@ func (s *Resampler[T]) processScalar(in []T) {
 		s.outIdx += s.outStep // + 1
 
 		// coefs contains precomputed centered windowed sinc on each output sample
-		for range s.taps {
-			// wrap into output buffer
-			// delay output by half the filter taps so all inputs can accumulate in time
-			s.out[(outMin+s.delay)&(len(s.out)-1)] += input * s.coefs[s.coefsIdx]
-			s.coefsIdx++
-			outMin++
+		for ch, out := range s.out {
+			outMin := outMin // reset for each channel
+			input := in[ch][i]
+			for range s.taps {
+				// wrap into output buffer
+				// delay output by half the filter taps so all inputs can accumulate in time
+				out[(outMin+s.delay)&(len(s.out)-1)] += input * s.coefs[s.coefsIdx]
+				s.coefsIdx++
+				outMin++
+			}
 		}
 
 		// wrap sample coefficients index
@@ -304,25 +351,29 @@ func (s *Resampler[T]) processScalar(in []T) {
 	}
 }
 
-func (s *Resampler[T]) Read(into []T) int {
-	n := len(into)
+func (s *Resampler[T]) Read(intos ...[]T) int {
+	n := len(intos[0])
 
 	// TODO doesn't this have issues when s.readIdx overflows and is greater than s.outIdx?
 
 	ln := min(int(s.outIdx>>fixedPointShift)-s.readIdx, n)
 	nextOutIdx := s.readIdx + ln
-	wrapped := s.readIdx & (len(s.out) - 1)
-	end := nextOutIdx & (len(s.out) - 1)
+	wrapped := s.readIdx & (len(s.out[0]) - 1)
+	end := nextOutIdx & (len(s.out[0]) - 1)
 
-	if end >= wrapped {
-		chunk := s.out[wrapped:end]
-		into = into[copy(into, chunk):]
-		_memClr(chunk)
-	} else {
-		into = into[copy(into, s.out[wrapped:]):]
-		into = into[copy(into, s.out[:end]):]
-		_memClr(s.out[wrapped:])
-		_memClr(s.out[:end])
+	for i := range s.out {
+		into := intos[i]
+		out := s.out[i]
+		if end >= wrapped {
+			chunk := out[wrapped:end]
+			into = into[copy(into, chunk):]
+			_memClr(chunk)
+		} else {
+			into = into[copy(into, out[wrapped:]):]
+			into = into[copy(into, out[:end]):]
+			_memClr(out[wrapped:])
+			_memClr(out[:end])
+		}
 	}
 
 	s.readIdx = nextOutIdx

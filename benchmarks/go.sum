@@ -37,3 +37,5 @@ golang.org/x/sys v0.47.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 lrkr.dev/resample v0.0.0-20260213020641-cb4e45e66eeb h1:bEY/TOZdVGg9DjZ9LmzdIQuWi2MBlZq5KSIf2V77U1Y=
 lrkr.dev/resample v0.0.0-20260213020641-cb4e45e66eeb/go.mod h1:du9uXY9zL2FEZCbkhu6M27QY9AOhrBRJAc6aVx2PadQ=
+lrkr.dev/resample v0.0.0-20260725180230-2c7043563f2a h1:UpkZgitTfjV3HpwTu+Cv1CzNndpnl7yyYmYx/HZ7j7Y=
+lrkr.dev/resample v0.0.0-20260725180230-2c7043563f2a/go.mod h1:fPKMmOs2/nEZPQkbF6XpFWneeTVQTU6C3C+v4mSltTs=

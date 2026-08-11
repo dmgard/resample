@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/faiface/beep v1.1.0
 	github.com/zeozeozeo/gomplerate v0.0.0-20250404113140-0fbb236df825
-	lrkr.dev/resample v0.0.0-20260213020641-cb4e45e66eeb
+	lrkr.dev/resample v0.0.0-20260725180230-2c7043563f2a
 )
 
 require (
