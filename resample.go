@@ -209,7 +209,7 @@ func (s *Resampler[T]) Clone() *Resampler[T] {
 // ResampleAll allocates a buffer large enough to store the resampled output
 // of the given input and resamples all input samples
 func (s *Resampler[T]) ResampleAll(in [][]T) [][]T {
-	out, _ := s.ResampleInto(s.MakeBuffersFor(in...), in...)
+	out, _ := s.ResampleInto(s.MakeBuffersFor(in...), in)
 	return out
 }
 
@@ -229,7 +229,7 @@ func (s *Resampler[T]) MakeBuffersFor(in ...[]T) [][]T {
 }
 
 // ResampleInto resamples as much input as possible into a user-allocated output buffer
-func (s *Resampler[T]) ResampleInto(out [][]T, in ...[]T) ([][]T, [][]T) {
+func (s *Resampler[T]) ResampleInto(out, in [][]T) ([][]T, [][]T) {
 	orig := out
 
 loop:
