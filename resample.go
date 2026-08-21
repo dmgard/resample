@@ -354,9 +354,7 @@ func (s *Resampler[T]) processScalar(in ...[]T) {
 func (s *Resampler[T]) Read(intos ...[]T) int {
 	n := len(intos[0])
 
-	// TODO doesn't this have issues when s.readIdx overflows and is greater than s.outIdx?
-
-	ln := min(int(s.outIdx>>fixedPointShift)-s.readIdx, n)
+	ln := min(s.BufferLevel(), n)
 	nextOutIdx := s.readIdx + ln
 	wrapped := s.readIdx & (len(s.out[0]) - 1)
 	end := nextOutIdx & (len(s.out[0]) - 1)
@@ -379,6 +377,13 @@ func (s *Resampler[T]) Read(intos ...[]T) int {
 	s.readIdx = nextOutIdx
 
 	return ln
+}
+
+func (s *Resampler[T]) BufferLevel() int {
+	// TODO make sure this handles overflow properly as intended
+	return int(uint32(
+		s.outIdx>>fixedPointShift -
+			fixed64(s.readIdx)<<fixedPointShift>>fixedPointShift))
 }
 
 var resampleFuncsF32 = sliceOf(

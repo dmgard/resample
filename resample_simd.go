@@ -3,6 +3,7 @@
 package resample
 
 import (
+	"simd"
 	"simd/archsimd"
 )
 
@@ -15,9 +16,9 @@ func (s *Resampler[T]) processGoSIMD(in []T) {
 		case slScalar:
 			panic("TODO scalar fallback")
 		case slSSE:
-			resamplerProcess[archsimd.Float32x4](s, SliceCast[float32](in), archsimd.LoadFloat32x4Slice, archsimd.BroadcastFloat32x4)
+			resamplerProcess[simd.Float32s](s, SliceCast[float32](in), archsimd.LoadFloat32x4Slice, archsimd.BroadcastFloat32x4)
 		case slAVX:
-			resamplerProcess[archsimd.Float32x8](s, SliceCast[float32](in), archsimd.LoadFloat32x8Slice, archsimd.BroadcastFloat32x8)
+			resamplerProcess[simd.Float32s](s, SliceCast[float32](in), archsimd.LoadFloat32x8Slice, archsimd.BroadcastFloat32x8)
 		case sl512:
 			resamplerProcess[archsimd.Float32x16](s, SliceCast[float32](in), archsimd.LoadFloat32x16Slice, archsimd.BroadcastFloat32x16)
 		}
@@ -29,8 +30,7 @@ func (s *Resampler[T]) processGoSIMD(in []T) {
 }
 
 type simdVec[V simdVec[V, T], T Sample] interface {
-	archsimd.Float32x4 | archsimd.Float32x8 | archsimd.Float32x16 |
-	archsimd.Float64x2 | archsimd.Float64x4 | archsimd.Float64x8
+	simd.Float32s | simd.Float64s
 
 	StoreSlice([]T)
 	MulAdd(V, V) V

@@ -207,6 +207,156 @@ func fixed_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls i
 	Ret()
 }
 
+func fixed_resample_sse[T float32 | float64, S SliceTypes](simdVecLen, unrolls int) {
+	var p struct {
+		Out, In, Coefs  Reg[S]
+		CoefIdx         Reg[int]
+		OutIdx, OutStep Reg[int]
+	}
+
+	var r struct {
+		CoefIdxOut Reg[int]
+		OutIdxOut  Reg[int]
+	}
+
+	suffix := fmt.Sprintf("F%d_%dx%d", unsafe.Sizeof(*new(T))*8, simdVecLen, unrolls)
+
+	Func("ResampleFixedSingle"+suffix, NOSPLIT, &p, &r)
+	// |--|--|--|--|--|--|--|--|--|--|--|--| // input samples
+	// |------|------|------|------|------| // output blocks
+	//       !     !     !        !     !   // input samples where an output block shift is triggered
+	// TODO the same process is used to generate coefficients - the global sample offset must be saved and passed in between calls as well
+	// instead of doing float conversion, map input samples/output samples to the range 0..MaxUint64. Add MaxUint64/(outRate*simdVecLen) * inRate each input sample to a subsample phase counter - when overflow occurs, output shift is needed.
+
+	swizzle := func() []int {
+		k := make([]int, unrolls-1)
+		for i := range k {
+			k[i] = i + 1
+		}
+		return k
+	}()
+	lowSwizzle := func() []int {
+		k := make([]int, unrolls-1)
+		for i := range k {
+			k[i] = i
+		}
+		return k
+	}()
+
+	out := Iter[T](&p.Out, simdVecLen, unrolls)
+	outShift := out.SwizzledUnrolls(swizzle...)
+	in := Iter[T](&p.In)
+	bcst := R[T](simdVecLen)
+	coefs := Iter[T](&p.Coefs, simdVecLen, unrolls)
+	coefIdx := p.CoefIdx.Init().Load()
+	coefsLen := Len[T, int](coefs).Init().Load()
+	outIdx := p.OutIdx.Init().Load()
+
+	// TODO this throws bad operands when not casting to int32
+	outLenMask := Len[T, int](out).Init().Load().Sub(int32(1))
+	outStep := p.OutStep.Init().Load()
+
+	Comment("Reload previous partially accumulated output samples")
+
+	outAlignedIdx := outIdx.CloneDef()
+
+	taps := simdVecLen * unrolls
+
+	Comment("Compute output vector index")
+	lg2vecLn := int8(tzcnt(simdVecLen))
+	outIdxToOutVecShift := fixedPointShift + lg2vecLn
+	// TODO somewhat redudnant to do this every time when it only shifts when
+	// the later CMOV test succeeds
+	outAlignedIdx.Load(outIdx).BitRshift(outIdxToOutVecShift).
+		BitLshift(lg2vecLn).
+		And(outLenMask)
+
+	Comment("Re-load partially accumulated output samples, wrapping ringbuffer")
+	{
+		outAlignedIdx := outAlignedIdx.Copy()
+
+		for i := range unrolls {
+			out := out.ByteOffsetAllTo(0)
+			SetIndex(outAlignedIdx, out)
+			out.SwizzledUnrolls(i).Load()
+			if i == unrolls-1 {
+				break
+			}
+			outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
+		}
+	}
+	SetIndex(outAlignedIdx, out)
+
+	Comment("Temporarily offset base coefficient index by one register")
+	Comment("so that sub-register alignment can be simplified")
+	coefIdx.Add(int32(simdVecLen))
+
+	Comment("For each input sample:")
+	RangeOver(in, func(i *Reg[int]) {
+		// TODO consider pregenerating at expected offsets
+
+		SetIndex(coefIdx.Copy().Sub(
+			outIdx.Copy().BitRshift(int8(fixedPointShift)).
+				And(int32(simdVecLen-1))), coefs)
+		//SetIndex(coefIdx, coefs)
+
+		Comment("Broadcast the current input sample and contribute and accumulate")
+		bcst.Broadcast(in.Addr())
+		out.AddProductOf(
+			bcst.BroadcastUnrolled(unrolls),
+			coefs.Addr(),
+		)
+
+		// TODO could probably do this with a bit test but const shifts might actually be faster
+		// NOTE three-argument SHRQ encodes seemingly as RORQ?
+		// that's why Copy() is used rather than CloneDef()
+		Comment("Compute current register index")
+		oldOutVec := outIdx.Copy().BitRshift(outIdxToOutVecShift)
+
+		Comment("Increment current output sample index and compute next register index")
+		newOutVec := outIdx.Add(outStep).Copy().BitRshift(outIdxToOutVecShift)
+
+		Comment("Store and shift registers if a register transition has happened")
+		oldOutVec.Compare(newOutVec).JumpE("no_store")
+		{
+			out.SwizzledUnrolls(0).Store()
+			outShift.Store(out.SwizzledUnrolls(lowSwizzle...))
+			out.SwizzledUnrolls(unrolls - 1).Xor()
+		}
+		Label("no_store")
+		Comment("Update and wrap the vector-aligned output index")
+		outAlignedIdx.Load(newOutVec).BitLshift(lg2vecLn).And(outLenMask)
+
+		Comment("Update and wrap coefficient index")
+		phaseScratch := R[int]().Xor()
+		coefIdx.Add(int32(taps + 1*simdVecLen)).Compare(coefsLen)
+		Comment("Wrap phase counter - SUB changes flags so do this after to avoid clobbering Compare result")
+		coefIdx.Sub(phaseScratch.MoveIf_GE(coefsLen))
+	})
+
+	Comment("Store each partially accumulated vector to the output slice")
+	Comment("taking care to wrap into output ringbuffer")
+	for i := range unrolls {
+		// TODO int constant in Add generates "bad operands" instead automatic convert or
+		// type error
+		out.ByteOffsetAllTo(0).SwizzledUnrolls(i).Store()
+		if i == unrolls-1 {
+			break
+		}
+		outAlignedIdx.Add(int32(simdVecLen)).And(outLenMask)
+	}
+
+	Comment("Undo temporary offset")
+	coefIdx.Sub(int32(simdVecLen))
+
+	ZeroUpper()
+	Comment("Return the latest phase and output index for reuse in future calls")
+	r.CoefIdxOut.Init().Addr().Load(coefIdx)
+	r.OutIdxOut.Init().Addr().Load(outIdx)
+
+	Ret()
+}
+
 func dummy_resample_avx[T float32 | float64, S SliceTypes](simdVecLen, unrolls int) {
 	var p struct {
 		Out, In, Coefs  Reg[S]
