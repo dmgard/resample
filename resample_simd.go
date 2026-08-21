@@ -2,87 +2,36 @@
 
 package resample
 
-import (
-	"simd"
-	"simd/archsimd"
-)
+import "simd"
 
-func (s *Resampler[T]) processGoSIMD(in []T) {
-	switch s := any(s).(type) {
-	case *Resampler[float32]:
-		switch simdLevel {
-		case slInvalid:
-			panic("impossible")
-		case slScalar:
-			panic("TODO scalar fallback")
-		case slSSE:
-			resamplerProcess[simd.Float32s](s, SliceCast[float32](in), archsimd.LoadFloat32x4Slice, archsimd.BroadcastFloat32x4)
-		case slAVX:
-			resamplerProcess[simd.Float32s](s, SliceCast[float32](in), archsimd.LoadFloat32x8Slice, archsimd.BroadcastFloat32x8)
-		case sl512:
-			resamplerProcess[archsimd.Float32x16](s, SliceCast[float32](in), archsimd.LoadFloat32x16Slice, archsimd.BroadcastFloat32x16)
-		}
-	case float64:
-		panic("TODO")
-	default:
-		panic("unsupported")
-	}
-}
-
-type simdVec[V simdVec[V, T], T Sample] interface {
-	simd.Float32s | simd.Float64s
-
-	StoreSlice([]T)
-	MulAdd(V, V) V
-	Len() int
-}
-
-type (
-	st1  [1]byte
-	st2  [2]byte
-	st4  [4]byte
-	st8  [8]byte
-	st16 [16]byte
-)
-
-func resamplerProcess[V simdVec[V, T], T Sample](s *Resampler[T], in []T, load func([]T) V, bcast func(T) V) {
-	vecWidth := (*new(V)).Len()
-
-	for _, input := range in {
+func resamplerProcessSimdF32(s *Resampler[float32], in ...[]float32) {
+	for i := range in[0] {
 		// weight contribution of this input sample to a patch the size of the filter
 		// and accumulate to output samples at integer output slice indices
 		// TODO might be off by one relative to floating point calculation
 		outMin := int(s.outIdx>>fixedPointShift) - s.delay
 
-		s.outIdx += s.outStep * fixed64(vecWidth) // + 1
-
-		inSample := bcast(input)
+		s.outIdx += s.outStep // + 1
 
 		// coefs contains precomputed centered windowed sinc on each output sample
-		for range s.taps / vecWidth {
-			// wrap into output buffer
-			// delay output by half the filter taps so all inputs can accumulate in time
+		for ch, out := range s.out {
+			outMin := outMin // reset for each channel
+			inputs := simd.BroadcastFloat32s(in[ch][i])
 
-			outSlice := s.out[(outMin+s.delay)&(len(s.out)-1):]
-			out := load(outSlice)
+			for si := 0; si < s.taps; si += inputs.Len() {
+				coef := simd.LoadFloat32s(s.coefs[s.coefsIdx:])
 
-			inSample.MulAdd(load(s.coefs[s.coefsIdx:]), out).StoreSlice(outSlice)
+				outCurr := out[(outMin+s.delay)&(len(s.out)-1):]
+				inputs.MulAdd(
+					coef,
+					simd.LoadFloat32s(outCurr),
+				).Store(outCurr)
 
-			s.coefsIdx += vecWidth
-			outMin += vecWidth
-		}
-
-		// wrap sample coefficients index
-		if s.coefsIdx >= len(s.coefs) {
-			s.coefsIdx = 0
-
-			// IFF this is a rational-approximation resampler,
-			// accumulate drift relative to ideal sample rate
-			// swap to alternate undershoot/overshoot resampler if clock drift is too high
-			s.drift += s.driftStep
-			if Sign(s.drift) == Sign(s.driftStep) { // TODO variable threshold?
-				s.consts, s.alt = s.alt, s.consts
+				s.coefsIdx += inputs.Len()
+				outMin += inputs.Len()
 			}
 		}
+
+		s.wrapCoefsIdx()
 	}
 }

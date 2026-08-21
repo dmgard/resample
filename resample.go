@@ -336,17 +336,21 @@ func (s *Resampler[T]) processScalar(in ...[]T) {
 			}
 		}
 
-		// wrap sample coefficients index
-		if s.coefsIdx >= len(s.coefs) {
-			s.coefsIdx = 0
+		s.wrapCoefsIdx()
+	}
+}
 
-			// IFF this is a rational-approximation resampler,
-			// accumulate drift relative to ideal sample rate
-			// swap to alternate undershoot/overshoot resampler if clock drift is too high
-			s.drift += s.driftStep
-			if Sign(s.drift) == Sign(s.driftStep) { // TODO variable threshold?
-				s.consts, s.alt = s.alt, s.consts
-			}
+func (s *Resampler[T]) wrapCoefsIdx() {
+	// wrap sample coefficients index
+	if s.coefsIdx >= len(s.coefs) {
+		s.coefsIdx = 0
+
+		// IFF this is a rational-approximation resampler,
+		// accumulate drift relative to ideal sample rate
+		// swap to alternate undershoot/overshoot resampler if clock drift is too high
+		s.drift += s.driftStep
+		if Sign(s.drift) == Sign(s.driftStep) { // TODO variable threshold?
+			s.consts, s.alt = s.alt, s.consts
 		}
 	}
 }
