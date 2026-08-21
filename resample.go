@@ -324,17 +324,23 @@ func (s *Resampler[T]) processScalar(in ...[]T) {
 		s.outIdx += s.outStep // + 1
 
 		// coefs contains precomputed centered windowed sinc on each output sample
+		coefs := s.coefsIdx
+
 		for ch, out := range s.out {
 			outMin := outMin // reset for each channel
 			input := in[ch][i]
+			coefs = s.coefsIdx
+
 			for range s.taps {
 				// wrap into output buffer
 				// delay output by half the filter taps so all inputs can accumulate in time
-				out[(outMin+s.delay)&(len(s.out)-1)] += input * s.coefs[s.coefsIdx]
-				s.coefsIdx++
+				out[(outMin+s.delay)&(len(s.out)-1)] += input * s.coefs[coefs]
+				coefs++
 				outMin++
 			}
 		}
+
+		s.coefsIdx = coefs
 
 		s.wrapCoefsIdx()
 	}
