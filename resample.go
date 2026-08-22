@@ -315,6 +315,11 @@ func (s *Resampler[T]) Write(in ...[]T) (n int) {
 }
 
 func (s *Resampler[T]) processScalar(in ...[]T) {
+	if Simd && unsafe.Sizeof(*new(T)) == 4 {
+		ss := (*Resampler[float32])(unsafe.Pointer(s))
+		resamplerProcessSimdF32(ss, SliceCast[[]float32](in))
+		return
+	}
 	for i := range in[0] {
 		// weight contribution of this input sample to a patch the size of the filter
 		// and accumulate to output samples at integer output slice indices
@@ -334,7 +339,7 @@ func (s *Resampler[T]) processScalar(in ...[]T) {
 			for range s.taps {
 				// wrap into output buffer
 				// delay output by half the filter taps so all inputs can accumulate in time
-				out[(outMin+s.delay)&(len(s.out)-1)] += input * s.coefs[coefs]
+				out[(outMin+s.delay)&(len(out)-1)] += input * s.coefs[coefs]
 				coefs++
 				outMin++
 			}

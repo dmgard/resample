@@ -69,7 +69,7 @@ func TestSIMD(t *testing.T) {
 	type T = float32
 
 	const quantum = 512
-	const taps = 128
+	const taps = 512
 
 	const srIn, srOut, outOffset = 48111, 47892, taps / 2
 	//const srIn, srOut, outOffset = 48111, 44111, taps / 2
