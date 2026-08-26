@@ -255,7 +255,7 @@ loop:
 	}
 
 	// TODO write zeroes to guarantee consuming all input?
-	return orig[:len(orig)-len(out)], in
+	return orig, in
 }
 
 // Process is a method for writing without checking how much input was consumed
